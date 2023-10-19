@@ -3,7 +3,7 @@
 import { useGame } from "../hooks";
 
 export const GameLobby = () => {
-  const { isConnected, players } = useGame();
+  const { players } = useGame();
 
   return (
     <div className="container max-w-3xl">

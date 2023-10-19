@@ -21,7 +21,6 @@ export class GamesService {
     let gameIdToJoin = await this.findOne(user);
     if (!gameIdToJoin) gameIdToJoin = await this.create(user);
     await this.addPlayer(gameIdToJoin, user.id);
-    console.log({ gameId: gameIdToJoin });
     return gameIdToJoin;
   }
 

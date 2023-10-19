@@ -36,6 +36,6 @@ export class GamesGateway implements OnGatewayDisconnect {
     const remainingPlayers = await this.gamesService.getPlayersInGame(gameId);
     if (remainingPlayers.length === 0)
       await this.gamesService.removeIfEmpty(gameId);
-    this.io.sockets.to(`game:${gameId}`).emit('players', remainingPlayers);
+    else this.io.sockets.to(`game:${gameId}`).emit('players', remainingPlayers);
   }
 }
