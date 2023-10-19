@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  joinedAt  DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  histories GameHistory[]
+}
+
+model Game {
+  id        Int        @id @default(autoincrement())
+  minWpm    Int
+  maxWpm    Int
+  paragraph String     @db.Text
+  timeLimit Int // seconds allowed to type the whole text
+  startedAt DateTime?
+  status    GameStatus @default(LOBBY)
+
+  histories GameHistory[]
+}
+
+model GameHistory {
+  gameId    Int
+  playerId  Int
+  wpm       Int
+  acc       Decimal @db.Decimal(2, 1)
+  timeTaken Int // ms taken for a player to type the whole text (<= timeLimit of a game)
+
+  game   Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  player User @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, playerId])
+}
+
+enum GameStatus {
+  LOBBY
+  PLAYING
+  ENDED
+}
