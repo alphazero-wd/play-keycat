@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/features/users/actions";
 import { redirect } from "next/navigation";
 import { Button, Card, CardContent, CardHeader } from "../features/ui";
+import Link from "next/link";
 
 export const metadata = {
   title: "Keycat | Lobby",
@@ -31,7 +32,9 @@ export default async function Home() {
         </CardHeader>
 
         <CardContent>
-          <Button>Join game</Button>
+          <Button asChild>
+            <Link href="/join-game">Join game</Link>
+          </Button>
         </CardContent>
       </Card>
     </div>

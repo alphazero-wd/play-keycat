@@ -12,4 +12,6 @@ export class UserResponse implements User {
 
   joinedAt: Date;
   updatedAt: Date;
+  inGameId: number;
+  keycatPoints: number;
 }

@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import * as Joi from '@hapi/joi';
 import { PrismaModule } from './prisma/prisma.module';
+import { GamesModule } from './games/games.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PrismaModule } from './prisma/prisma.module';
     UsersModule,
     AuthModule,
     PrismaModule,
+    GamesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

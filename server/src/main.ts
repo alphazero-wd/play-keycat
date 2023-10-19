@@ -6,6 +6,7 @@ import * as session from 'express-session';
 import RedisStore from 'connect-redis';
 import { createClient } from 'redis';
 import * as passport from 'passport';
+import { SessionAdapter } from './config/session-adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,20 +20,22 @@ async function bootstrap() {
   const redisClient = createClient({ url: configService.get('REDIS_URL') });
   await redisClient.connect();
 
-  app.use(
-    session({
-      store: new RedisStore({ client: redisClient }),
-      secret: configService.get('SESSION_SECRET'),
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: configService.get('NODE_ENV') === 'production',
-        maxAge: 1000 * 60 * 60 * 24 * 7,
-      },
-    }),
-  );
+  const sessionMiddleware = session({
+    store: new RedisStore({ client: redisClient }),
+    secret: configService.get('SESSION_SECRET'),
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: configService.get('NODE_ENV') === 'production',
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    },
+  });
+
+  app.use(sessionMiddleware);
+
+  app.useWebSocketAdapter(new SessionAdapter(sessionMiddleware, app));
 
   app.use(passport.initialize());
   app.use(passport.session());
