@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GameStatus, Prisma, User } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
@@ -25,11 +20,26 @@ export class GamesService {
   }
 
   async getPlayersInGame(gameId: number) {
-    const { players } = await this.prisma.game.findUnique({
+    const game = await this.prisma.game.findUnique({
       where: { id: gameId },
       include: { players: true },
     });
-    return players;
+    return game;
+  }
+
+  async updateGameStatus(gameId: number, status: GameStatus) {
+    try {
+      const game = await this.prisma.game.update({
+        where: { id: gameId },
+        data: { status },
+      });
+      return game;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError)
+        if (error.code === PrismaError.RecordNotFound)
+          throw new WsException('Cannot update game with the given id');
+      throw new WsException('Something went wrong');
+    }
   }
 
   async removePlayer(playerId: number) {
@@ -49,7 +59,14 @@ export class GamesService {
   }
 
   async removeIfEmpty(gameId: number) {
-    await this.prisma.game.delete({ where: { id: gameId } });
+    try {
+      await this.prisma.game.delete({ where: { id: gameId } });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError)
+        if (error.code === PrismaError.RecordNotFound)
+          throw new WsException('Cannot delete game with the given id');
+      throw new WsException('Something went wrong');
+    }
   }
 
   async findById(id: number) {
@@ -59,8 +76,8 @@ export class GamesService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)
         if (error.code === PrismaError.RecordNotFound)
-          throw new NotFoundException('Cannot find game with the given id');
-      throw new InternalServerErrorException('Something went wrong');
+          throw new WsException('Cannot find game with the given id');
+      throw new WsException('Something went wrong');
     }
   }
 
