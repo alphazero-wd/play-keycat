@@ -29,6 +29,7 @@ export class GamesService {
 
   async updateGameStatus(gameId: number, status: GameStatus) {
     try {
+      const time = new Date();
       const game = await this.prisma.game.update({
         where: { id: gameId },
         data: { status, startedAt: new Date().toISOString() },
@@ -45,11 +46,12 @@ export class GamesService {
   async removePlayer(playerId: number) {
     try {
       const { inGameId } = await this.usersService.findById(playerId);
+      const gameId = inGameId;
       await this.prisma.user.update({
         where: { id: playerId },
         data: { inGameId: null },
       });
-      return inGameId;
+      return gameId;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === PrismaError.RecordNotFound)
@@ -86,7 +88,7 @@ export class GamesService {
     if (!player) throw new WsException('Player not found');
     if (player.inGameId)
       throw new WsException(
-        'You are already in a game. Please leave the game before joining in another room',
+        'You are already in a game. Please leave the game before joining in another one',
       );
   }
 

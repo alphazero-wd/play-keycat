@@ -1,25 +1,38 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
-import { useGame } from "../hooks";
+import { useCallback, useEffect } from "react";
+import { useGame, useTyping } from "../hooks";
 import { GameStatus } from "../types";
-import { useStopwatch, useTimer } from "react-timer-hook";
+import { useTimer } from "react-timer-hook";
 import { Input } from "@/features/ui";
 import { addSeconds } from "date-fns";
 
 export const GameLobby = () => {
   const { players, game } = useGame();
+  const { value, prevError, charsTyped, preventCheating, onChange, onKeydown } =
+    useTyping(game?.paragraph || "");
 
   const {
-    seconds,
+    totalSeconds: timeRemaining,
     minutes,
-    start: startTimer,
-  } = useStopwatch({ autoStart: false });
+    seconds,
+    restart: startTimeLimit,
+  } = useTimer({
+    autoStart: false,
+    expiryTimestamp: new Date(),
+  });
 
   const { totalSeconds: countdown, start: startCountdown } = useTimer({
     autoStart: false,
     expiryTimestamp: addSeconds(new Date(), 10),
-    onExpire: startTimer,
+    onExpire: () => {
+      startTimeLimit(
+        addSeconds(
+          new Date(),
+          Math.trunc((game!.paragraph.length / 5 / 39) * 60)
+        )
+      );
+    },
   });
 
   useEffect(() => {
@@ -30,7 +43,7 @@ export const GameLobby = () => {
     if (!game?.status) return "Game Lobby";
     if (game.status === GameStatus.PLAYING && countdown > 0)
       return "Game starting...";
-    if (countdown === 0) return "Game has flared up 🔥";
+    if (timeRemaining > 0) return "Game has flared up 🔥";
     return "Game ended";
   }, [game?.status, countdown]);
 
@@ -38,8 +51,8 @@ export const GameLobby = () => {
     if (!game?.status) return "Waiting for opponents...";
     if (game.status === GameStatus.PLAYING && countdown > 0)
       return `Game starting in ${countdown} seconds...`;
-    if (countdown === 0)
-      return `Time elapsed ${minutes}:${(seconds < 10 ? "0" : "") + seconds}`;
+    if (timeRemaining > 0)
+      return `Time remaining ${minutes}:${(seconds < 10 ? "0" : "") + seconds}`;
     return "Game has ended. Showing game history";
   }, [game?.status, countdown, minutes, seconds]);
 
@@ -62,11 +75,27 @@ export const GameLobby = () => {
           ))}
         </div>
       </div>
-      <p className="my-4 text-lg text-secondary-foreground">
-        {game?.paragraph}
-      </p>
+      {game?.paragraph && (
+        <p className="my-4 text-lg text-secondary-foreground">
+          {game.paragraph
+            .substring(0, charsTyped)
+            .split("")
+            .map((char, index) => (
+              <span
+                className={prevError === index ? "bg-red-200" : "bg-green-200"}
+              >
+                {char}
+              </span>
+            ))}
+          {game.paragraph.substring(charsTyped)}
+        </p>
+      )}
       {game?.status === GameStatus.PLAYING && (
         <Input
+          value={value}
+          onKeyDown={onKeydown}
+          onChange={onChange}
+          onPaste={preventCheating}
           className="w-full"
           placeholder="Type when the game starts"
           disabled={countdown > 0}
