@@ -10,5 +10,5 @@ export interface Game {
   maxPoints: number;
   status: GameStatus;
   paragraph: string;
-  timeLimit: number;
+  startedAt?: string;
 }

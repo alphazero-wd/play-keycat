@@ -21,7 +21,6 @@ CREATE TABLE "Game" (
     "minPoints" INTEGER NOT NULL,
     "maxPoints" INTEGER NOT NULL,
     "paragraph" TEXT NOT NULL,
-    "timeLimit" INTEGER NOT NULL,
     "startedAt" TIMESTAMP(3),
     "status" "GameStatus" NOT NULL DEFAULT 'LOBBY',
 

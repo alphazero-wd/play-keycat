@@ -1,28 +1,47 @@
 "use client";
 
-import { useCallback } from "react";
-import { useCountdown, useGame } from "../hooks";
+import { useCallback, useEffect, useMemo } from "react";
+import { useGame } from "../hooks";
 import { GameStatus } from "../types";
+import { useStopwatch, useTimer } from "react-timer-hook";
+import { Input } from "@/features/ui";
+import { addSeconds } from "date-fns";
 
 export const GameLobby = () => {
   const { players, game } = useGame();
-  const { seconds } = useCountdown(players.length);
+
+  const {
+    seconds,
+    minutes,
+    start: startTimer,
+  } = useStopwatch({ autoStart: false });
+
+  const { totalSeconds: countdown, start: startCountdown } = useTimer({
+    autoStart: false,
+    expiryTimestamp: addSeconds(new Date(), 10),
+    onExpire: startTimer,
+  });
+
+  useEffect(() => {
+    if (players.length === 3) startCountdown();
+  }, [players.length]);
 
   const displayTitle = useCallback(() => {
     if (!game?.status) return "Game Lobby";
-    if (game.status === GameStatus.PLAYING && seconds > 0)
+    if (game.status === GameStatus.PLAYING && countdown > 0)
       return "Game starting...";
-    if (seconds === 0) return "Game started";
+    if (countdown === 0) return "Game has flared up 🔥";
     return "Game ended";
-  }, [game?.status, seconds]);
+  }, [game?.status, countdown]);
 
   const displaySubtitle = useCallback(() => {
     if (!game?.status) return "Waiting for opponents...";
-    if (game.status === GameStatus.PLAYING && seconds > 0)
-      return `Game starting in ${seconds} seconds...`;
-    if (seconds === 0) return "Game has flared up 🔥🔥🔥";
+    if (game.status === GameStatus.PLAYING && countdown > 0)
+      return `Game starting in ${countdown} seconds...`;
+    if (countdown === 0)
+      return `Time elapsed ${minutes}:${(seconds < 10 ? "0" : "") + seconds}`;
     return "Game has ended. Showing game history";
-  }, [game?.status, seconds]);
+  }, [game?.status, countdown, minutes, seconds]);
 
   return (
     <div className="container max-w-3xl">
@@ -46,6 +65,13 @@ export const GameLobby = () => {
       <p className="my-4 text-lg text-secondary-foreground">
         {game?.paragraph}
       </p>
+      {game?.status === GameStatus.PLAYING && (
+        <Input
+          className="w-full"
+          placeholder="Type when the game starts"
+          disabled={countdown > 0}
+        />
+      )}
     </div>
   );
 };

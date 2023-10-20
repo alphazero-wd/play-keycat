@@ -29,7 +29,6 @@ model Game {
   minPoints Int
   maxPoints Int
   paragraph String     @db.Text
-  timeLimit Int // seconds allowed to type the whole text
   startedAt DateTime?
   status    GameStatus @default(LOBBY)
   players   User[]

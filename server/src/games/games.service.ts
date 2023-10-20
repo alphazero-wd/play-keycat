@@ -31,7 +31,7 @@ export class GamesService {
     try {
       const game = await this.prisma.game.update({
         where: { id: gameId },
-        data: { status },
+        data: { status, startedAt: new Date().toISOString() },
       });
       return game;
     } catch (error) {
@@ -121,13 +121,11 @@ export class GamesService {
   private async create(user: User) {
     const paragraph =
       'Green vines attached to the trunk of the tree had wound themselves toward the top of the canopy. Ants used the vine as their private highway, avoiding all the creases and crags of the bark, to freely move at top speed from top to bottom or bottom to top depending on their current chore.';
-    const timeLimit = Math.trunc((paragraph.length / 5 / 39) * 60);
     const game = await this.prisma.game.create({
       data: {
         minPoints: Math.max(user.keycatPoints - 200, 0),
         maxPoints: Math.max(user.keycatPoints + 200, 0),
         paragraph,
-        timeLimit,
       },
     });
     return game.id;
