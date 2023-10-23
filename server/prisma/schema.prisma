@@ -25,12 +25,11 @@ model User {
 }
 
 model Game {
-  id        Int        @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   minPoints Int
   maxPoints Int
-  paragraph String     @db.Text
+  paragraph String    @db.Text
   startedAt DateTime?
-  status    GameStatus @default(LOBBY)
   players   User[]
 
   histories GameHistory[]
@@ -40,17 +39,11 @@ model GameHistory {
   gameId    Int
   playerId  Int
   wpm       Int?
-  acc       Decimal? @db.Decimal(2, 1)
+  acc       Decimal? @db.Decimal(4, 1)
   timeTaken Int? // ms taken for a player to type the whole text (<= timeLimit of a game)
 
   game   Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
   player User @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   @@id([gameId, playerId])
-}
-
-enum GameStatus {
-  LOBBY
-  PLAYING
-  ENDED
 }

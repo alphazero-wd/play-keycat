@@ -4,21 +4,28 @@ import {
   WebSocketServer,
   SubscribeMessage,
   ConnectedSocket,
+  MessageBody,
 } from '@nestjs/websockets';
 import { GamesService } from './games.service';
 import { Server } from 'socket.io';
 import { SocketUser } from '../common/types';
 import { UseGuards } from '@nestjs/common';
 import { WsCookieAuthGuard } from '../auth/guards';
-import { GameStatus } from '@prisma/client';
+import { PlayerFinishedDto } from './dto';
+import { HistoriesService } from '../histories/histories.service';
+import { UsersService } from '../users/users.service';
 
 @WebSocketGateway()
-@UseGuards(WsCookieAuthGuard)
 export class GamesGateway implements OnGatewayDisconnect {
-  constructor(private readonly gamesService: GamesService) {}
+  constructor(
+    private readonly gamesService: GamesService,
+    private readonly historiesService: HistoriesService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @WebSocketServer() io: Server;
 
+  @UseGuards(WsCookieAuthGuard)
   @SubscribeMessage('joinGame')
   async joinGame(@ConnectedSocket() socket: SocketUser) {
     const user = socket.request.user;
@@ -27,14 +34,37 @@ export class GamesGateway implements OnGatewayDisconnect {
     const { players } = await this.gamesService.getPlayersInGame(gameId);
 
     if (players.length === 3) {
-      const game = await this.gamesService.updateGameStatus(
-        gameId,
-        GameStatus.PLAYING,
-      );
+      const game = await this.gamesService.startGame(gameId);
       this.io.sockets.to(`game:${gameId}`).emit('startGame', game);
     }
 
     this.io.sockets.to(`game:${gameId}`).emit('players', players);
+  }
+
+  @UseGuards(WsCookieAuthGuard)
+  @SubscribeMessage('progress')
+  async reflectProgress(
+    @ConnectedSocket() socket: SocketUser,
+    @MessageBody('progress') progress: number,
+  ) {
+    const user = await this.usersService.findById(socket.request.user.id);
+    this.io.sockets
+      .to(`game:${user.inGameId}`)
+      .emit('playerProgress', { id: user.id, progress });
+  }
+
+  @UseGuards(WsCookieAuthGuard)
+  @SubscribeMessage('playerFinished')
+  async onPlayerFinished(
+    @ConnectedSocket() socket: SocketUser,
+    @MessageBody() { wpm, acc }: PlayerFinishedDto,
+  ) {
+    const user = socket.request.user;
+    await this.historiesService.create({
+      acc,
+      wpm,
+      playerId: user.id,
+    });
   }
 
   async handleDisconnect(socket: SocketUser) {
@@ -44,11 +74,10 @@ export class GamesGateway implements OnGatewayDisconnect {
 
     // check for `gameId` because a player might join in on multiple devices causes NestJS to raise an uncanny exception
     if (!gameId) return;
-    const { players, status } = await this.gamesService.getPlayersInGame(
-      gameId,
-    );
-    if (players.length === 0 && status !== GameStatus.ENDED)
-      await this.gamesService.removeIfEmpty(gameId);
-    else this.io.sockets.to(`game:${gameId}`).emit('players', players);
+    const { players } = await this.gamesService.getPlayersInGame(gameId);
+    if (players.length === 0) await this.gamesService.removeIfEmpty(gameId);
+    else {
+      this.io.sockets.to(`game:${gameId}`).emit('players', players);
+    }
   }
 }

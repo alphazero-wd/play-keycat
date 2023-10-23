@@ -4,7 +4,8 @@ import {
   KeyboardEventHandler,
   useState,
 } from "react";
-import { isSpecialKeyPressed } from "../utils";
+import { calculateProgress, isSpecialKeyPressed } from "../utils";
+import { socket } from "@/lib/socket";
 
 export const useTyping = (paragraph: string) => {
   const [typos, setTypos] = useState(0);
@@ -29,6 +30,9 @@ export const useTyping = (paragraph: string) => {
     } else if (!isSpecialKeyPressed(e.key) && prevError === null) {
       if (paragraph[charsTyped] === e.key) {
         if (e.key === " ") {
+          socket.emit("progress", {
+            progress: calculateProgress(charsTyped, paragraph),
+          });
           setValue("");
         }
       } else {
@@ -40,5 +44,13 @@ export const useTyping = (paragraph: string) => {
     } else e.preventDefault();
   };
 
-  return { value, charsTyped, onChange, onKeydown, preventCheating, prevError };
+  return {
+    value,
+    typos,
+    charsTyped,
+    onChange,
+    onKeydown,
+    preventCheating,
+    prevError,
+  };
 };

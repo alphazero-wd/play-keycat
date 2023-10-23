@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { GameStatus, Prisma, User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
 import { WsException } from '@nestjs/websockets';
 import { UsersService } from '../users/users.service';
@@ -27,12 +27,11 @@ export class GamesService {
     return game;
   }
 
-  async updateGameStatus(gameId: number, status: GameStatus) {
+  async startGame(gameId: number) {
     try {
-      const time = new Date();
       const game = await this.prisma.game.update({
         where: { id: gameId },
-        data: { status, startedAt: new Date().toISOString() },
+        data: { startedAt: new Date().toISOString() },
       });
       return game;
     } catch (error) {
@@ -46,12 +45,11 @@ export class GamesService {
   async removePlayer(playerId: number) {
     try {
       const { inGameId } = await this.usersService.findById(playerId);
-      const gameId = inGameId;
       await this.prisma.user.update({
         where: { id: playerId },
         data: { inGameId: null },
       });
-      return gameId;
+      return inGameId;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === PrismaError.RecordNotFound)
@@ -62,7 +60,11 @@ export class GamesService {
 
   async removeIfEmpty(gameId: number) {
     try {
-      await this.prisma.game.delete({ where: { id: gameId } });
+      const historiesCount = await this.prisma.gameHistory.count({
+        where: { gameId },
+      });
+      if (historiesCount === 0)
+        await this.prisma.game.delete({ where: { id: gameId } });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)
         if (error.code === PrismaError.RecordNotFound)
@@ -112,7 +114,7 @@ export class GamesService {
       where: {
         minPoints: { lte: user.keycatPoints },
         maxPoints: { gte: user.keycatPoints },
-        status: GameStatus.LOBBY,
+        startedAt: null,
       },
       select: { id: true, _count: { select: { players: true } } },
     });

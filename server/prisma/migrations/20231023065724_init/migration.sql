@@ -1,6 +1,3 @@
--- CreateEnum
-CREATE TYPE "GameStatus" AS ENUM ('LOBBY', 'PLAYING', 'ENDED');
-
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
@@ -22,7 +19,6 @@ CREATE TABLE "Game" (
     "maxPoints" INTEGER NOT NULL,
     "paragraph" TEXT NOT NULL,
     "startedAt" TIMESTAMP(3),
-    "status" "GameStatus" NOT NULL DEFAULT 'LOBBY',
 
     CONSTRAINT "Game_pkey" PRIMARY KEY ("id")
 );
@@ -32,7 +28,7 @@ CREATE TABLE "GameHistory" (
     "gameId" INTEGER NOT NULL,
     "playerId" INTEGER NOT NULL,
     "wpm" INTEGER,
-    "acc" DECIMAL(2,1),
+    "acc" DECIMAL(4,1),
     "timeTaken" INTEGER,
 
     CONSTRAINT "GameHistory_pkey" PRIMARY KEY ("gameId","playerId")
