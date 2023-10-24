@@ -1,13 +1,14 @@
 "use client";
 
-import { Input } from "@/features/ui";
+import { Button, Input } from "@/features/ui";
 import { addSeconds, differenceInMilliseconds, format } from "date-fns";
 import { useCallback, useEffect } from "react";
 import { useGame, useTimeDisplay, useTyping } from "../hooks";
 import { socket } from "@/lib/socket";
 import { calculateAccuracy, calculateProgress, calculateWpm } from "../utils";
+import Link from "next/link";
 
-export const GameLobby = () => {
+export const Gameplay = () => {
   const { players, game, isGameOver, setIsGameOver, playersProgress } =
     useGame();
   const {
@@ -43,14 +44,18 @@ export const GameLobby = () => {
   }, [charsTyped, game?.paragraph]);
 
   useEffect(() => {
-    if (game?.paragraph && charsTyped === game?.paragraph.length) {
+    const hasReachedTheEnd =
+      game?.paragraph && charsTyped === game?.paragraph.length;
+    if (hasReachedTheEnd) {
       setIsGameOver(true);
       sendResult();
     }
   }, [game?.paragraph, charsTyped, sendResult]);
 
   useEffect(() => {
-    if (game && countdown === 0 && !isGameOver && timeRemaining === 0) {
+    const hasTimeup =
+      game && countdown === 0 && !isGameOver && timeRemaining === 0;
+    if (hasTimeup) {
       setIsGameOver(true);
       sendResult();
     }
@@ -107,6 +112,10 @@ export const GameLobby = () => {
           )}
         </>
       )}
+
+      <Button className="mt-3" asChild>
+        <Link href="/">Leave game</Link>
+      </Button>
     </div>
   );
 };

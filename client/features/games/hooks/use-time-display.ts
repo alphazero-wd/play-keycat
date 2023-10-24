@@ -35,8 +35,8 @@ export const useTimeDisplay = (game: Game | null) => {
     if (game.startedAt && countdown > 0)
       return `Game starting in ${countdown} seconds...`;
     if (timeRemaining > 0)
-      return `Time remaining ${format(timeRemaining * 1000, "mm:ss")} seconds`;
-    return "Game has ended. Showing game history";
+      return `Time remaining ${format(timeRemaining * 1000, "mm:ss")}`;
+    return "Game has ended. Showing game history...";
   }, [game?.startedAt, countdown, timeRemaining]);
 
   return {

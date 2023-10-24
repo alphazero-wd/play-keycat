@@ -29,7 +29,6 @@ export const useGame = () => {
         ...prevProgress,
         [id]: progress,
       }));
-      console.log({ playersProgress });
     };
 
     socket.on("connect", onConnect);
