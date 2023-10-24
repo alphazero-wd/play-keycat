@@ -20,7 +20,7 @@ export class HistoriesService {
   async create({ playerId, ...createHistoryDto }: CreateHistoryDto) {
     try {
       const user = await this.usersService.findById(playerId);
-      const gameHistory = this.prisma.gameHistory.create({
+      const gameHistory = await this.prisma.gameHistory.create({
         data: { ...createHistoryDto, playerId, gameId: user.inGameId },
       });
       return gameHistory;

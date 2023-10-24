@@ -7,8 +7,9 @@ import { useGame, useTimeDisplay, useTyping } from "../hooks";
 import { socket } from "@/lib/socket";
 import { calculateAccuracy, calculateProgress, calculateWpm } from "../utils";
 import Link from "next/link";
+import { User } from "@/features/users/types";
 
-export const Gameplay = () => {
+export const Gameplay = ({ user }: { user: User }) => {
   const { players, game, isGameOver, setIsGameOver, playersProgress } =
     useGame();
   const {
@@ -35,11 +36,12 @@ export const Gameplay = () => {
       socket.emit("progress", {
         progress: calculateProgress(charsTyped, game!.paragraph),
       });
-      socket.emit("playerFinished", {
-        acc: calculateAccuracy(typos, charsTyped),
-        wpm: calculateWpm(charsTyped, timeTaken),
-        timeTaken,
-      });
+      if (playersProgress[user.id] >= 50)
+        socket.emit("playerFinished", {
+          acc: calculateAccuracy(typos, charsTyped),
+          wpm: calculateWpm(charsTyped, timeTaken),
+          timeTaken,
+        });
     }
   }, [charsTyped, game?.paragraph]);
 
@@ -72,7 +74,9 @@ export const Gameplay = () => {
         <div className="space-y-4 max-w-2xl">
           {players.map((player) => (
             <div key={player.id} className="flex justify-between items-center">
-              <span className="font-medium text-lg">{player.username}</span>
+              <span className="font-medium text-lg">
+                {player.username} {player.id === user.id && "(you)"}
+              </span>
               <span className="text-muted-foreground">
                 {playersProgress[player.id] || 0}%
               </span>

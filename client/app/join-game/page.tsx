@@ -6,5 +6,5 @@ export default async function JoinGamePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
 
-  return <Gameplay />;
+  return <Gameplay user={user} />;
 }

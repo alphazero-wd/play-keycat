@@ -19,8 +19,12 @@ export const useTimeDisplay = (game: Game | null) => {
   });
 
   useEffect(() => {
-    if (game?.paragraph)
-      setTimeLimit(Math.trunc((game.paragraph.length / 5 / 39) * 60));
+    if (game?.paragraph) {
+      const timeLimitWpmBased = Math.trunc(
+        (game.paragraph.length / 5 / 39) * 60
+      );
+      setTimeLimit(timeLimitWpmBased);
+    }
   }, [game?.paragraph]);
 
   const title = useMemo(() => {

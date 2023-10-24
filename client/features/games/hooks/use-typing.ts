@@ -6,9 +6,11 @@ import {
 } from "react";
 import { calculateProgress, isSpecialKeyPressed } from "../utils";
 import { socket } from "@/lib/socket";
+import { useAlert } from "@/features/layout/alert";
 
 export const useTyping = (paragraph: string) => {
   const [typos, setTypos] = useState(0);
+  const { setAlert } = useAlert();
   const [charsTyped, setCharsTyped] = useState(0);
   const [prevError, setPrevError] = useState<number | null>(null);
   const [value, setValue] = useState("");
@@ -41,7 +43,11 @@ export const useTyping = (paragraph: string) => {
       }
 
       setCharsTyped((c) => c + 1);
-    } else e.preventDefault();
+    } else {
+      e.preventDefault();
+      if (prevError)
+        setAlert("error", "You need to correct the typos before continuing");
+    }
   };
 
   return {
