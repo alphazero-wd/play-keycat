@@ -5,6 +5,7 @@ import { User } from "@/features/users/types";
 
 export const useGame = () => {
   const [players, setPlayers] = useState<User[]>([]);
+  const [playersFinishedCount, setPlayersFinishedCount] = useState(0);
   const [game, setGame] = useState<Game | null>(null);
   const [playersProgress, setPlayersProgress] = useState<
     Record<number, number>
@@ -31,9 +32,14 @@ export const useGame = () => {
       }));
     };
 
+    const onPlayerFinished = () => {
+      setPlayersFinishedCount((c) => c + 1);
+    };
+
     socket.on("connect", onConnect);
     socket.on("players", onPlayers);
     socket.on("playerProgress", onPlayerProgress);
+    socket.on("playerFinished", onPlayerFinished);
     socket.on("startGame", (game) => setGame(game));
 
     return () => {
@@ -54,5 +60,6 @@ export const useGame = () => {
     setIsGameOver,
     isGameOver,
     playersProgress,
+    playersFinishedCount,
   };
 };

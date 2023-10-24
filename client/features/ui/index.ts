@@ -31,3 +31,20 @@ export {
 
 export { Alert, AlertDescription, AlertTitle } from "./alert";
 export { Avatar, AvatarFallback, AvatarImage } from "./avatar";
+export {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./table";
+
+export {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./tooltip";

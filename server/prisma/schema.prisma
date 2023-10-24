@@ -11,14 +11,14 @@ datasource db {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  username     String   @unique
-  email        String   @unique
-  password     String
-  joinedAt     DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  keycatPoints Int      @default(0)
-  inGameId     Int?
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  joinedAt  DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  catPoints Int      @default(0)
+  inGameId  Int?
 
   inGame    Game?         @relation(fields: [inGameId], references: [id], onDelete: SetNull)
   histories GameHistory[]
@@ -38,9 +38,9 @@ model Game {
 model GameHistory {
   gameId    Int
   playerId  Int
-  wpm       Int?
-  acc       Decimal? @db.Decimal(4, 1)
-  timeTaken Int? // ms taken for a player to type the whole text (<= timeLimit of a game)
+  wpm       Int
+  acc       Decimal @db.Decimal(4, 1)
+  timeTaken Int // ms taken for a player to type the whole text (<= timeLimit of a game)
 
   game   Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
   player User @relation(fields: [playerId], references: [id], onDelete: Cascade)

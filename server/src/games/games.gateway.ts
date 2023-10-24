@@ -57,15 +57,19 @@ export class GamesGateway implements OnGatewayDisconnect {
   @SubscribeMessage('playerFinished')
   async onPlayerFinished(
     @ConnectedSocket() socket: SocketUser,
-    @MessageBody() { wpm, acc, timeTaken }: PlayerFinishedDto,
+    @MessageBody() { wpm, acc, timeTaken, catPoints }: PlayerFinishedDto,
   ) {
     const user = socket.request.user;
-    await this.historiesService.create({
+    await this.usersService.update(user.id, {
+      catPoints: user.catPoints + +catPoints,
+    });
+    const gameHistory = await this.historiesService.create({
       acc,
       wpm,
       timeTaken,
       playerId: user.id,
     });
+    this.io.sockets.to(`game:${gameHistory.gameId}`).emit('playerFinished', {});
   }
 
   async handleDisconnect(socket: SocketUser) {

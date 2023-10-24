@@ -1,17 +1,30 @@
 "use client";
 
 import { Button, Input } from "@/features/ui";
-import { addSeconds, differenceInMilliseconds, format } from "date-fns";
-import { useCallback, useEffect } from "react";
+import { addSeconds, differenceInMilliseconds } from "date-fns";
+import { useCallback, useEffect, useRef } from "react";
 import { useGame, useTimeDisplay, useTyping } from "../hooks";
 import { socket } from "@/lib/socket";
-import { calculateAccuracy, calculateProgress, calculateWpm } from "../utils";
+import {
+  calculateAccuracy,
+  calculateCPs,
+  calculateProgress,
+  calculateWpm,
+} from "../utils";
 import Link from "next/link";
 import { User } from "@/features/users/types";
+import { useRouter } from "next/navigation";
+import { useAlert } from "@/features/layout/alert";
 
 export const Gameplay = ({ user }: { user: User }) => {
-  const { players, game, isGameOver, setIsGameOver, playersProgress } =
-    useGame();
+  const {
+    players,
+    game,
+    isGameOver,
+    setIsGameOver,
+    playersProgress,
+    playersFinishedCount,
+  } = useGame();
   const {
     typos,
     value,
@@ -25,10 +38,9 @@ export const Gameplay = ({ user }: { user: User }) => {
   const { startCountdown, title, subtitle, timeRemaining, countdown } =
     useTimeDisplay(game);
 
-  useEffect(() => {
-    if (players.length === 3) startCountdown();
-  }, [players.length]);
-
+  const router = useRouter();
+  const { setAlert } = useAlert();
+  const typingInputRef = useRef<HTMLInputElement>(null);
   const sendResult = useCallback(() => {
     if (game) {
       const startedAt = addSeconds(new Date(game.startedAt), 10);
@@ -36,14 +48,31 @@ export const Gameplay = ({ user }: { user: User }) => {
       socket.emit("progress", {
         progress: calculateProgress(charsTyped, game!.paragraph),
       });
-      if (playersProgress[user.id] >= 50)
+      if (playersProgress[user.id] >= 50) {
+        const acc = calculateAccuracy(typos, charsTyped);
+        const wpm = calculateWpm(charsTyped, timeTaken);
         socket.emit("playerFinished", {
-          acc: calculateAccuracy(typos, charsTyped),
-          wpm: calculateWpm(charsTyped, timeTaken),
+          wpm,
+          acc,
+          catPoints: calculateCPs(
+            wpm,
+            acc,
+            players.length,
+            playersFinishedCount + 1
+          ),
           timeTaken,
         });
+      }
     }
   }, [charsTyped, game?.paragraph]);
+
+  useEffect(() => {
+    if (game && countdown === 0) typingInputRef.current?.focus();
+  }, [countdown, game]);
+
+  useEffect(() => {
+    if (players.length === 3) startCountdown();
+  }, [players.length]);
 
   useEffect(() => {
     const hasReachedTheEnd =
@@ -62,6 +91,24 @@ export const Gameplay = ({ user }: { user: User }) => {
       sendResult();
     }
   }, [game, timeRemaining, isGameOver, sendResult]);
+
+  useEffect(() => {
+    if (game && timeRemaining === 0 && isGameOver) {
+      typingInputRef.current?.blur();
+      const timeout = setTimeout(() => {
+        if (playersProgress[user.id] >= 50)
+          router.push(`/games/${game.id}/history`);
+        else {
+          setAlert(
+            "info",
+            "Your progress is not saved because it is below 50%"
+          );
+          router.push("/");
+        }
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [timeRemaining, isGameOver]);
 
   return (
     <div className="container max-w-3xl">
@@ -105,6 +152,7 @@ export const Gameplay = ({ user }: { user: User }) => {
           )}
           {game?.startedAt && (
             <Input
+              ref={typingInputRef}
               value={value}
               onKeyDown={onKeydown}
               onChange={onChange}

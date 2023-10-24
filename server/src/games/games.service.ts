@@ -60,6 +60,7 @@ export class GamesService {
 
   async removeIfEmpty(gameId: number) {
     try {
+      // if the game has ended, and everyone has left the game then don't delete the game
       const historiesCount = await this.prisma.gameHistory.count({
         where: { gameId },
       });
@@ -112,8 +113,8 @@ export class GamesService {
   private async findOne(user: User) {
     const idealGame = await this.prisma.game.findFirst({
       where: {
-        minPoints: { lte: user.keycatPoints },
-        maxPoints: { gte: user.keycatPoints },
+        minPoints: { lte: user.catPoints },
+        maxPoints: { gte: user.catPoints },
         startedAt: null,
       },
       select: { id: true, _count: { select: { players: true } } },
@@ -127,8 +128,8 @@ export class GamesService {
       'Green vines attached to the trunk of the tree had wound themselves toward the top of the canopy. Ants used the vine as their private highway, avoiding all the creases and crags of the bark, to freely move at top speed from top to bottom or bottom to top depending on their current chore.';
     const game = await this.prisma.game.create({
       data: {
-        minPoints: Math.max(user.keycatPoints - 200, 0),
-        maxPoints: Math.max(user.keycatPoints + 200, 0),
+        minPoints: Math.max(user.catPoints - 200, 0),
+        maxPoints: Math.max(user.catPoints + 200, 0),
         paragraph,
       },
     });

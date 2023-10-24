@@ -6,7 +6,7 @@ CREATE TABLE "User" (
     "password" TEXT NOT NULL,
     "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "keycatPoints" INTEGER NOT NULL DEFAULT 0,
+    "catPoints" INTEGER NOT NULL DEFAULT 0,
     "inGameId" INTEGER,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
@@ -27,9 +27,9 @@ CREATE TABLE "Game" (
 CREATE TABLE "GameHistory" (
     "gameId" INTEGER NOT NULL,
     "playerId" INTEGER NOT NULL,
-    "wpm" INTEGER,
-    "acc" DECIMAL(4,1),
-    "timeTaken" INTEGER,
+    "wpm" INTEGER NOT NULL,
+    "acc" DECIMAL(4,1) NOT NULL,
+    "timeTaken" INTEGER NOT NULL,
 
     CONSTRAINT "GameHistory_pkey" PRIMARY KEY ("gameId","playerId")
 );

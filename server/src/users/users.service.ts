@@ -3,7 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto';
+import { CreateUserDto, UpdateUserDto } from './dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
@@ -48,6 +48,14 @@ export class UsersService {
       success: false,
       message: 'User with that email does not exist',
     });
+  }
+
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    const updatedUser = await this.prisma.user.update({
+      where: { id },
+      data: updateUserDto,
+    });
+    return updatedUser;
   }
 
   findById(id: number) {

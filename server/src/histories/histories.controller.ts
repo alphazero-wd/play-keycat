@@ -6,7 +6,7 @@ export class HistoriesController {
   constructor(private historiesService: HistoriesService) {}
 
   @Get('games/:id/history')
-  async findByGame(@Param('gameId', ParseIntPipe) gameId: number) {
+  async findByGame(@Param('id', ParseIntPipe) gameId: number) {
     const gameHistories = await this.historiesService.findByGame(gameId);
     return gameHistories;
   }

@@ -2,6 +2,7 @@ import { addSeconds, format } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import { useTimer } from "react-timer-hook";
 import { Game } from "../types";
+import { calculateTimeLimit } from "../utils";
 
 export const useTimeDisplay = (game: Game | null) => {
   const [timeLimit, setTimeLimit] = useState(1e9);
@@ -20,9 +21,7 @@ export const useTimeDisplay = (game: Game | null) => {
 
   useEffect(() => {
     if (game?.paragraph) {
-      const timeLimitWpmBased = Math.trunc(
-        (game.paragraph.length / 5 / 39) * 60
-      );
+      const timeLimitWpmBased = calculateTimeLimit(39, game.paragraph);
       setTimeLimit(timeLimitWpmBased);
     }
   }, [game?.paragraph]);
