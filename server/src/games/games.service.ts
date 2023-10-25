@@ -125,11 +125,13 @@ export class GamesService {
 
   private async create(user: User) {
     const paragraph =
-      'Green vines attached to the trunk of the tree had wound themselves toward the top of the canopy. Ants used the vine as their private highway, avoiding all the creases and crags of the bark, to freely move at top speed from top to bottom or bottom to top depending on their current chore.';
+      'Green vines attached to the trunk of the tree had wound themselves toward the top of the canopy.';
+    // 'Green vines attached to the trunk of the tree had wound themselves toward the top of the canopy. Ants used the vine as their private highway, avoiding all the creases and crags of the bark, to freely move at top speed from top to bottom or bottom to top depending on their current chore.';
+
     const game = await this.prisma.game.create({
       data: {
         minPoints: Math.max(user.catPoints - 200, 0),
-        maxPoints: Math.max(user.catPoints + 200, 0),
+        maxPoints: user.catPoints + 200,
         paragraph,
       },
     });

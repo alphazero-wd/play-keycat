@@ -5,5 +5,5 @@ import { IsInt, IsOptional } from 'class-validator';
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsInt()
   @IsOptional()
-  catPoints?: number;
+  catPoints: number;
 }

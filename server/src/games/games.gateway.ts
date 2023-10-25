@@ -9,7 +9,7 @@ import {
 import { GamesService } from './games.service';
 import { Server } from 'socket.io';
 import { SocketUser } from '../common/types';
-import { UseGuards } from '@nestjs/common';
+import { ParseIntPipe, UseGuards } from '@nestjs/common';
 import { WsCookieAuthGuard } from '../auth/guards';
 import { PlayerFinishedDto } from './dto';
 import { HistoriesService } from '../histories/histories.service';
@@ -45,7 +45,7 @@ export class GamesGateway implements OnGatewayDisconnect {
   @SubscribeMessage('progress')
   async reflectProgress(
     @ConnectedSocket() socket: SocketUser,
-    @MessageBody('progress') progress: number,
+    @MessageBody('progress', ParseIntPipe) progress: number,
   ) {
     const user = await this.usersService.findById(socket.request.user.id);
     this.io.sockets
@@ -59,17 +59,16 @@ export class GamesGateway implements OnGatewayDisconnect {
     @ConnectedSocket() socket: SocketUser,
     @MessageBody() { wpm, acc, timeTaken, catPoints }: PlayerFinishedDto,
   ) {
-    const user = socket.request.user;
+    const user = await this.usersService.findById(socket.request.user.id);
     await this.usersService.update(user.id, {
-      catPoints: user.catPoints + +catPoints,
+      catPoints: Math.max(0, user.catPoints + catPoints),
     });
-    const gameHistory = await this.historiesService.create({
+    await this.historiesService.create({
       acc,
       wpm,
       timeTaken,
       playerId: user.id,
     });
-    this.io.sockets.to(`game:${gameHistory.gameId}`).emit('playerFinished', {});
   }
 
   async handleDisconnect(socket: SocketUser) {

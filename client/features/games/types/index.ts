@@ -14,4 +14,5 @@ export interface GameHistory {
   wpm: number;
   acc: number;
   timeTaken: number;
+  catPoints: number;
 }

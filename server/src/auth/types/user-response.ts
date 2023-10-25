@@ -5,6 +5,8 @@ export class UserResponse implements User {
   id: number;
 
   username: string;
+
+  @Exclude()
   email: string;
 
   @Exclude()

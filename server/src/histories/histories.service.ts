@@ -43,7 +43,7 @@ export class HistoriesService {
         where: { id: gameId },
         include: {
           histories: {
-            orderBy: { timeTaken: 'asc' },
+            orderBy: [{ timeTaken: 'asc' }, { wpm: 'desc' }],
             select: { timeTaken: true, wpm: true, acc: true, player: true },
           },
         },

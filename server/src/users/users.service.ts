@@ -58,7 +58,10 @@ export class UsersService {
     return updatedUser;
   }
 
-  findById(id: number) {
-    return this.prisma.user.findUnique({ where: { id } });
+  async findById(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+    return user;
   }
 }

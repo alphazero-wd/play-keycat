@@ -1,1 +1,1 @@
-export { UserResponse } from './auth-response';
+export { UserResponse } from './user-response';

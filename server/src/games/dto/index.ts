@@ -1,1 +1,1 @@
-export { type PlayerFinishedDto } from './player-finished.dto';
+export { PlayerFinishedDto } from './player-finished.dto';

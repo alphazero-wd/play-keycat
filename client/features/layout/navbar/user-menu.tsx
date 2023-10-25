@@ -57,7 +57,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
         <DropdownMenuGroup>
           <DropdownMenuLabel>{user.username}</DropdownMenuLabel>
           <DropdownMenuLabel className="font-normal">
-            {user.email}
+            {user.catPoints} CPs
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

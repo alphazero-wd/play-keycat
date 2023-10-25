@@ -15,37 +15,37 @@ import {
 import { Game } from "../types";
 import { User } from "@/features/users/types";
 import { format } from "date-fns";
-import { calculateCPs } from "../utils";
 import { useCallback } from "react";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
   MinusIcon,
 } from "@heroicons/react/20/solid";
+import { calculateCPs } from "../utils";
 
 export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
   const displayCPsEarned = useCallback(
     (wpm: number, acc: number, playersCount: number, pos: number) => {
-      const cpsEarned = +calculateCPs(wpm, acc, playersCount, pos);
-      if (cpsEarned > 0) {
+      const catPoints = +calculateCPs(wpm, acc, playersCount, pos);
+      if (catPoints > 0) {
         return (
           <span className="bg-green-100 text-green-800 text-xs font-medium inline-flex items-center px-4 py-1 rounded-md dark:bg-green-900 dark:text-green-300">
             <ArrowUpIcon className="w-4 h-4 mr-1.5" />
-            {cpsEarned}
+            {catPoints}
           </span>
         );
-      } else if (cpsEarned < 0) {
+      } else if (catPoints < 0) {
         return (
           <span className="bg-red-100 text-red-800 text-xs font-medium inline-flex items-center px-4 py-1 rounded-md dark:bg-red-900 dark:text-red-300">
             <ArrowDownIcon className="w-4 h-4 mr-1.5" />
-            {cpsEarned}
+            {catPoints}
           </span>
         );
       } else {
         return (
           <span className="bg-gray-100 text-gray-800 text-xs font-medium inline-flex items-center px-4 py-1 rounded-md dark:bg-gray-900 dark:text-gray-300">
             <MinusIcon className="w-4 h-4 mr-1.5" />
-            {cpsEarned}
+            {catPoints}
           </span>
         );
       }
@@ -65,7 +65,7 @@ export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
           <TableHead className="text-right">WPM</TableHead>
           <TableHead className="text-right">Accuracy</TableHead>
           <TableHead className="text-right">Time taken</TableHead>
-          <TableHead className="text-right">CPs earned</TableHead>
+          <TableHead className="text-right">Cat Points</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

@@ -10,6 +10,7 @@ import {
   calculateCPs,
   calculateProgress,
   calculateWpm,
+  determineRank,
 } from "../utils";
 import Link from "next/link";
 import { User } from "@/features/users/types";
@@ -17,14 +18,8 @@ import { useRouter } from "next/navigation";
 import { useAlert } from "@/features/layout/alert";
 
 export const Gameplay = ({ user }: { user: User }) => {
-  const {
-    players,
-    game,
-    isGameOver,
-    setIsGameOver,
-    playersProgress,
-    playersFinishedCount,
-  } = useGame();
+  const { players, game, isGameOver, setIsGameOver, playersProgress } =
+    useGame();
   const {
     typos,
     value,
@@ -58,7 +53,7 @@ export const Gameplay = ({ user }: { user: User }) => {
             wpm,
             acc,
             players.length,
-            playersFinishedCount + 1
+            determineRank(playersProgress, user.id)
           ),
           timeTaken,
         });
@@ -105,6 +100,7 @@ export const Gameplay = ({ user }: { user: User }) => {
           );
           router.push("/");
         }
+        router.refresh();
       }, 3000);
       return () => clearTimeout(timeout);
     }

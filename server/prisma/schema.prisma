@@ -17,8 +17,8 @@ model User {
   password  String
   joinedAt  DateTime @default(now())
   updatedAt DateTime @updatedAt
-  catPoints Int      @default(0)
   inGameId  Int?
+  catPoints Int      @default(0)
 
   inGame    Game?         @relation(fields: [inGameId], references: [id], onDelete: SetNull)
   histories GameHistory[]
