@@ -6,18 +6,19 @@ import {
   CalendarDaysIcon,
   ClockIcon,
   DocumentTextIcon,
+  HashtagIcon,
   TrophyIcon,
 } from "@heroicons/react/24/outline";
 import { addSeconds, format } from "date-fns";
 import { calculateTimeLimit } from "../utils";
 import { Label } from "@/features/ui";
-import { cn } from "@/lib/utils";
 
 export const Overview = ({ game }: { game: Game }) => {
-  const [truncated, setTruncated] = useState(false);
+  const [truncated, setTruncated] = useState(true);
 
   const attributes = useMemo(
     () => [
+      { icon: HashtagIcon, text: game.id, label: "ID" },
       {
         icon: CalendarDaysIcon,
         text: format(
@@ -35,15 +36,18 @@ export const Overview = ({ game }: { game: Game }) => {
         icon: DocumentTextIcon,
         text: (
           <>
-            <p className={cn(truncated ? "line-clamp-3" : "line-clamp-none")}>
-              {game.paragraph}{" "}
+            <p>
+              {truncated ? game.paragraph.slice(0, 100) : game.paragraph}
+              {truncated && game.paragraph.length >= 100 && "..."}{" "}
+              {game.paragraph.length >= 100 && (
+                <span
+                  onClick={() => setTruncated(!truncated)}
+                  className="cursor-pointer text-sm font-medium text-primary hover:underline"
+                >
+                  {truncated ? "More" : "Less"}
+                </span>
+              )}
             </p>
-            <span
-              onClick={() => setTruncated(!truncated)}
-              className="cursor-pointer text-sm font-medium text-primary hover:underline"
-            >
-              {truncated ? "More" : "Less"}
-            </span>
           </>
         ),
         label: "Typing text",
@@ -57,12 +61,17 @@ export const Overview = ({ game }: { game: Game }) => {
     <div className="my-6">
       <ul className="space-y-4">
         {attributes.map((attr) => (
-          <li key={attr.label} className="grid grid-cols-4 gap-x-4">
+          <li
+            key={attr.label}
+            className="grid grid-cols-8 sm:grid-cols-6 lg:grid-cols-4 gap-x-4"
+          >
             <div className="flex gap-x-4 items-center text-muted-foreground">
               <attr.icon className="w-5 h-5 flex-shrink-0" />
               <Label className="hidden lg:block">{attr.label}</Label>
             </div>
-            <div className="text-foreground col-span-3">{attr.text}</div>
+            <div className="text-foreground col-span-7 sm:col-span-5 lg:col-span-3">
+              {attr.text}
+            </div>
           </li>
         ))}
       </ul>

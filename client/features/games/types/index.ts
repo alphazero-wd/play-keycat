@@ -11,6 +11,8 @@ export interface Game {
 
 export interface GameHistory {
   player: User;
+  gameId: number;
+  game: Game;
   wpm: number;
   acc: number;
   timeTaken: number;

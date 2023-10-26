@@ -41,6 +41,7 @@ model GameHistory {
   wpm       Int
   acc       Decimal @db.Decimal(4, 1)
   timeTaken Int // ms taken for a player to type the whole text (<= timeLimit of a game)
+  catPoints Int
 
   game   Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
   player User @relation(fields: [playerId], references: [id], onDelete: Cascade)

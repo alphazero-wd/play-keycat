@@ -32,17 +32,21 @@ export const UserMenu = ({ user }: UserMenuProps) => {
   const { logout } = useLogout();
   const userMenuItems = useMemo(
     () => [
-      { text: "Profile", href: `/player/${user.id}/profile`, icon: UserIcon },
+      {
+        text: "Profile",
+        href: `/player/${user.username}/profile`,
+        icon: UserIcon,
+      },
       { text: "Lobby", href: "/", icon: HomeIcon },
       { text: "Leaderboards", href: "/leaderboards", icon: ChartBarIcon },
       {
         text: "Friends",
-        href: `player/${user.id}/friends`,
+        href: `player/${user.username}/friends`,
         icon: UserGroupIcon,
       },
       { text: "Settings", href: "/settings", icon: Cog6ToothIcon },
     ],
-    [user.id]
+    [user.username]
   );
 
   return (

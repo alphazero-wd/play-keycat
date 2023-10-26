@@ -48,3 +48,5 @@ export {
   TooltipProvider,
   TooltipTrigger,
 } from "./tooltip";
+
+export { Separator } from "./separator";

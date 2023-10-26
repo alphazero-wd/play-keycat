@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -61,7 +62,49 @@ export class UsersService {
   async findById(id: number) {
     const user = await this.prisma.user.findUnique({
       where: { id },
+      select: { id: true, inGameId: true, catPoints: true, username: true },
     });
     return user;
+  }
+
+  async findProfile(username: string) {
+    try {
+      const user = await this.prisma.user.findUniqueOrThrow({
+        where: { username },
+        select: {
+          id: true,
+          username: true,
+          joinedAt: true,
+          catPoints: true,
+        },
+      });
+
+      const {
+        _max: { wpm: highestWpm = 0 },
+        _count: { gameId: gamesPlayed = 0 },
+      } = await this.prisma.gameHistory.aggregate({
+        where: { playerId: user.id },
+        _max: { wpm: true },
+        _count: { gameId: true },
+      });
+
+      const {
+        _avg: { wpm: lastTenAverageWpm = 0 },
+      } = await this.prisma.gameHistory.aggregate({
+        where: { playerId: user.id },
+        _avg: { wpm: true },
+        take: 10,
+        orderBy: { game: { startedAt: 'desc' } },
+      });
+
+      return { ...user, highestWpm, lastTenAverageWpm, gamesPlayed };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError)
+        if (error.code === PrismaError.RecordNotFound)
+          throw new NotFoundException(
+            'Cannot find player with the given username',
+          );
+      throw new InternalServerErrorException('Something went wrong');
+    }
   }
 }

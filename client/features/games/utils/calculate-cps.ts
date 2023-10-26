@@ -4,6 +4,6 @@ export const calculateCPs = (
   playersCount: number,
   pos: number
 ) => {
-  const score = wpm - 39 + (acc - 98) + 2 * (playersCount - pos);
+  const score = wpm + (acc - 50) + 2 * (playersCount - pos);
   return +score.toFixed(0);
 };

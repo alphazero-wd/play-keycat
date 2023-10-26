@@ -4,6 +4,7 @@ import { Prisma, User } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
 import { WsException } from '@nestjs/websockets';
 import { UsersService } from '../users/users.service';
+import { faker } from '@faker-js/faker';
 
 @Injectable()
 export class GamesService {
@@ -124,9 +125,7 @@ export class GamesService {
   }
 
   private async create(user: User) {
-    const paragraph =
-      'Green vines attached to the trunk of the tree had wound themselves toward the top of the canopy.';
-    // 'Green vines attached to the trunk of the tree had wound themselves toward the top of the canopy. Ants used the vine as their private highway, avoiding all the creases and crags of the bark, to freely move at top speed from top to bottom or bottom to top depending on their current chore.';
+    const paragraph = faker.word.words(20);
 
     const game = await this.prisma.game.create({
       data: {

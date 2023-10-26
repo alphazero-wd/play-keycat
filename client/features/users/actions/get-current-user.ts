@@ -9,6 +9,8 @@ export const getCurrentUser = async () => {
       headers: {
         Cookie: cookies().toString(),
       },
+      // @ts-ignore
+      cache: "no-store",
     });
     return user as User | undefined;
   } catch (error) {

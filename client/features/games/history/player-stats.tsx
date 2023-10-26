@@ -15,44 +15,10 @@ import {
 import { Game } from "../types";
 import { User } from "@/features/users/types";
 import { format } from "date-fns";
-import { useCallback } from "react";
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  MinusIcon,
-} from "@heroicons/react/20/solid";
-import { calculateCPs } from "../utils";
+import Link from "next/link";
+import { displayCPsEarned } from "../utils";
 
 export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
-  const displayCPsEarned = useCallback(
-    (wpm: number, acc: number, playersCount: number, pos: number) => {
-      const catPoints = +calculateCPs(wpm, acc, playersCount, pos);
-      if (catPoints > 0) {
-        return (
-          <span className="bg-green-100 text-green-800 text-xs font-medium inline-flex items-center px-4 py-1 rounded-md dark:bg-green-900 dark:text-green-300">
-            <ArrowUpIcon className="w-4 h-4 mr-1.5" />
-            {catPoints}
-          </span>
-        );
-      } else if (catPoints < 0) {
-        return (
-          <span className="bg-red-100 text-red-800 text-xs font-medium inline-flex items-center px-4 py-1 rounded-md dark:bg-red-900 dark:text-red-300">
-            <ArrowDownIcon className="w-4 h-4 mr-1.5" />
-            {catPoints}
-          </span>
-        );
-      } else {
-        return (
-          <span className="bg-gray-100 text-gray-800 text-xs font-medium inline-flex items-center px-4 py-1 rounded-md dark:bg-gray-900 dark:text-gray-300">
-            <MinusIcon className="w-4 h-4 mr-1.5" />
-            {catPoints}
-          </span>
-        );
-      }
-    },
-    []
-  );
-
   return (
     <Table>
       <TableCaption>
@@ -62,9 +28,9 @@ export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
         <TableRow>
           <TableHead className="w-[50px] text-right">#</TableHead>
           <TableHead>Player</TableHead>
+          <TableHead className="text-right">Time</TableHead>
           <TableHead className="text-right">WPM</TableHead>
           <TableHead className="text-right">Accuracy</TableHead>
-          <TableHead className="text-right">Time taken</TableHead>
           <TableHead className="text-right">Cat Points</TableHead>
         </TableRow>
       </TableHeader>
@@ -84,21 +50,23 @@ export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
                   {history.player.username[0].toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              {history.player.username}{" "}
-              {history.player.id === user?.id && "(you)"}
+              <div>
+                <Link
+                  href={`/player/${history.player.username}/profile`}
+                  className="font-medium text-primary hover:underline"
+                >
+                  @{history.player.username}
+                </Link>{" "}
+                <span>{history.player.id === user?.id && "(you)"}</span>
+              </div>
+            </TableCell>
+            <TableCell className="text-right">
+              {format(new Date(history.timeTaken), "mm:ss.SSS")}
             </TableCell>
             <TableCell className="text-right">{history.wpm}</TableCell>
             <TableCell className="text-right">{history.acc}%</TableCell>
             <TableCell className="text-right">
-              {format(new Date(history.timeTaken), "mm:ss.SSS")}
-            </TableCell>
-            <TableCell className="text-right">
-              {displayCPsEarned(
-                history.wpm,
-                history.acc,
-                game.histories.length,
-                index + 1
-              )}
+              {displayCPsEarned(history.catPoints)}
             </TableCell>
           </TableRow>
         ))}

@@ -5,3 +5,9 @@ export interface User {
   inGameId?: number;
   catPoints: number;
 }
+
+export interface Player extends User {
+  highestWpm: number;
+  lastTenAverageWpm: number;
+  gamesPlayed: number;
+}

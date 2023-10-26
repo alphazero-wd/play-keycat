@@ -3,4 +3,5 @@ export interface CreateHistoryDto {
   acc: number;
   playerId: number;
   timeTaken: number;
+  catPoints: number;
 }

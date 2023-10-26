@@ -3,3 +3,4 @@ export * from "./calculate-typing";
 export { calculateCPs } from "./calculate-cps";
 export { calculateTimeLimit } from "./calculate-time-limit";
 export { determineRank } from "./determine-rank";
+export { displayCPsEarned } from "./display-cps-earned";
