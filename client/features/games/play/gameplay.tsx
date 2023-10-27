@@ -2,7 +2,7 @@
 
 import { Button, Input } from "@/features/ui";
 import { addSeconds, differenceInMilliseconds } from "date-fns";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useGame, useTimeDisplay, useTyping } from "../hooks";
 import { socket } from "@/lib/socket";
 import {
@@ -10,7 +10,7 @@ import {
   calculateCPs,
   calculateProgress,
   calculateWpm,
-  determineRank,
+  determinePosition,
 } from "../utils";
 import Link from "next/link";
 import { User } from "@/features/users/types";
@@ -30,8 +30,16 @@ export const Gameplay = ({ user }: { user: User }) => {
     onKeydown,
   } = useTyping(game?.paragraph || "");
 
+  const averagePlayerCPs = useMemo(() => {
+    const totalPlayerCPs = players.reduce(
+      (sum, player) => (sum += player.catPoints),
+      0
+    );
+    return +(totalPlayerCPs / players.length).toFixed(0);
+  }, [players]);
+
   const { startCountdown, title, subtitle, timeRemaining, countdown } =
-    useTimeDisplay(game);
+    useTimeDisplay(game, averagePlayerCPs);
 
   const router = useRouter();
   const { setAlert } = useAlert();
@@ -53,7 +61,7 @@ export const Gameplay = ({ user }: { user: User }) => {
             wpm,
             acc,
             players.length,
-            determineRank(playersProgress, user.id)
+            determinePosition(playersProgress, user.id)
           ),
           timeTaken,
         });

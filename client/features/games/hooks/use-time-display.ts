@@ -4,7 +4,7 @@ import { useTimer } from "react-timer-hook";
 import { Game } from "../types";
 import { calculateTimeLimit } from "../utils";
 
-export const useTimeDisplay = (game: Game | null) => {
+export const useTimeDisplay = (game: Game | null, averageCPs: number) => {
   const [timeLimit, setTimeLimit] = useState(1e9);
   const { totalSeconds: timeRemaining, restart: startTimeLimit } = useTimer({
     autoStart: false,
@@ -21,7 +21,7 @@ export const useTimeDisplay = (game: Game | null) => {
 
   useEffect(() => {
     if (game?.paragraph) {
-      const timeLimitWpmBased = calculateTimeLimit(39, game.paragraph);
+      const timeLimitWpmBased = calculateTimeLimit(averageCPs, game.paragraph);
       setTimeLimit(timeLimitWpmBased);
     }
   }, [game?.paragraph]);
@@ -34,7 +34,7 @@ export const useTimeDisplay = (game: Game | null) => {
   }, [game?.startedAt, countdown, timeRemaining]);
 
   const subtitle = useMemo(() => {
-    if (!game?.startedAt) return "Waiting for opponents...";
+    if (!game?.startedAt) return "Waiting for opponents with similar levels...";
     if (game.startedAt && countdown > 0)
       return `Game starting in ${countdown} seconds...`;
     if (timeRemaining > 0)

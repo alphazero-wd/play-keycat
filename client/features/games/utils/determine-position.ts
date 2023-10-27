@@ -1,4 +1,4 @@
-export const determineRank = (
+export const determinePosition = (
   playersProgress: Record<number, number>,
   playerId: number
 ) => {
@@ -7,7 +7,9 @@ export const determineRank = (
   // Output: 3
 
   const progress = Object.values(playersProgress);
-  const sortedProgressSetDesc = progress.sort((a, b) => b - a);
+  const sortedProgressSetDesc = Array.from(new Set(progress)).sort(
+    (a, b) => b - a
+  );
 
   return (
     sortedProgressSetDesc.findIndex(

@@ -94,6 +94,10 @@ export const HistoriesTable = ({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                className="cursor-pointer"
+                onClick={() =>
+                  router.push(`/games/${row.original.gameId}/history`)
+                }
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>

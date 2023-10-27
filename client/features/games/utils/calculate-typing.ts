@@ -17,4 +17,4 @@ export const calculateAccuracy = (typos: number, charsTyped: number) => {
 };
 
 export const calculateProgress = (charsTyped: number, paragraph: string) =>
-  +((charsTyped / paragraph.length) * 100).toFixed(0);
+  Math.trunc((charsTyped / paragraph.length) * 100);
