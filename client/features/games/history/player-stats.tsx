@@ -43,7 +43,7 @@ export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
             <TableCell className="flex gap-x-3 items-center">
               <Avatar>
                 <AvatarImage
-                  src="https://github.com/shadcn.png"
+                  src="/icons/sprout.jpg"
                   alt={`@${history.player.username}`}
                 />
                 <AvatarFallback>

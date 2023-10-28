@@ -3,12 +3,12 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateHistoryDto, FindPlayerHistoriesDto } from './dto';
-import { PrismaService } from '../prisma/prisma.service';
+import { WsException } from '@nestjs/websockets';
 import { Prisma } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
-import { WsException } from '@nestjs/websockets';
+import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
+import { CreateHistoryDto } from './dto';
 
 @Injectable()
 export class HistoriesService {
@@ -74,16 +74,14 @@ export class HistoriesService {
     }
   }
 
-  async findByPlayer(
-    username: string,
-    { offset, limit }: FindPlayerHistoriesDto,
-  ) {
+  async findByPlayer(username: string, offset: number) {
     const playerHistoriesCount = await this.prisma.gameHistory.count({
       where: { player: { username } },
+      take: 100,
     });
     const playerHistories = await this.prisma.gameHistory.findMany({
       where: { player: { username } },
-      take: limit,
+      take: 10,
       skip: offset,
       select: {
         gameId: true,

@@ -1,4 +1,4 @@
-import { getPlayerHistories, getPlayerProfile } from "@/features/users/actions";
+import { getPlayerProfile } from "@/features/users/actions";
 import { redirect } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/features/ui";
 import { format } from "date-fns";
@@ -7,6 +7,7 @@ import { Metadata } from "next";
 import { About, ProfileShares } from "@/features/users/profile";
 import { PlayerGameHistories } from "@/features/users/histories";
 import { Suspense } from "react";
+import { getCurrentRank } from "@/features/users/utils";
 
 interface PlayerProfilePageProps {
   params: {
@@ -24,7 +25,11 @@ export const generateMetadata = async ({
   if (!player) return { title: "Player not found" };
   return {
     title: player.username,
-    description: `Rank: Silver IV (${player.catPoints} CPs), Average WPM (last 10 games): ${player.lastTenAverageWpm}, Highest WPM: ${player.highestWpm}`,
+    description: `Rank: ${getCurrentRank(player.catPoints)} (${
+      player.catPoints
+    } CPs), Average WPM (last 10 games): ${
+      player.lastTenAverageWpm
+    }, Highest WPM: ${player.highestWpm}`,
   };
 };
 
@@ -39,10 +44,7 @@ export default async function PlayerProfilePage({
     <div className="container max-w-3xl space-y-6">
       <div className="flex gap-x-8 items-center">
         <Avatar className="h-36 w-36">
-          <AvatarImage
-            className="object-cover object-top"
-            src="https://i.pinimg.com/originals/2e/81/a8/2e81a8c5cbd9f4ac1aad2b29ae93b710.jpg"
-          />
+          <AvatarImage className="object-cover" src="/icons/sprout.jpg" />
           <AvatarFallback>{player.username[0].toUpperCase()}</AvatarFallback>
         </Avatar>
 

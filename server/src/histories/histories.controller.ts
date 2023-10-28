@@ -1,6 +1,5 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { HistoriesService } from './histories.service';
-import { FindPlayerHistoriesDto } from './dto';
 
 @Controller()
 export class HistoriesController {
@@ -15,10 +14,10 @@ export class HistoriesController {
   @Get('player/:username/histories')
   async findPlayerHistories(
     @Param('username') username: string,
-    @Query() queries: FindPlayerHistoriesDto,
+    @Query('offset', ParseIntPipe) offset: number,
   ) {
     const { playerHistories, playerHistoriesCount } =
-      await this.historiesService.findByPlayer(username, queries);
+      await this.historiesService.findByPlayer(username, offset);
     return { playerHistories, playerHistoriesCount };
   }
 }
