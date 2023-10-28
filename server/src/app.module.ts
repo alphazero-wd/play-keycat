@@ -8,6 +8,7 @@ import * as Joi from '@hapi/joi';
 import { PrismaModule } from './prisma/prisma.module';
 import { GamesModule } from './games/games.module';
 import { HistoriesModule } from './histories/histories.module';
+import { LeaderboardsModule } from './leaderboards/leaderboards.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { HistoriesModule } from './histories/histories.module';
     PrismaModule,
     GamesModule,
     HistoriesModule,
+    LeaderboardsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

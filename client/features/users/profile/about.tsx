@@ -1,9 +1,9 @@
 import Image from "next/image";
-import { Player } from "../types";
+import { User } from "../types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/features/ui";
 import { getCurrentRank } from "../utils";
 
-export const About = ({ player }: { player: Player }) => {
+export const About = ({ player }: { player: User }) => {
   return (
     <div>
       <h3 className="font-medium text-foreground">About the player</h3>
@@ -26,7 +26,7 @@ export const About = ({ player }: { player: Player }) => {
                 width={200}
                 className="mx-auto"
                 height={200}
-                alt={getCurrentRank(player.catPoints) + " Badge"}
+                alt={getCurrentRank(player.catPoints)}
               />
             )}
 

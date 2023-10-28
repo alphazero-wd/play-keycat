@@ -1,6 +1,6 @@
 "use client";
 import React, { useMemo } from "react";
-import { Player } from "@/features/users/types";
+import { User } from "@/features/users/types";
 import {
   FacebookShareButton,
   LinkedinShareButton,
@@ -15,7 +15,7 @@ import {
 } from "@/features/ui";
 import { ShareIcon } from "@heroicons/react/24/outline";
 
-export const ProfileShares = ({ player }: { player: Player }) => {
+export const ProfileShares = ({ player }: { player: User }) => {
   const url = useMemo(
     () => `http://localhost:3000/player/${player.username}/profile`,
     []

@@ -1,9 +1,6 @@
 "use client";
 
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
   Table,
   TableBody,
   TableCaption,
@@ -15,8 +12,8 @@ import {
 import { Game } from "../types";
 import { User } from "@/features/users/types";
 import { format } from "date-fns";
-import Link from "next/link";
 import { displayCPsEarned } from "../utils";
+import { PlayerCell } from "@/features/shared/data-table/components";
 
 export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
   return (
@@ -41,24 +38,7 @@ export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
               {index + 1}
             </TableCell>
             <TableCell className="flex gap-x-3 items-center">
-              <Avatar>
-                <AvatarImage
-                  src="/icons/sprout.jpg"
-                  alt={`@${history.player.username}`}
-                />
-                <AvatarFallback>
-                  {history.player.username[0].toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <Link
-                  href={`/player/${history.player.username}/profile`}
-                  className="font-medium text-primary hover:underline"
-                >
-                  @{history.player.username}
-                </Link>{" "}
-                <span>{history.player.id === user?.id && "(you)"}</span>
-              </div>
+              <PlayerCell player={history.player} user={user} />
             </TableCell>
             <TableCell className="text-right">
               {format(new Date(history.timeTaken), "mm:ss.SSS")}

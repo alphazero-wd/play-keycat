@@ -29,32 +29,21 @@ export class LeaderboardsService {
     });
 
     return {
-      topPlayers: topPlayers.map(({ histories, ...player }) => {
-        const lastTenAverageWpm =
-          histories.reduce((avg, h) => avg + h.wpm, 0) / 10;
-        return { ...player, lastTenAverageWpm };
+      topPlayers: topPlayers.map(({ histories, _count, ...player }) => {
+        const { sum: sumWpm, max: highestWpm } = histories.reduce(
+          (acc, h) => ({ max: Math.max(acc.max, h.wpm), sum: acc.sum + h.wpm }),
+          { max: -Infinity, sum: 0 },
+        );
+        return {
+          ...player,
+          highestWpm,
+          lastTenAverageWpm: Math.trunc(
+            sumWpm / Math.min(10, histories.length),
+          ),
+          gamesPlayed: _count.histories,
+        };
       }),
       topPlayersCount,
     };
-  }
-
-  async findTop100Games() {
-    const topGamesCount = await this.prisma.game.count({
-      take: 100,
-    });
-    const topGames = await this.prisma.gameHistory.findMany({
-      take: 10,
-      select: {
-        gameId: true,
-        playerId: true,
-        catPoints: true,
-        wpm: true,
-        acc: true,
-        player: { select: { username: true } },
-      },
-      orderBy: { wpm: 'desc' },
-    });
-
-    return { topGames, topGamesCount };
   }
 }

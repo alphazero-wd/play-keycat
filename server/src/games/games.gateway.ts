@@ -60,13 +60,16 @@ export class GamesGateway implements OnGatewayDisconnect {
     @MessageBody() { wpm, acc, timeTaken, catPoints }: PlayerFinishedDto,
   ) {
     const user = await this.usersService.findById(socket.request.user.id);
-    await this.historiesService.create({
+    const payload = {
       acc,
       wpm,
       timeTaken,
       catPoints,
       playerId: user.id,
-    });
+    };
+    await this.historiesService.create(payload);
+    delete payload.timeTaken;
+    this.io.sockets.emit('leaderboardUpdate');
   }
 
   async handleDisconnect(socket: SocketUser) {
