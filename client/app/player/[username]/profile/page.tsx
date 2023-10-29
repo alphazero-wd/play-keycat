@@ -1,13 +1,16 @@
-import { getPlayerProfile } from "@/features/users/actions";
-import { redirect } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "@/features/ui";
-import { format } from "date-fns";
-import { CalendarDaysIcon } from "@heroicons/react/24/outline";
-import { Metadata } from "next";
-import { About, ProfileShares } from "@/features/users/profile";
+import { Avatar, AvatarFallback, AvatarImage } from "@/features/ui/avatar";
 import { PlayerGameHistories } from "@/features/users/histories";
+import {
+  About,
+  ProfileShares,
+  getCurrentRank,
+  getPlayerProfile,
+} from "@/features/users/profile";
+import { CalendarDaysIcon } from "@heroicons/react/24/outline";
+import { format } from "date-fns";
+import { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { getCurrentRank } from "@/features/users/utils";
 
 interface PlayerProfilePageProps {
   params: {
@@ -42,7 +45,7 @@ export default async function PlayerProfilePage({
 
   return (
     <div className="container max-w-3xl space-y-6">
-      <div className="flex gap-x-8 items-center">
+      <div className="flex items-center gap-x-8">
         <Avatar className="h-36 w-36">
           <AvatarImage className="object-cover" src="/icons/sprout.jpg" />
           <AvatarFallback>{player.username[0].toUpperCase()}</AvatarFallback>
@@ -51,16 +54,16 @@ export default async function PlayerProfilePage({
         <div className="w-full flex-1">
           <div className="flex items-center justify-between gap-x-4">
             <div>
-              <h2 className="font-bold tracking-tight sm:text-4xl text-2xl text-foreground">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-4xl">
                 {player.username}
               </h2>
               <p className="font-medium text-primary">@{player.username}</p>
             </div>
             <ProfileShares player={player} />
           </div>
-          <div className="space-y-1 mt-4">
-            <p className="flex items-center text-muted-foreground text-sm">
-              <CalendarDaysIcon className="w-5 h-5 mr-2" />
+          <div className="mt-4 space-y-1">
+            <p className="flex items-center text-sm text-muted-foreground">
+              <CalendarDaysIcon className="mr-2 h-5 w-5" />
               Joined {format(new Date(player.joinedAt), "MMMM Y")}
             </p>
             {/* <p className="flex items-center text-muted-foreground text-sm">

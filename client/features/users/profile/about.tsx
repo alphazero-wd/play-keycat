@@ -1,14 +1,14 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/features/ui/card";
 import Image from "next/image";
-import { User } from "../types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/features/ui";
-import { getCurrentRank } from "../utils";
+import { User } from "../profile";
+import { getCurrentRank } from "./get-current-rank";
 
 export const About = ({ player }: { player: User }) => {
   return (
     <div>
       <h3 className="font-medium text-foreground">About the player</h3>
-      <div className="mt-1 mb-2" />
-      <div className="grid md:grid-cols-2 gap-x-3">
+      <div className="mb-2 mt-1" />
+      <div className="grid gap-x-3 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-center text-card-foreground">
@@ -17,7 +17,7 @@ export const About = ({ player }: { player: User }) => {
           </CardHeader>
           <CardContent className="flex flex-col items-center">
             {player.catPoints < 500 ? (
-              <div className="w-[200px] h-[200px] mx-auto border-2 border-dashed rounded-full border-muted-foreground" />
+              <div className="mx-auto h-[200px] w-[200px] rounded-full border-2 border-dashed border-muted-foreground" />
             ) : (
               <Image
                 src={`/images/${getCurrentRank(player.catPoints)
@@ -44,9 +44,9 @@ export const About = ({ player }: { player: User }) => {
               Stats
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex gap-y-3 flex-col items-center">
-            <div className="text-center mt-3">
-              <h3 className="font-medium block text-card-foreground text-lg">
+          <CardContent className="flex flex-col items-center gap-y-3">
+            <div className="mt-3 text-center">
+              <h3 className="block text-lg font-medium text-card-foreground">
                 Games Played
               </h3>
               <p className="text-2xl text-muted-foreground">
@@ -54,16 +54,16 @@ export const About = ({ player }: { player: User }) => {
               </p>
             </div>
 
-            <div className="text-center mt-3">
-              <h3 className="font-medium block text-card-foreground text-lg">
+            <div className="mt-3 text-center">
+              <h3 className="block text-lg font-medium text-card-foreground">
                 WPM (last 10 games)
               </h3>
               <p className="text-2xl text-muted-foreground">
                 {Math.round(player.lastTenAverageWpm)}
               </p>
             </div>
-            <div className="text-center mt-3">
-              <h3 className="font-medium block text-card-foreground text-lg">
+            <div className="mt-3 text-center">
+              <h3 className="block text-lg font-medium text-card-foreground">
                 Highest WPM
               </h3>
               <p className="text-2xl text-muted-foreground">

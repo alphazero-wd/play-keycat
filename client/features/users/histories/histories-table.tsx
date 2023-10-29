@@ -1,10 +1,10 @@
 "use client";
-import { GameHistory } from "@/features/games/types";
+import { GameHistory } from "@/features/games/history";
 import {
   DataTable,
   DataTablePagination,
-} from "@/features/shared/data-table/components";
-import { useTable } from "@/features/shared/data-table/hooks";
+  useTable,
+} from "@/features/ui/data-table";
 import { columns } from "./columns";
 
 export const HistoriesTable = ({

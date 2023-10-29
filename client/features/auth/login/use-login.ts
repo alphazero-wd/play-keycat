@@ -1,12 +1,12 @@
 "use client";
 
-import * as z from "zod";
-import * as authApi from "@/features/auth/api";
-import { useForm } from "react-hook-form";
+import { useAlert } from "@/features/ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { useAlert } from "@/features/layout/alert";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { login } from "./login-api";
 
 const formSchema = z.object({
   email: z
@@ -26,7 +26,7 @@ export const useLogin = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
     try {
-      const { data: user } = await authApi.login(values);
+      const { data: user } = await login(values);
       setAlert("success", `Welcome back, ${user.username}!`);
       form.reset();
       router.push("/");

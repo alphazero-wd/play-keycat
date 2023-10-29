@@ -1,17 +1,13 @@
 "use client";
-import React, { useMemo, useState } from "react";
-import { Game } from "../types";
+import { Label } from "@/features/ui/label";
 import {
-  BoltIcon,
   CalendarDaysIcon,
-  ClockIcon,
   DocumentTextIcon,
   HashtagIcon,
-  TrophyIcon,
 } from "@heroicons/react/24/outline";
 import { addSeconds, format } from "date-fns";
-import { calculateTimeLimit } from "../utils";
-import { Label } from "@/features/ui";
+import { useMemo, useState } from "react";
+import { Game } from "../play";
 
 export const Overview = ({ game }: { game: Game }) => {
   const [truncated, setTruncated] = useState(true);
@@ -23,14 +19,9 @@ export const Overview = ({ game }: { game: Game }) => {
         icon: CalendarDaysIcon,
         text: format(
           addSeconds(new Date(game.startedAt), 10),
-          "d MMM, Y h:mm a"
+          "d MMM, Y h:mm a",
         ),
         label: "Started at",
-      },
-      {
-        icon: ClockIcon,
-        text: format(calculateTimeLimit(39, game.paragraph) * 1000, "mm:ss"),
-        label: "Time limit",
       },
       {
         icon: DocumentTextIcon,
@@ -52,10 +43,8 @@ export const Overview = ({ game }: { game: Game }) => {
         ),
         label: "Typing text",
       },
-      { icon: BoltIcon, text: 39, label: "WPM required" },
-      { icon: TrophyIcon, text: "95%", label: "Accuracy required" },
     ],
-    [game, truncated]
+    [game, truncated],
   );
   return (
     <div className="my-6">
@@ -63,13 +52,13 @@ export const Overview = ({ game }: { game: Game }) => {
         {attributes.map((attr) => (
           <li
             key={attr.label}
-            className="grid grid-cols-8 sm:grid-cols-6 lg:grid-cols-4 gap-x-4"
+            className="grid grid-cols-8 gap-x-4 sm:grid-cols-6 lg:grid-cols-4"
           >
-            <div className="flex gap-x-4 items-center text-muted-foreground">
-              <attr.icon className="w-5 h-5 flex-shrink-0" />
+            <div className="flex items-center gap-x-4 text-muted-foreground">
+              <attr.icon className="h-5 w-5 flex-shrink-0" />
               <Label className="hidden lg:block">{attr.label}</Label>
             </div>
-            <div className="text-foreground col-span-7 sm:col-span-5 lg:col-span-3">
+            <div className="col-span-7 text-foreground sm:col-span-5 lg:col-span-3">
               {attr.text}
             </div>
           </li>

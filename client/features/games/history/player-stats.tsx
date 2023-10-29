@@ -1,6 +1,6 @@
 "use client";
-
 import {
+  PlayerCell,
   Table,
   TableBody,
   TableCaption,
@@ -8,12 +8,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/features/ui";
-import { Game } from "../types";
-import { User } from "@/features/users/types";
+} from "@/features/ui/table";
+import { User } from "@/features/users/profile";
 import { format } from "date-fns";
-import { displayCPsEarned } from "../utils";
-import { PlayerCell } from "@/features/shared/data-table/components";
+import { Game } from "../play";
+import { displayCPsEarned } from "./display-cps-earned";
 
 export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
   return (
@@ -34,10 +33,10 @@ export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
       <TableBody>
         {game.histories.map((history, index) => (
           <TableRow key={history.player.id}>
-            <TableCell className="font-medium text-right">
+            <TableCell className="text-right font-medium">
               {index + 1}
             </TableCell>
-            <TableCell className="flex gap-x-3 items-center">
+            <TableCell className="flex items-center gap-x-3">
               <PlayerCell player={history.player} user={user} />
             </TableCell>
             <TableCell className="text-right">

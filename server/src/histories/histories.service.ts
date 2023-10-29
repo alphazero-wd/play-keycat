@@ -4,33 +4,30 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
-import { Prisma } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
 import { PrismaService } from '../prisma/prisma.service';
-import { UsersService } from '../users/users.service';
 import { CreateHistoryDto } from './dto';
 
 @Injectable()
 export class HistoriesService {
-  constructor(
-    private prisma: PrismaService,
-    private usersService: UsersService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  async create({ playerId, catPoints, ...createHistoryDto }: CreateHistoryDto) {
+  async create(
+    { catPoints, ...createHistoryDto }: CreateHistoryDto,
+    user: User,
+  ) {
     try {
-      const user = await this.usersService.findById(playerId);
       const gameHistory = await this.prisma.$transaction([
         this.prisma.user.update({
-          where: { id: playerId },
+          where: { id: user.id },
           data: { catPoints: Math.max(user.catPoints + catPoints, 0) },
         }),
         this.prisma.gameHistory.create({
           data: {
             ...createHistoryDto,
             catPoints: user.catPoints + catPoints < 0 ? 0 : catPoints,
-            playerId,
-            gameId: user.inGameId,
+            playerId: user.id,
           },
         }),
       ]);

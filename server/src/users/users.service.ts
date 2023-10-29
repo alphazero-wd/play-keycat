@@ -60,11 +60,18 @@ export class UsersService {
   }
 
   async findById(id: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-      select: { id: true, inGameId: true, catPoints: true, username: true },
-    });
-    return user;
+    try {
+      const user = await this.prisma.user.findUniqueOrThrow({
+        where: { id },
+        select: { id: true, inGameId: true, catPoints: true, username: true },
+      });
+      return user;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError)
+        if (error.code === PrismaError.RecordNotFound)
+          throw new NotFoundException('User not found');
+      throw new InternalServerErrorException('Something went wrong');
+    }
   }
 
   async findProfile(username: string) {

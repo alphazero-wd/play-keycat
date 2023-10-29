@@ -1,7 +1,7 @@
-import { GameHistory } from "@/features/games/types";
+"use client";
+import { GameHistory, displayCPsEarned } from "@/features/games/history";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { displayCPsEarned } from "@/features/games/utils";
 
 export const columns: ColumnDef<GameHistory>[] = [
   {

@@ -1,10 +1,10 @@
 import {
   Card,
+  CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/features/ui";
+} from "@/features/ui/card";
 import { ReactNode } from "react";
 
 interface AuthWrapperProps {

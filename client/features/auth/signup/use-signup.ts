@@ -1,16 +1,17 @@
 "use client";
 
-import * as z from "zod";
-import * as authApi from "@/features/auth/api";
 import {
   STRONG_PASSWORD_REGEX,
   VALID_USERNAME_REGEX,
-} from "@/features/shared/constants";
-import { useForm } from "react-hook-form";
+} from "@/features/constants";
+import { useAlert } from "@/features/ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { useAlert } from "@/features/layout/alert";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { login } from "../login";
+import { signup } from "./signup-api";
 
 const formSchema = z.object({
   username: z
@@ -38,8 +39,8 @@ export const useSignup = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
     try {
-      await authApi.signup(values);
-      await authApi.login({
+      await signup(values);
+      await login({
         email: values.email,
         password: values.password,
       });

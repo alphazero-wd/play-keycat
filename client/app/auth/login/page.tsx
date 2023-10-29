@@ -1,7 +1,7 @@
-import { AuthWrapper } from "@/features/auth/shared";
-import Link from "next/link";
 import { LoginForm } from "@/features/auth/login";
-import { getCurrentUser } from "@/features/users/actions";
+import { AuthWrapper } from "@/features/auth/shared";
+import { getCurrentUser } from "@/features/users/me";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export const metadata = {
@@ -19,7 +19,7 @@ export default async function SignupPage() {
         subtitle="Continue your league journey"
       >
         <LoginForm />
-        <div className="text-sm text-secondary-foreground mt-3 text-center">
+        <div className="mt-3 text-center text-sm text-secondary-foreground">
           Don&apos;t have an account?{" "}
           <Link href="/auth/signup" className="font-medium text-primary">
             Sign up

@@ -5,9 +5,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  Input,
-} from "@/features/ui";
-import { ReactNode } from "react";
+} from "@/features/ui/form";
+import { Input } from "@/features/ui/input";
 
 interface InputGroupProps {
   label: string;

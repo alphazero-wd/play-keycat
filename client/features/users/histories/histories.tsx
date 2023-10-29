@@ -1,4 +1,4 @@
-import { getPlayerHistories } from "../actions";
+import { getPlayerHistories } from "./get-player-histories";
 import { HistoriesTable } from "./histories-table";
 
 export const PlayerGameHistories = async ({
@@ -10,7 +10,7 @@ export const PlayerGameHistories = async ({
 }) => {
   const { playerHistories, playerHistoriesCount } = await getPlayerHistories(
     username,
-    +(offset || "0")
+    +(offset || "0"),
   );
   return (
     <HistoriesTable

@@ -1,10 +1,10 @@
-import * as authApi from "@/features/auth/api";
 import { useRouter } from "next/navigation";
+import * as api from "./logout-api";
 
 export const useLogout = () => {
   const router = useRouter();
   const logout = async () => {
-    await authApi.logout();
+    await api.logout();
     router.push("/auth/login");
     router.refresh();
   };

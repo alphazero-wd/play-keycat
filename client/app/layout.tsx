@@ -1,8 +1,8 @@
+import { Alert } from "@/features/ui/alert";
+import { Navbar } from "@/features/ui/navbar";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/features/layout/navbar/navbar";
-import { Alert } from "@/features/layout/alert";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Navbar />
         <Alert />
-        <main className="px-4 sm:px-6 lg:px-8 py-16">{children}</main>
+        <main className="px-4 py-16 sm:px-6 lg:px-8">{children}</main>
       </body>
     </html>
   );

@@ -1,9 +1,10 @@
 "use client";
 
-import { Button, Form, FormField, FormItem } from "@/features/ui";
-import { useSignup } from "./use-signup";
-import { InputGroup } from "../shared";
+import { Button } from "@/features/ui/button";
+import { Form, FormField, FormItem } from "@/features/ui/form";
 import { Loader2 } from "lucide-react";
+import { InputGroup } from "../shared";
+import { useSignup } from "./use-signup";
 
 export const SignupForm = () => {
   const { form, loading, onSubmit } = useSignup();
@@ -62,7 +63,7 @@ export const SignupForm = () => {
 
         <Button disabled={loading} type="submit">
           {loading ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
+            <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
             "Create account"
           )}

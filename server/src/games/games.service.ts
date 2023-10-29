@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, User } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
@@ -14,6 +14,7 @@ export class GamesService {
   ) {}
 
   async join(user: User) {
+    await this.checkPlayerAlreadyInGame(user.id);
     let gameIdToJoin = await this.findOne(user);
     if (!gameIdToJoin) gameIdToJoin = await this.create(user);
     await this.addPlayer(gameIdToJoin, user.id);
@@ -21,11 +22,11 @@ export class GamesService {
   }
 
   async getPlayersInGame(gameId: number) {
-    const game = await this.prisma.game.findUnique({
+    const { players } = await this.prisma.game.findUnique({
       where: { id: gameId },
-      include: { players: true },
+      select: { players: true },
     });
-    return game;
+    return players;
   }
 
   async startGame(gameId: number) {
@@ -91,14 +92,13 @@ export class GamesService {
     const player = await this.usersService.findById(playerId);
     if (!player) throw new WsException('Player not found');
     if (player.inGameId)
-      throw new WsException(
+      throw new ForbiddenException(
         'You are already in a game. Please leave the game before joining in another one',
       );
   }
 
   private async addPlayer(gameId: number, playerId: number) {
     try {
-      await this.checkPlayerAlreadyInGame(playerId);
       await this.prisma.user.update({
         where: { id: playerId },
         data: { inGameId: gameId },
