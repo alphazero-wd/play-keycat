@@ -4,12 +4,13 @@ import { ranks } from "@/features/data";
 import { useAlert } from "@/features/ui/alert";
 import { Button } from "@/features/ui/button";
 import { Input } from "@/features/ui/input";
-import { User, getCurrentRank } from "@/features/users/profile";
+import { ProfileCard, User, getCurrentRank } from "@/features/users/profile";
 import { socket } from "@/lib/socket";
 import { differenceInMilliseconds } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { useGame, useTimeDisplay, useTyping } from "./hooks";
 import { Game } from "./types";
 import {
@@ -123,19 +124,31 @@ export const Gameplay = ({ user, game }: { user: User; game: Game }) => {
       </h1>
       <p className="font-normal text-muted-foreground md:text-lg">{subtitle}</p>
 
-      <div className="mt-6 space-y-4">
-        <div className="max-w-2xl space-y-4">
-          {players.map((player) => (
-            <div key={player.id} className="flex items-center justify-between">
-              <span className="text-lg font-medium">
-                {player.username} {player.id === user.id && "(you)"}
-              </span>
-              <span className="text-muted-foreground">
-                {playersProgress[player.id] || 0}%
-              </span>
+      <div className="mt-6 max-w-2xl space-y-4">
+        {players.map((player) => (
+          <div key={player.id} className="flex items-center justify-between">
+            <div className="flex w-[200px] items-center justify-between">
+              <ProfileCard player={player} userId={user.id} />
+              <Avatar
+                className="transition-transform"
+                style={{
+                  transform: `translateX(${
+                    (playersProgress[player.id] || 0) * 10
+                  }%)`,
+                }}
+              >
+                <AvatarImage src="/icons/sprout.jpg" />
+                <AvatarFallback>
+                  {player.username[0].toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
             </div>
-          ))}
-        </div>
+
+            <span className="flex-shrink-0 text-muted-foreground">
+              {playersProgress[player.id] || 0}%
+            </span>
+          </div>
+        ))}
       </div>
       {startedAt && !isGameOver && (
         <>

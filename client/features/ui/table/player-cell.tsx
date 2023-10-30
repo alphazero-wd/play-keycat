@@ -1,7 +1,6 @@
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/features/ui/avatar";
-import { User } from "@/features/users/profile";
-import Link from "next/link";
+import { ProfileCard, User } from "@/features/users/profile";
 
 export const PlayerCell = ({ player, user }: { player: User; user?: User }) => {
   return (
@@ -10,15 +9,7 @@ export const PlayerCell = ({ player, user }: { player: User; user?: User }) => {
         <AvatarImage src="/icons/sprout.jpg" alt={`@${player.username}`} />
         <AvatarFallback>{player.username[0].toUpperCase()}</AvatarFallback>
       </Avatar>
-      <div>
-        <Link
-          href={`/player/${player.username}/profile`}
-          className="font-medium text-primary hover:underline"
-        >
-          @{player.username}
-        </Link>{" "}
-        <span>{player.id === user?.id && "(you)"}</span>
-      </div>
+      <ProfileCard player={player} userId={user?.id} />
     </div>
   );
 };

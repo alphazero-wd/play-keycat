@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/features/ui/card";
-import Image from "next/image";
 import { User } from "../profile";
 import { getCurrentRank } from "./get-current-rank";
+import { RankBadge } from "./rank-badge";
 
 export const About = ({ player }: { player: User }) => {
   return (
@@ -16,19 +16,7 @@ export const About = ({ player }: { player: User }) => {
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center">
-            {player.catPoints < 500 ? (
-              <div className="mx-auto h-[200px] w-[200px] rounded-full border-2 border-dashed border-muted-foreground" />
-            ) : (
-              <Image
-                src={`/images/${getCurrentRank(player.catPoints)
-                  .split(" ")[0]
-                  .toLowerCase()}.png`}
-                width={200}
-                className="mx-auto"
-                height={200}
-                alt={getCurrentRank(player.catPoints)}
-              />
-            )}
+            <RankBadge catPoints={player.catPoints} />
 
             <p className="mt-3 text-foreground">
               <span className="text-2xl font-medium text-muted-foreground">

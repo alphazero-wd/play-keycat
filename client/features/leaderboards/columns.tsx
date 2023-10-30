@@ -5,9 +5,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/features/ui/tooltip";
-import { User, getCurrentRank } from "@/features/users/profile";
+import { RankBadge, User, getCurrentRank } from "@/features/users/profile";
 import { ColumnDef } from "@tanstack/react-table";
-import Image from "next/image";
 
 export const columnsWrapper = (user?: User) => {
   const columns: ColumnDef<User>[] = [
@@ -35,18 +34,7 @@ export const columnsWrapper = (user?: User) => {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger className="mx-auto" asChild>
-              {row.original.catPoints < 500 ? (
-                <div className="h-[40px] w-[40px] rounded-full border-2 border-dashed border-muted-foreground" />
-              ) : (
-                <Image
-                  width={40}
-                  height={40}
-                  src={`/images/${getCurrentRank(row.original.catPoints)
-                    .split(" ")[0]
-                    .toLowerCase()}.png`}
-                  alt={getCurrentRank(row.original.catPoints)}
-                />
-              )}
+              <RankBadge catPoints={row.original.catPoints} size="sm" />
             </TooltipTrigger>
             <TooltipContent>
               {getCurrentRank(row.original.catPoints)}
