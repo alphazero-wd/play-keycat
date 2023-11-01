@@ -47,7 +47,14 @@ export const LoginForm = () => {
         />
 
         <Button disabled={loading} type="submit">
-          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Log in"}
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Logging in...
+            </>
+          ) : (
+            "Log in"
+          )}
         </Button>
       </form>
     </Form>

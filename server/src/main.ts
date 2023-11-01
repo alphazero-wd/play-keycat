@@ -35,7 +35,9 @@ async function bootstrap() {
 
   app.use(sessionMiddleware);
 
-  app.useWebSocketAdapter(new SessionAdapter(sessionMiddleware, app));
+  app.useWebSocketAdapter(
+    new SessionAdapter(configService, sessionMiddleware, app),
+  );
 
   app.use(passport.initialize());
   app.use(passport.session());

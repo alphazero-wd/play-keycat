@@ -19,7 +19,14 @@ export const RankedMode = () => {
 
       <CardContent>
         <Button disabled={loading} onClick={joinGame}>
-          {loading ? <Loader2 className="h-5 w-5" /> : "Join game"}
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Joining game...
+            </>
+          ) : (
+            "Join game"
+          )}
         </Button>
       </CardContent>
     </Card>

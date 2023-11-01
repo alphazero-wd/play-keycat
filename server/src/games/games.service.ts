@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, User } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
@@ -35,6 +39,7 @@ export class GamesService {
         where: { id: gameId },
         data: { startedAt: new Date().toISOString() },
       });
+
       return game;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)
@@ -83,8 +88,8 @@ export class GamesService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)
         if (error.code === PrismaError.RecordNotFound)
-          throw new WsException('Cannot find game with the given id');
-      throw new WsException('Something went wrong');
+          throw new NotFoundException('Cannot find game with the given id');
+      throw new NotFoundException('Something went wrong');
     }
   }
 
@@ -129,8 +134,8 @@ export class GamesService {
 
     const game = await this.prisma.game.create({
       data: {
-        minPoints: Math.max(user.catPoints - 200, 0),
-        maxPoints: user.catPoints + 200,
+        minPoints: Math.max(user.catPoints - 250, 0),
+        maxPoints: user.catPoints + 250,
         paragraph,
       },
     });

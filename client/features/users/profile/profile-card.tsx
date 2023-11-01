@@ -37,14 +37,16 @@ export const ProfileCard = ({
 
   return (
     <HoverCard>
-      <HoverCardTrigger className="line-clamp-1 ">
-        <Link
-          href={`/player/${player.username}/profile`}
-          className="font-medium text-primary hover:underline"
-        >
-          @{player.username}
-        </Link>{" "}
-        <span>{player.id === userId && "(you)"}</span>
+      <HoverCardTrigger asChild className="line-clamp-1">
+        <div>
+          <Link
+            href={`/player/${player.username}/profile`}
+            className="font-medium text-primary hover:underline"
+          >
+            @{player.username}
+          </Link>{" "}
+          <span>{player.id === userId && "(you)"}</span>
+        </div>
       </HoverCardTrigger>
       <HoverCardContent className="w-80 space-y-3">
         <div className="flex w-fit items-center gap-x-3">

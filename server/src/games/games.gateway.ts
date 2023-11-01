@@ -1,18 +1,18 @@
+import { ParseIntPipe, UseGuards } from '@nestjs/common';
 import {
-  WebSocketGateway,
-  OnGatewayDisconnect,
-  WebSocketServer,
-  SubscribeMessage,
   ConnectedSocket,
   MessageBody,
+  OnGatewayDisconnect,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
 } from '@nestjs/websockets';
-import { GamesService } from './games.service';
 import { Server } from 'socket.io';
-import { SocketUser } from '../common/types';
-import { ParseIntPipe, UseGuards } from '@nestjs/common';
 import { WsCookieAuthGuard } from '../auth/guards';
-import { PlayerFinishedDto } from './dto';
+import { SocketUser } from '../common/types';
 import { HistoriesService } from '../histories/histories.service';
+import { PlayerFinishedDto } from './dto';
+import { GamesService } from './games.service';
 
 @WebSocketGateway()
 export class GamesGateway implements OnGatewayDisconnect {

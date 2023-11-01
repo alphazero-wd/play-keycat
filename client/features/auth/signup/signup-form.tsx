@@ -20,7 +20,9 @@ export const SignupForm = () => {
               <InputGroup
                 label="Username"
                 inputProps={{ ...field, placeholder: "sample_username" }}
-                desc="Your username is public to other players. 1-30 characters long, letters, numbers and underscores are allowed."
+                desc={
+                  "Your username is public to other players.\nBetween 1-30 characters long\nContain only letters, numbers and underscores (_)."
+                }
               />
             </FormItem>
           )}
@@ -53,9 +55,11 @@ export const SignupForm = () => {
                 inputProps={{
                   ...field,
                   type: "password",
-                  placeholder: "●●●●●●",
+                  placeholder: "••••••",
                 }}
-                desc="At least 6 characters, at least 1 lower and 1 uppercase letter, 1 number and 1 special character"
+                desc={
+                  "At least 6 characters\nAt least 1 lower letter and 1 uppercase letter\nAt least 1 number\nAt least 1 special character"
+                }
               />
             </FormItem>
           )}
@@ -63,7 +67,10 @@ export const SignupForm = () => {
 
         <Button disabled={loading} type="submit">
           {loading ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Creating account...
+            </>
           ) : (
             "Create account"
           )}

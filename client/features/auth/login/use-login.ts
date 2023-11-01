@@ -20,6 +20,7 @@ export const useLogin = () => {
   const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: { email: "", password: "" },
   });
   const router = useRouter();
 

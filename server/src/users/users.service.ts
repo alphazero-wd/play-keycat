@@ -23,22 +23,17 @@ export class UsersService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === PrismaError.UniqueViolation) {
           if (error.message.includes('username'))
-            throw new BadRequestException({
-              success: false,
-              message: 'User with that username already exists',
-            });
+            throw new BadRequestException(
+              'User with that username already exists',
+            );
           if (error.message.includes('email'))
-            throw new BadRequestException({
-              success: false,
-              message: 'User with that email already exists',
-            });
+            throw new BadRequestException(
+              'User with that email already exists',
+            );
         }
       }
 
-      throw new InternalServerErrorException({
-        success: false,
-        message: 'Something went wrong',
-      });
+      throw new InternalServerErrorException('Something went wrong');
     }
   }
 
@@ -69,7 +64,7 @@ export class UsersService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)
         if (error.code === PrismaError.RecordNotFound)
-          throw new NotFoundException('User not found');
+          throw new NotFoundException('Cannot find user with the given id');
       throw new InternalServerErrorException('Something went wrong');
     }
   }
@@ -87,8 +82,8 @@ export class UsersService {
       });
 
       const {
-        _max: { wpm: highestWpm = 0 },
-        _count: { gameId: gamesPlayed = 0 },
+        _max: { wpm: highestWpm },
+        _count: { gameId: gamesPlayed },
       } = await this.prisma.gameHistory.aggregate({
         where: { playerId: user.id },
         _max: { wpm: true },
@@ -96,7 +91,7 @@ export class UsersService {
       });
 
       const {
-        _avg: { wpm: lastTenAverageWpm = 0 },
+        _avg: { wpm: lastTenAverageWpm },
       } = await this.prisma.gameHistory.aggregate({
         where: { playerId: user.id },
         _avg: { wpm: true },
@@ -104,7 +99,12 @@ export class UsersService {
         orderBy: { game: { startedAt: 'desc' } },
       });
 
-      return { ...user, highestWpm, lastTenAverageWpm, gamesPlayed };
+      return {
+        ...user,
+        highestWpm: highestWpm || 0,
+        lastTenAverageWpm: lastTenAverageWpm || 0,
+        gamesPlayed: gamesPlayed || 0,
+      };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)
         if (error.code === PrismaError.RecordNotFound)

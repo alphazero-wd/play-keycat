@@ -33,6 +33,7 @@ export const useSignup = () => {
   const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: { username: "", email: "", password: "" },
   });
   const router = useRouter();
 

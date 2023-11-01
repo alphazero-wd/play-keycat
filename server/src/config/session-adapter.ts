@@ -3,11 +3,16 @@ import { INestApplication } from '@nestjs/common';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { Server } from 'socket.io';
 import * as passport from 'passport';
+import { ConfigService } from '@nestjs/config';
 
 export class SessionAdapter extends IoAdapter {
   session: express.RequestHandler;
 
-  constructor(session: express.RequestHandler, app: INestApplication) {
+  constructor(
+    private configService: ConfigService,
+    session: express.RequestHandler,
+    app: INestApplication,
+  ) {
     super(app);
     this.session = session;
   }
@@ -16,7 +21,7 @@ export class SessionAdapter extends IoAdapter {
     const server: Server = super.create(port, {
       ...options,
       cors: {
-        origin: 'http://localhost:3000',
+        origin: this.configService.get('CORS_ORIGIN'),
         credentials: true,
       },
     });
