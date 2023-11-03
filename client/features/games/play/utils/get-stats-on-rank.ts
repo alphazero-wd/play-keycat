@@ -1,5 +1,5 @@
 import { ranks } from "@/features/data";
-import { getCurrentRank } from "@/features/users";
+import { getCurrentRank } from "@/features/users/profile";
 
 export const getStatsBasedOnRank = (averageCps: number) => {
   const currentRank = getCurrentRank(averageCps);

@@ -26,18 +26,18 @@ export class GamesService {
   }
 
   async getPlayersInGame(gameId: number) {
-    const { players } = await this.prisma.game.findUnique({
+    const game = await this.prisma.game.findUnique({
       where: { id: gameId },
       select: { players: true },
     });
-    return players;
+    return game.players;
   }
 
   async startGame(gameId: number) {
     try {
       const game = await this.prisma.game.update({
         where: { id: gameId },
-        data: { startedAt: new Date().toISOString() },
+        data: { startedAt: new Date() },
       });
 
       return game;

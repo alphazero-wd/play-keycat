@@ -15,11 +15,6 @@ export class PlayerFinishedDto {
 
   @Transform(() => Number)
   @IsInt()
-  @Min(0)
-  timeTaken: number;
-
-  @Transform(() => Number)
-  @IsInt()
   catPoints: number;
 
   @Transform(() => Number)

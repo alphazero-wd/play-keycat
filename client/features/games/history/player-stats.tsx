@@ -10,7 +10,6 @@ import {
   TableRow,
 } from "@/features/ui/table";
 import { User } from "@/features/users/profile";
-import { format } from "date-fns";
 import { Game } from "../play";
 import { displayCPsEarned } from "./display-cps-earned";
 
@@ -24,10 +23,10 @@ export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
         <TableRow>
           <TableHead className="w-[50px] text-right">#</TableHead>
           <TableHead>Player</TableHead>
-          <TableHead className="text-right">Time</TableHead>
           <TableHead className="text-right">WPM</TableHead>
           <TableHead className="text-right">Accuracy</TableHead>
           <TableHead className="text-right">Cat Points</TableHead>
+          {/* add player position here */}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -39,10 +38,9 @@ export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
             <TableCell className="flex items-center gap-x-3">
               <PlayerCell player={history.player} user={user} />
             </TableCell>
-            <TableCell className="text-right">
-              {format(new Date(history.timeTaken), "mm:ss.SSS")}
+            <TableCell className="text-right text-base font-medium">
+              {history.wpm}
             </TableCell>
-            <TableCell className="text-right">{history.wpm}</TableCell>
             <TableCell className="text-right">{history.acc}%</TableCell>
             <TableCell className="text-right">
               {displayCPsEarned(history.catPoints)}

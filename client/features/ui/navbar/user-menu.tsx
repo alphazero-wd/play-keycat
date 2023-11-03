@@ -67,7 +67,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
           {userMenuItems.map((item) => (
             <DropdownMenuItem asChild key={item.text}>
               <Link href={item.href}>
-                <item.icon className="mr-2 h-4 w-4" />
+                <item.icon className="mr-2 h-5 w-5 text-muted-foreground" />
                 <span>{item.text}</span>
               </Link>
             </DropdownMenuItem>
@@ -76,7 +76,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={logout}>
-            <ArrowRightOnRectangleIcon className="mr-2 h-4 w-4" />
+            <ArrowRightOnRectangleIcon className="mr-2 h-5 w-5 text-muted-foreground" />
             <span>Log out</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>

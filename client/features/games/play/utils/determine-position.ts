@@ -1,5 +1,5 @@
 export const determinePosition = (
-  playersProgress: Record<number, number>,
+  playersProgress: Map<number, number>,
   playerId: number,
 ) => {
   // Input: {1: 50, 2: 75, 3: 60, 4: 75, 5: 100}, playerId = 3
@@ -13,7 +13,7 @@ export const determinePosition = (
 
   return (
     sortedProgressSetDesc.findIndex(
-      (prog) => playersProgress[playerId] === prog,
+      (prog) => playersProgress.get(playerId) === prog,
     ) + 1
   );
 };

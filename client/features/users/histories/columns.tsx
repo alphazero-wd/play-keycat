@@ -1,7 +1,10 @@
 "use client";
 import { GameHistory, displayCPsEarned } from "@/features/games/history";
+import { EyeIcon } from "@heroicons/react/24/outline";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
+import Link from "next/link";
+import { Button } from "../../ui/button";
 
 export const columns: ColumnDef<GameHistory>[] = [
   {
@@ -34,6 +37,16 @@ export const columns: ColumnDef<GameHistory>[] = [
       <div className="text-right">
         {displayCPsEarned(row.original.catPoints)}
       </div>
+    ),
+  },
+  {
+    accessorKey: "actions",
+    cell: ({ row }) => (
+      <Button asChild variant="ghost" size="icon">
+        <Link href={`/games/${row.original.gameId}/history`}>
+          <EyeIcon className="h-5 w-5" />
+        </Link>
+      </Button>
     ),
   },
 ];

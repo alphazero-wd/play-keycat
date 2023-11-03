@@ -36,7 +36,11 @@ async function bootstrap() {
   app.use(sessionMiddleware);
 
   app.useWebSocketAdapter(
-    new SessionAdapter(configService, sessionMiddleware, app),
+    new SessionAdapter(
+      sessionMiddleware,
+      app,
+      configService.get('CORS_ORIGIN'),
+    ),
   );
 
   app.use(passport.initialize());

@@ -4,60 +4,69 @@ import {
   ChangeEventHandler,
   ClipboardEventHandler,
   KeyboardEventHandler,
+  useCallback,
   useState,
 } from "react";
+import { TypingStats } from "../types";
 import { calculateProgress, isSpecialKeyPressed } from "../utils";
 
 export const useTyping = (paragraph: string, gameId: number) => {
-  const [typos, setTypos] = useState(0);
+  const [typingStats, setTypingStats] = useState<TypingStats>({
+    typos: 0,
+    charsTyped: 0,
+    prevError: null,
+    value: "",
+  });
   const { setAlert } = useAlert();
-  const [charsTyped, setCharsTyped] = useState(0);
-  const [prevError, setPrevError] = useState<number | null>(null);
-  const [value, setValue] = useState("");
+
+  const updateTypingStats = useCallback((updated: Partial<TypingStats>) => {
+    setTypingStats((prevStats) => ({ ...prevStats, ...updated }));
+  }, []);
 
   const preventCheating: ClipboardEventHandler<HTMLInputElement> = (e) => {
     e.preventDefault();
   };
 
   const onChange: ChangeEventHandler<HTMLInputElement> = (e) =>
-    setValue(e.target.value);
+    updateTypingStats({ value: e.target.value });
 
   const onKeydown: KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (e.key === "Backspace") {
-      if (prevError === null) e.preventDefault();
+      if (typingStats.prevError === null) e.preventDefault();
       else {
-        setCharsTyped((c) => c - 1);
-        setPrevError(null);
+        updateTypingStats({
+          charsTyped: typingStats.charsTyped - 1,
+          prevError: null,
+        });
       }
-    } else if (!isSpecialKeyPressed(e.key) && prevError === null) {
-      if (paragraph[charsTyped] === e.key) {
+    } else if (!isSpecialKeyPressed(e.key) && typingStats.prevError === null) {
+      if (paragraph[typingStats.charsTyped] === e.key) {
         if (e.key === " ") {
           socket.emit("progress", {
-            progress: calculateProgress(charsTyped, paragraph),
+            progress: calculateProgress(typingStats.charsTyped, paragraph),
             gameId,
           });
-          setValue("");
+          updateTypingStats({ value: "" });
         }
       } else {
-        setTypos((t) => t + 1);
-        setPrevError(() => charsTyped);
+        updateTypingStats({
+          typos: typingStats.typos + 1,
+          prevError: typingStats.charsTyped,
+        });
       }
 
-      setCharsTyped((c) => c + 1);
+      updateTypingStats({ charsTyped: typingStats.charsTyped + 1 });
     } else {
       e.preventDefault();
-      if (prevError)
+      if (typingStats.prevError)
         setAlert("error", "You need to correct the typos before continuing");
     }
   };
 
   return {
-    value,
-    typos,
-    charsTyped,
     onChange,
     onKeydown,
     preventCheating,
-    prevError,
+    typingStats,
   };
 };

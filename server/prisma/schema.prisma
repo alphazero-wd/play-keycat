@@ -30,8 +30,8 @@ model Game {
   maxPoints Int
   paragraph String    @db.Text
   startedAt DateTime?
-  players   User[]
 
+  players   User[]
   histories GameHistory[]
 }
 
@@ -40,7 +40,6 @@ model GameHistory {
   playerId  Int
   wpm       Int
   acc       Decimal @db.Decimal(4, 1)
-  timeTaken Int // ms taken for a player to type the whole text (<= timeLimit of a game)
   catPoints Int
 
   game   Game @relation(fields: [gameId], references: [id], onDelete: Cascade)

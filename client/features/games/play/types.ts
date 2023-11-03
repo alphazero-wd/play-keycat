@@ -8,3 +8,10 @@ export interface Game {
   startedAt: string;
   histories: GameHistory[];
 }
+
+export interface TypingStats {
+  typos: number;
+  charsTyped: number;
+  prevError: number | null;
+  value: string;
+}

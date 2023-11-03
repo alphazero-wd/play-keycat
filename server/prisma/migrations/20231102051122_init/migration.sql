@@ -29,7 +29,6 @@ CREATE TABLE "GameHistory" (
     "playerId" INTEGER NOT NULL,
     "wpm" INTEGER NOT NULL,
     "acc" DECIMAL(4,1) NOT NULL,
-    "timeTaken" INTEGER NOT NULL,
     "catPoints" INTEGER NOT NULL,
 
     CONSTRAINT "GameHistory_pkey" PRIMARY KEY ("gameId","playerId")

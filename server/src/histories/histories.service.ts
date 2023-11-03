@@ -7,14 +7,14 @@ import { WsException } from '@nestjs/websockets';
 import { Prisma, User } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateHistoryDto } from './dto';
+import { PlayerFinishedDto } from '../games/dto';
 
 @Injectable()
 export class HistoriesService {
   constructor(private prisma: PrismaService) {}
 
   async create(
-    { catPoints, ...createHistoryDto }: CreateHistoryDto,
+    { catPoints, ...createHistoryDto }: PlayerFinishedDto,
     user: User,
   ) {
     try {
@@ -51,9 +51,8 @@ export class HistoriesService {
         where: { id: gameId },
         include: {
           histories: {
-            orderBy: [{ timeTaken: 'asc' }, { wpm: 'desc' }],
+            orderBy: { wpm: 'desc' },
             select: {
-              timeTaken: true,
               wpm: true,
               catPoints: true,
               acc: true,
