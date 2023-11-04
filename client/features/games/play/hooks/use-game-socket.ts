@@ -4,10 +4,12 @@ import { useGameStore } from "./use-game-store";
 import { updateProgress, usePlayersStore } from "./use-players-store";
 
 export const useGameSocket = (gameId: number) => {
-  const { onPlayers } = usePlayersStore();
-  const { startGame } = useGameStore();
+  const { onPlayers, clearProgress } = usePlayersStore();
+  const { startGame, resetGame } = useGameStore();
 
   useEffect(() => {
+    clearProgress();
+    resetGame();
     socket.connect();
     function onConnect() {
       if (gameId) socket.emit("joinGame", { gameId });

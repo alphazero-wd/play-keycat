@@ -13,7 +13,8 @@ export const calculateWpm = (charsTyped: number, timeTaken: number) => {
 };
 
 export const calculateAccuracy = (typos: number, charsTyped: number) => {
-  return 100 - +((typos / charsTyped) * 100).toFixed(1);
+  const acc = 100 - +((typos / charsTyped) * 100).toFixed(1);
+  return isNaN(acc) ? 0 : acc;
 };
 
 export const calculateProgress = (charsTyped: number, paragraph: string) =>

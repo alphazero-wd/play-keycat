@@ -5,13 +5,13 @@ export interface Rank {
 }
 
 export const ranks: Record<string, Rank> = {
-  Unranked: { minCPs: 0, minWpm: 0, minAcc: 50 },
-  "Bronze IV": { minCPs: 500, minWpm: 40, minAcc: 55 },
-  "Bronze III": { minCPs: 625, minWpm: 45, minAcc: 60 },
-  "Bronze II": { minCPs: 750, minWpm: 50, minAcc: 65 },
-  "Bronze I": { minCPs: 875, minWpm: 55, minAcc: 70 },
-  "Silver IV": { minCPs: 1000, minWpm: 60, minAcc: 75 },
-  "Silver III": { minCPs: 1125, minWpm: 65, minAcc: 80 },
+  Unranked: { minCPs: 0, minWpm: 0, minAcc: 75 },
+  "Bronze IV": { minCPs: 500, minWpm: 40, minAcc: 75 },
+  "Bronze III": { minCPs: 625, minWpm: 45, minAcc: 75 },
+  "Bronze II": { minCPs: 750, minWpm: 50, minAcc: 80 },
+  "Bronze I": { minCPs: 875, minWpm: 55, minAcc: 80 },
+  "Silver IV": { minCPs: 1000, minWpm: 60, minAcc: 85 },
+  "Silver III": { minCPs: 1125, minWpm: 65, minAcc: 85 },
   "Silver II": { minCPs: 1250, minWpm: 70, minAcc: 85 },
   "Silver I": { minCPs: 1375, minWpm: 75, minAcc: 90 },
   "Gold IV": { minCPs: 1500, minWpm: 80, minAcc: 90 },

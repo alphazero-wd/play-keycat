@@ -1,4 +1,4 @@
-import { User } from "@/features/users";
+import { User } from "@/features/users/profile";
 import { Game } from "../play";
 
 export interface GameHistory {

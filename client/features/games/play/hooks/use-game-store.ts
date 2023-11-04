@@ -8,6 +8,7 @@ type State = {
 type Action = {
   endGame: () => void;
   startGame: () => void;
+  resetGame: () => void;
 };
 
 export const useGameStore = create<State & Action>()((set) => ({
@@ -15,4 +16,5 @@ export const useGameStore = create<State & Action>()((set) => ({
   hasFinished: false,
   startGame: () => set({ startedAt: new Date().toISOString() }),
   endGame: () => set({ hasFinished: true }),
+  resetGame: () => set({ hasFinished: false, startedAt: null }),
 }));

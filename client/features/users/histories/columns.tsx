@@ -5,6 +5,12 @@ import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import Link from "next/link";
 import { Button } from "../../ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../ui/tooltip";
 
 export const columns: ColumnDef<GameHistory>[] = [
   {
@@ -41,12 +47,20 @@ export const columns: ColumnDef<GameHistory>[] = [
   },
   {
     accessorKey: "actions",
+    header: "",
     cell: ({ row }) => (
-      <Button asChild variant="ghost" size="icon">
-        <Link href={`/games/${row.original.gameId}/history`}>
-          <EyeIcon className="h-5 w-5" />
-        </Link>
-      </Button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button asChild variant="ghost" className="text-center" size="icon">
+              <Link href={`/games/${row.original.gameId}/history`}>
+                <EyeIcon className="h-5 w-5" />
+              </Link>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>View more</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     ),
   },
 ];

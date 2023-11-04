@@ -8,12 +8,14 @@ type State = {
 
 type Action = {
   onPlayers: (updatedPlayers: User[]) => void;
+  clearProgress: () => void;
 };
 
-export const usePlayersStore = create<State & Action>()((set, get) => ({
+export const usePlayersStore = create<State & Action>()((set) => ({
   players: [],
   playersProgress: new Map(),
   onPlayers: (updatedPlayers) => set({ players: updatedPlayers }),
+  clearProgress: () => set({ playersProgress: new Map(), players: [] }),
 }));
 
 export const updateProgress = ({
@@ -32,11 +34,3 @@ export const getProgress = (id: number) => {
   const progress = usePlayersStore.getState().playersProgress.get(id);
   return progress || 0;
 };
-export const averagePlayerCPs = (function () {
-  const { players } = usePlayersStore.getState();
-  const totalPlayerCPs = players.reduce(
-    (sum, player) => sum + player.catPoints,
-    0,
-  );
-  return +(totalPlayerCPs / players.length).toFixed(0);
-})();

@@ -6,12 +6,10 @@ import {
   HashtagIcon,
 } from "@heroicons/react/24/outline";
 import { addSeconds, format } from "date-fns";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Game } from "../play";
 
 export const Overview = ({ game }: { game: Game }) => {
-  const [truncated, setTruncated] = useState(true);
-
   const attributes = useMemo(
     () => [
       { icon: HashtagIcon, text: game.id, label: "ID" },
@@ -25,26 +23,11 @@ export const Overview = ({ game }: { game: Game }) => {
       },
       {
         icon: DocumentTextIcon,
-        text: (
-          <>
-            <p>
-              {truncated ? game.paragraph.slice(0, 100) : game.paragraph}
-              {truncated && game.paragraph.length >= 100 && "..."}{" "}
-              {game.paragraph.length >= 100 && (
-                <span
-                  onClick={() => setTruncated(!truncated)}
-                  className="cursor-pointer text-sm font-medium text-primary hover:underline"
-                >
-                  {truncated ? "More" : "Less"}
-                </span>
-              )}
-            </p>
-          </>
-        ),
+        text: <p>{game.paragraph}</p>,
         label: "Typing text",
       },
     ],
-    [game, truncated],
+    [game],
   );
   return (
     <div className="my-6">

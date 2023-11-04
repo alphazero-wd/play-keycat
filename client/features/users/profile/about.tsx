@@ -8,7 +8,7 @@ export const About = ({ player }: { player: User }) => {
     <div>
       <h3 className="font-medium text-foreground">About the player</h3>
       <div className="mb-2 mt-1" />
-      <div className="grid gap-x-3 md:grid-cols-2">
+      <div className="grid gap-3 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-center text-card-foreground">

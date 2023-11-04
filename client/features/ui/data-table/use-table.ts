@@ -48,7 +48,7 @@ export const useTable = <TData>(
 
   useEffect(() => {
     const queryParams = qs.parse(searchParams.toString());
-    queryParams.offset = pageIndex.toString();
+    queryParams.offset = (pageIndex * pageSize).toString();
     const url = qs.stringifyUrl({ url: pathname, query: queryParams });
     router.replace(url, { scroll: false });
   }, [pageIndex]);

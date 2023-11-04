@@ -1,25 +1,13 @@
-import { ranks } from "@/features/data";
 import { useAlert } from "@/features/ui/alert";
-import { User, getCurrentRank } from "@/features/users/profile";
+import { User } from "@/features/users/profile";
 import { socket } from "@/lib/socket";
-import { differenceInMilliseconds } from "date-fns";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect } from "react";
 import { Game, TypingStats } from "../types";
-import {
-  calculateAccuracy,
-  calculateCPs,
-  calculateProgress,
-  calculateWpm,
-  determinePosition,
-} from "../utils";
+import { calculateProgress } from "../utils";
 import { useGameStore } from "./use-game-store";
-import {
-  averagePlayerCPs,
-  getProgress,
-  usePlayersStore,
-} from "./use-players-store";
-import { useRankUpdateModal } from "./use-rank-update-modal";
+import { getProgress } from "./use-players-store";
+import { useTypingStats } from "./use-typing-stats";
 
 export const useEndGame = (
   user: User,
@@ -27,91 +15,72 @@ export const useEndGame = (
   game: Game,
   timeRemaining: number,
 ) => {
-  const { startedAt, endGame, hasFinished } = useGameStore();
-  const { players, playersProgress } = usePlayersStore();
+  const { endGame, hasFinished } = useGameStore();
+  const { acc, wpm, catPoints } = useTypingStats(typingStats, user.id);
   const router = useRouter();
   const { setAlert } = useAlert();
-  const { onOpen } = useRankUpdateModal();
-
-  const userGameHistory = useMemo(() => {
-    const timeTaken = differenceInMilliseconds(
-      Date.now(),
-      new Date(startedAt!),
-    );
-    const averageRank = getCurrentRank(averagePlayerCPs);
-    const acc = calculateAccuracy(typingStats.typos, typingStats.charsTyped);
-    const wpm = calculateWpm(typingStats.charsTyped, timeTaken);
-    return {
-      wpm,
-      acc,
-      catPoints: calculateCPs(
-        wpm - ranks[averageRank].minAcc,
-        acc - ranks[averageRank].minWpm,
-        players.length,
-        determinePosition(playersProgress, user.id),
-      ),
-      gameId: game.id,
-    };
-  }, [
-    averagePlayerCPs,
-    typingStats.typos,
-    typingStats.charsTyped,
-    startedAt,
-    playersProgress,
-    user.id,
-    game.id,
-  ]);
 
   const sendResult = useCallback(() => {
     socket.emit("progress", {
-      progress: calculateProgress(typingStats.charsTyped, game.paragraph),
+      progress: calculateProgress(
+        typingStats.charsTyped - +!!typingStats.prevError,
+        game.paragraph,
+      ),
       gameId: game.id,
     });
-    if (getProgress(user.id) >= 50)
-      socket.emit("playerFinished", userGameHistory);
-  }, [typingStats.charsTyped, game.paragraph, userGameHistory, game.id]);
+    if (getProgress(user.id) >= 50) {
+      socket.emit("playerFinished", { wpm, acc, catPoints, gameId: game.id });
+    }
+  }, [
+    typingStats.charsTyped,
+    typingStats.prevError,
+    wpm,
+    acc,
+    catPoints,
+    game.paragraph,
+    game.id,
+  ]);
+
+  // const showRankUpdateModal = useCallback(() => {
+  //   const nextRank = getCurrentRank(user.catPoints + catPoints);
+  //   const currentRank = getCurrentRank(user.catPoints);
+  //   if (hasFinished && nextRank !== currentRank)
+  //     onOpen(
+  //       currentRank,
+  //       nextRank,
+  //       catPoints > 0 ? RankUpdateStatus.PROMOTED : RankUpdateStatus.DEMOTED,
+  //       user.catPoints + catPoints,
+  //     );
+  // }, [hasFinished, timeRemaining, user.catPoints]);
 
   useEffect(() => {
+    const isLastCharacterMatch =
+      game.paragraph[typingStats.charsTyped - 1] === game.paragraph.at(-1);
     const hasReachedTheEnd = typingStats.charsTyped === game.paragraph.length;
-    if (hasReachedTheEnd) {
+
+    if (hasReachedTheEnd && isLastCharacterMatch) {
       endGame();
       sendResult();
     }
-  }, [typingStats.charsTyped, game.paragraph.length, sendResult]);
+  }, [typingStats.charsTyped, game.paragraph, sendResult]);
 
   useEffect(() => {
-    const hasTimeup = timeRemaining === 0;
+    const hasTimeup = !hasFinished && timeRemaining === 0; // avoid overridding finished result
     if (hasTimeup) {
-      endGame();
       sendResult();
     }
-  }, [timeRemaining, sendResult]);
+  }, [timeRemaining, hasFinished, sendResult]);
 
   useEffect(() => {
-    if (
-      getCurrentRank(user.catPoints + userGameHistory.catPoints) !==
-      getCurrentRank(user.catPoints)
-    )
-      onOpen();
-  }, [user.catPoints, userGameHistory.catPoints]);
-
-  useEffect(() => {
-    if (hasFinished) {
-      const timeout = setTimeout(() => {
-        if (getProgress(user.id) >= 50)
-          router.push(`/games/${game.id}/history`);
-        else {
-          setAlert(
-            "info",
-            "Your progress is not saved because it is below 50%",
-          );
-          router.push("/");
-        }
-        router.refresh();
-      }, 3000);
-      return () => clearTimeout(timeout);
-    }
-  }, [hasFinished]);
-
-  return { userGameHistory };
+    if (timeRemaining !== 0) return;
+    const timeout = setTimeout(() => {
+      if (getProgress(user.id) >= 50) router.push(`/games/${game.id}/history`);
+      else {
+        setAlert("info", "Your progress is not saved because it is below 50%");
+        router.push("/");
+      }
+      router.refresh();
+    }, 3000);
+    return () => clearTimeout(timeout);
+  }, [hasFinished, timeRemaining]);
 };

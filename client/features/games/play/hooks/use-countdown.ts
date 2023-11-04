@@ -4,6 +4,7 @@ import { useTimer } from "react-timer-hook";
 
 export const useCountdown = () => {
   const { restart, totalSeconds } = useTimer({
+    autoStart: false,
     expiryTimestamp: addSeconds(new Date(), 1e9),
   });
 

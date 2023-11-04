@@ -15,3 +15,8 @@ export interface TypingStats {
   prevError: number | null;
   value: string;
 }
+
+export enum RankUpdateStatus {
+  PROMOTED = "PROMOTED",
+  DEMOTED = "DEMOTED",
+}

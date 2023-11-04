@@ -14,6 +14,7 @@ export const TypingParagraph = ({
         .split("")
         .map((char, index) => (
           <span
+            key={index}
             className={
               typingStats.prevError === index ? "bg-red-200" : "bg-green-200"
             }
