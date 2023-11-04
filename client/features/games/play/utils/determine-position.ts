@@ -6,7 +6,7 @@ export const determinePosition = (
   // Set + Sorted DESC: [100, 75, 60, 50]
   // Output: 3
 
-  const progress = Object.values(playersProgress);
+  const progress = playersProgress.values();
   const sortedProgressSetDesc = Array.from(new Set(progress)).sort(
     (a, b) => b - a,
   );

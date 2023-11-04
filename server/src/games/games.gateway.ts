@@ -71,10 +71,7 @@ export class GamesGateway implements OnGatewayDisconnect {
 
     // check for `gameId` because a player might join in on multiple devices causes NestJS to raise an uncanny exception
     if (!gameId) return;
-    const players = await this.gamesService.getPlayersInGame(gameId);
-    if (players.length === 0) await this.gamesService.removeIfEmpty(gameId);
-    else {
-      this.io.sockets.to(`game:${gameId}`).emit('players', players);
-    }
+
+    await this.gamesService.removeIfEmpty(gameId);
   }
 }

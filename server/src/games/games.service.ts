@@ -67,11 +67,14 @@ export class GamesService {
 
   async removeIfEmpty(gameId: number) {
     try {
-      // if the game has ended, and everyone has left the game then don't delete the game
+      const playersCount = await this.prisma.user.count({
+        where: { inGameId: gameId },
+      });
       const historiesCount = await this.prisma.gameHistory.count({
         where: { gameId },
       });
-      if (historiesCount === 0)
+      // if the game has ended, and everyone has left the game then don't delete the game
+      if (historiesCount === 0 && playersCount === 0)
         await this.prisma.game.delete({ where: { id: gameId } });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)

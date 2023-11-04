@@ -36,10 +36,11 @@ export const useTypingStats = (typingStats: TypingStats, userId: number) => {
   const catPoints = useMemo(() => {
     const averageRank = getCurrentRank(calculateAverageCPs(players));
     console.log({
-      wpmPoints: wpm - ranks[averageRank].minWpm,
-      accPoints: acc - ranks[averageRank].minAcc,
-      positionBonus:
-        2 * (players.length - determinePosition(playersProgress, userId)),
+      wpm,
+      acc,
+      wpmRequired: ranks[averageRank].minWpm,
+      accRequired: ranks[averageRank].minAcc,
+      position,
     });
     return calculateCPs(
       wpm - ranks[averageRank].minWpm,
