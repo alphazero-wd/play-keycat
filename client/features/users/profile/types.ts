@@ -5,6 +5,7 @@ export interface User {
   inGameId?: number;
   catPoints: number;
   highestWpm: number;
+  rank: string;
   lastTenAverageWpm: number;
   gamesPlayed: number;
 }

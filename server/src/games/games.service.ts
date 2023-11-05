@@ -26,25 +26,16 @@ export class GamesService {
   }
 
   async getPlayersInGame(gameId: number) {
-    const game = await this.prisma.game.findUnique({
-      where: { id: gameId },
-      select: { players: true },
-    });
-    return game.players;
-  }
-
-  async startGame(gameId: number) {
     try {
-      const game = await this.prisma.game.update({
+      const game = await this.prisma.game.findUniqueOrThrow({
         where: { id: gameId },
-        data: { startedAt: new Date() },
+        select: { players: true },
       });
-
-      return game;
+      return game.players;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)
         if (error.code === PrismaError.RecordNotFound)
-          throw new WsException('Cannot update game with the given id');
+          throw new WsException('Cannot find game with the given id');
       throw new WsException('Something went wrong');
     }
   }
@@ -65,16 +56,36 @@ export class GamesService {
     }
   }
 
+  async updateTime(gameId: number, field: 'startedAt' | 'endedAt') {
+    try {
+      const game = await this.prisma.game.update({
+        where: { id: gameId },
+        data: { [field]: new Date() },
+      });
+
+      return game;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError)
+        if (error.code === PrismaError.RecordNotFound)
+          throw new WsException('Cannot update game with the given id');
+      throw new WsException('Something went wrong');
+    }
+  }
+
+  async countPlayersInGame(gameId: number) {
+    const playersCount = await this.prisma.user.count({
+      where: { inGameId: gameId },
+    });
+    return playersCount;
+  }
+
   async removeIfEmpty(gameId: number) {
     try {
-      const playersCount = await this.prisma.user.count({
-        where: { inGameId: gameId },
-      });
       const historiesCount = await this.prisma.gameHistory.count({
         where: { gameId },
       });
       // if the game has ended, and everyone has left the game then don't delete the game
-      if (historiesCount === 0 && playersCount === 0)
+      if (historiesCount === 0)
         await this.prisma.game.delete({ where: { id: gameId } });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)

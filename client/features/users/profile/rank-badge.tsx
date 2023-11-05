@@ -1,19 +1,18 @@
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { getCurrentRank } from "./get-current-rank";
 
 interface RankBadgeProps {
   size?: "sm" | "md";
-  catPoints: number;
+  rank: string;
 }
 
 const badgeClassesOnSize = {
   md: "h-[200px] w-[200px]",
-  sm: "h-[40px] w-[40px]",
+  sm: "h-[50px] w-[50px]",
 };
 
-export const RankBadge = ({ catPoints, size = "md" }: RankBadgeProps) => {
-  if (catPoints < 500) {
+export const RankBadge = ({ rank, size = "md" }: RankBadgeProps) => {
+  if (rank === "Unranked") {
     return (
       <div
         className={cn(
@@ -25,13 +24,11 @@ export const RankBadge = ({ catPoints, size = "md" }: RankBadgeProps) => {
   }
   return (
     <Image
-      src={`/images/${getCurrentRank(catPoints)
-        .split(" ")[0]
-        .toLowerCase()}.png`}
+      src={`/images/${rank.split(" ")[0].toLowerCase()}.png`}
       width={size === "md" ? 200 : 40}
       className="mx-auto"
       height={size === "md" ? 200 : 40}
-      alt={getCurrentRank(catPoints)}
+      alt={rank}
     />
   );
 };

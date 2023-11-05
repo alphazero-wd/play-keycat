@@ -1,16 +1,16 @@
-import { addSeconds } from "date-fns";
-import { useCallback } from "react";
-import { useTimer } from "react-timer-hook";
+import { create } from "zustand";
 
-export const useCountdown = () => {
-  const { restart, totalSeconds } = useTimer({
-    autoStart: false,
-    expiryTimestamp: addSeconds(new Date(), 1e9),
-  });
-
-  const startCountdown = useCallback((seconds: number) => {
-    restart(addSeconds(new Date(), seconds));
-  }, []);
-
-  return { startCountdown, countdown: totalSeconds };
+type State = {
+  countdown: number;
 };
+
+type Action = {
+  updateCountdown: (countdown: number) => void;
+  resetCountdown: () => void;
+};
+
+export const useCountdown = create<State & Action>((set) => ({
+  countdown: Infinity,
+  updateCountdown: (countdown) => set({ countdown }),
+  resetCountdown: () => set({ countdown: Infinity }),
+}));

@@ -8,6 +8,7 @@ import { CreateUserDto, UpdateUserDto } from './dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
+import { getCurrentRank } from '../ranks';
 
 @Injectable()
 export class UsersService {
@@ -60,7 +61,7 @@ export class UsersService {
         where: { id },
         select: { id: true, inGameId: true, catPoints: true, username: true },
       });
-      return user;
+      return { ...user, rank: getCurrentRank(user.catPoints) };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)
         if (error.code === PrismaError.RecordNotFound)
@@ -101,6 +102,7 @@ export class UsersService {
 
       return {
         ...user,
+        rank: getCurrentRank(user.catPoints),
         highestWpm: highestWpm || 0,
         lastTenAverageWpm: lastTenAverageWpm || 0,
         gamesPlayed: gamesPlayed || 0,

@@ -19,6 +19,7 @@ CREATE TABLE "Game" (
     "maxPoints" INTEGER NOT NULL,
     "paragraph" TEXT NOT NULL,
     "startedAt" TIMESTAMP(3),
+    "endedAt" TIMESTAMP(3),
 
     CONSTRAINT "Game_pkey" PRIMARY KEY ("id")
 );

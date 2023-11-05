@@ -3,7 +3,6 @@ import { PlayerGameHistories } from "@/features/users/histories";
 import {
   About,
   ProfileShares,
-  getCurrentRank,
   getPlayerProfile,
 } from "@/features/users/profile";
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
@@ -28,11 +27,7 @@ export const generateMetadata = async ({
   if (!player) return { title: "Player not found" };
   return {
     title: player.username,
-    description: `Rank: ${getCurrentRank(player.catPoints)} (${
-      player.catPoints
-    } CPs), Average WPM (last 10 games): ${
-      player.lastTenAverageWpm
-    }, Highest WPM: ${player.highestWpm}`,
+    description: `Rank: ${player.rank} (${player.catPoints} CPs), Average WPM (last 10 games): ${player.lastTenAverageWpm}, Highest WPM: ${player.highestWpm}`,
   };
 };
 

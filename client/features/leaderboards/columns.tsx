@@ -5,7 +5,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/features/ui/tooltip";
-import { RankBadge, User, getCurrentRank } from "@/features/users/profile";
+import { RankBadge, User } from "@/features/users/profile";
 import { ColumnDef } from "@tanstack/react-table";
 
 export const columnsWrapper = (user?: User) => {
@@ -34,11 +34,9 @@ export const columnsWrapper = (user?: User) => {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger className="mx-auto" asChild>
-              <RankBadge catPoints={row.original.catPoints} size="sm" />
+              <RankBadge rank={row.original.rank} size="sm" />
             </TooltipTrigger>
-            <TooltipContent>
-              {getCurrentRank(row.original.catPoints)}
-            </TooltipContent>
+            <TooltipContent>{row.original.rank}</TooltipContent>
           </Tooltip>
         </TooltipProvider>
       ),

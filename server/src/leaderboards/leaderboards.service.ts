@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { getCurrentRank } from '../ranks';
 
 @Injectable()
 export class LeaderboardsService {
@@ -36,6 +37,7 @@ export class LeaderboardsService {
         );
         return {
           ...player,
+          rank: getCurrentRank(player.catPoints),
           highestWpm,
           lastTenAverageWpm: Math.trunc(
             sumWpm / Math.min(10, histories.length),

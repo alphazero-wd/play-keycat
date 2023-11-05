@@ -30,6 +30,7 @@ model Game {
   maxPoints Int
   paragraph String    @db.Text
   startedAt DateTime?
+  endedAt   DateTime?
 
   players   User[]
   histories GameHistory[]

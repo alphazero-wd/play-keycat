@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/features/ui/card";
 import { User } from "../profile";
-import { getCurrentRank } from "./get-current-rank";
 import { RankBadge } from "./rank-badge";
 
 export const About = ({ player }: { player: User }) => {
@@ -12,11 +11,11 @@ export const About = ({ player }: { player: User }) => {
         <Card>
           <CardHeader>
             <CardTitle className="text-center text-card-foreground">
-              {getCurrentRank(player.catPoints)}
+              {player.rank}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center">
-            <RankBadge catPoints={player.catPoints} />
+            <RankBadge rank={player.rank} />
 
             <p className="mt-3 text-foreground">
               <span className="text-2xl font-medium text-muted-foreground">

@@ -1,24 +1,20 @@
 import { format } from "date-fns";
 import { useMemo } from "react";
-import { useGameStore } from "./hooks";
+import { useCountdown, useGameStore } from "./hooks";
 
-export const GameSubheading = ({
-  countdown,
-  timeRemaining,
-}: {
-  countdown: number;
-  timeRemaining: number;
-}) => {
-  const { startedAt } = useGameStore();
+export const GameSubheading = () => {
+  const { startedAt, endedAt } = useGameStore();
+  const { countdown } = useCountdown();
 
   const subtitle = useMemo(() => {
-    if (!startedAt) return "Waiting for opponents with similar levels...";
-    if (startedAt && countdown > 0)
+    if (!startedAt && !isFinite(countdown))
+      return "Waiting for opponents with similar levels...";
+    if (!startedAt && countdown >= 0)
       return `Game starting in ${countdown} seconds...`;
-    if (timeRemaining > 0)
-      return `Time remaining ${format(timeRemaining * 1000, "mm:ss")}`;
+    if (startedAt && !endedAt)
+      return `Time remaining ${format(countdown * 1000, "mm:ss")}`;
     return "Game has ended. Showing game history...";
-  }, [startedAt, countdown, timeRemaining]);
+  }, [startedAt, countdown]);
 
   return (
     <p className="font-normal text-muted-foreground md:text-lg">{subtitle}</p>

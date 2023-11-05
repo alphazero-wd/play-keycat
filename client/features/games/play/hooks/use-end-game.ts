@@ -1,25 +1,22 @@
 import { useAlert } from "@/features/ui/alert";
-import { User, getCurrentRank } from "@/features/users/profile";
+import { User } from "@/features/users/profile";
 import { socket } from "@/lib/socket";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
-import { Game, RankUpdateStatus, TypingStats } from "../types";
+import { Game, TypingStats } from "../types";
 import { calculateProgress } from "../utils";
 import { useGameStore } from "./use-game-store";
 import { getProgress } from "./use-players-store";
-import { useRankUpdateModal } from "./use-rank-update-modal";
 import { useTypingStats } from "./use-typing-stats";
 
 export const useEndGame = (
   user: User,
   typingStats: TypingStats,
   game: Game,
-  timeRemaining: number,
 ) => {
-  const { endGame, hasFinished } = useGameStore();
-  const { acc, wpm, catPoints } = useTypingStats(typingStats, user.id);
+  const { finishGame, endedAt } = useGameStore();
+  const { acc, wpm, position } = useTypingStats(typingStats, user.id);
   const router = useRouter();
-  const { onOpen } = useRankUpdateModal();
   const { setAlert } = useAlert();
 
   const sendResult = useCallback(() => {
@@ -31,29 +28,17 @@ export const useEndGame = (
       gameId: game.id,
     });
     if (getProgress(user.id) >= 50) {
-      socket.emit("playerFinished", { wpm, acc, catPoints, gameId: game.id });
+      socket.emit("playerFinished", { wpm, acc, position, gameId: game.id });
     }
   }, [
     typingStats.charsTyped,
     typingStats.prevError,
     wpm,
     acc,
-    catPoints,
+    position,
     game.paragraph,
     game.id,
   ]);
-
-  const showRankUpdateModal = useCallback(() => {
-    const nextRank = getCurrentRank(user.catPoints + catPoints);
-    const currentRank = getCurrentRank(user.catPoints);
-    if ((hasFinished || timeRemaining === 0) && nextRank !== currentRank)
-      onOpen(
-        currentRank,
-        nextRank,
-        catPoints > 0 ? RankUpdateStatus.PROMOTED : RankUpdateStatus.DEMOTED,
-        user.catPoints + catPoints,
-      );
-  }, [hasFinished, timeRemaining, user.catPoints, catPoints]);
 
   useEffect(() => {
     const hasReachedTheEnd =
@@ -61,31 +46,36 @@ export const useEndGame = (
       typingStats.charsTyped === game.paragraph.length;
 
     if (hasReachedTheEnd) {
-      endGame();
+      finishGame();
       sendResult();
-      showRankUpdateModal();
       router.refresh();
     }
-  }, [typingStats.charsTyped, game.paragraph, sendResult]);
+  }, [
+    typingStats.charsTyped,
+    typingStats.prevError,
+    game.paragraph,
+    sendResult,
+  ]);
+
+  console.log({
+    hasReachedTheEnd: typingStats.charsTyped === game.paragraph.length,
+  });
 
   useEffect(() => {
-    const hasTimeup = !hasFinished && timeRemaining === 0; // avoid overridding finished result
-    if (hasTimeup) {
-      sendResult();
-      showRankUpdateModal();
-      router.refresh();
+    if (endedAt) {
+      const timeout = setTimeout(() => {
+        router.refresh();
+        if (getProgress(user.id) >= 50)
+          router.push(`/games/${game.id}/history`);
+        else {
+          setAlert(
+            "info",
+            "Your progress is not saved because it is below 50%",
+          );
+          router.push("/");
+        }
+      }, 3000);
+      return () => clearTimeout(timeout);
     }
-  }, [timeRemaining, hasFinished, sendResult]);
-
-  useEffect(() => {
-    if (timeRemaining !== 0) return;
-    const timeout = setTimeout(() => {
-      if (getProgress(user.id) >= 50) router.push(`/games/${game.id}/history`);
-      else {
-        setAlert("info", "Your progress is not saved because it is below 50%");
-        router.push("/");
-      }
-    }, 3000);
-    return () => clearTimeout(timeout);
-  }, [hasFinished, timeRemaining]);
+  }, [endedAt]);
 };

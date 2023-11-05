@@ -1,5 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsInt, IsNumber, Max, Min } from 'class-validator';
+import { MAX_PLAYERS_COUNT } from '../../common/constants';
 
 export class PlayerFinishedDto {
   @Transform(() => Number)
@@ -15,7 +16,9 @@ export class PlayerFinishedDto {
 
   @Transform(() => Number)
   @IsInt()
-  catPoints: number;
+  @Min(1)
+  @Max(MAX_PLAYERS_COUNT)
+  position: number;
 
   @Transform(() => Number)
   @Min(1)

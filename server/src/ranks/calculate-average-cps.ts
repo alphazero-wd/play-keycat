@@ -1,4 +1,4 @@
-import { User } from "@/features/users/profile";
+import { User } from '@prisma/client';
 
 export const calculateAverageCPs = (players: User[]) => {
   const sumCPs = players.reduce((sum, player) => sum + player.catPoints, 0);

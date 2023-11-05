@@ -1,9 +1,8 @@
-import { ranks } from "@/features/data";
-import { getCurrentRank } from "@/features/users/profile";
+import { getCurrentRank, ranks } from '../../ranks';
 
 const getWpmBasedOnRank = (averageCps: number) => {
   const currentRank = getCurrentRank(averageCps);
-  return ranks[currentRank].minWpm || 20;
+  return ranks[currentRank].minWpm;
 };
 
 export const calculateTimeLimit = (averageCPs: number, paragraph: string) => {

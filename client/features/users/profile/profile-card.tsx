@@ -15,7 +15,6 @@ import {
 import { format } from "date-fns";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getCurrentRank } from "./get-current-rank";
 import { getPlayerProfile } from "./get-player-profile";
 import { RankBadge } from "./rank-badge";
 import { User } from "./types";
@@ -54,7 +53,7 @@ export const ProfileCard = ({
             <AvatarImage src="/icons/sprout.jpg" />
             <AvatarFallback>{profile.username[0].toUpperCase()}</AvatarFallback>
           </Avatar>
-          <RankBadge catPoints={profile.catPoints} size="sm" />
+          <RankBadge rank={profile.rank} size="sm" />
         </div>
         <div className="space-y-1">
           <div className="flex items-baseline gap-x-2">
@@ -64,9 +63,7 @@ export const ProfileCard = ({
           <div className="flex items-center text-foreground">
             <PresentationChartBarIcon className="mr-2 h-5 w-5 text-muted-foreground" />{" "}
             <span>
-              <span className="text-base font-semibold">
-                {getCurrentRank(profile.catPoints)}
-              </span>{" "}
+              <span className="text-base font-semibold">{profile.rank}</span>{" "}
               <span className="text-sm text-muted-foreground">
                 {profile.catPoints} CPs
               </span>

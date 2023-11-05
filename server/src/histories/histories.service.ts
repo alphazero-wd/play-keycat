@@ -8,16 +8,15 @@ import { Prisma, User } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
 import { PrismaService } from '../prisma/prisma.service';
 import { PlayerFinishedDto } from '../games/dto';
+import { calculateCPs } from '../games/utils';
 
 @Injectable()
 export class HistoriesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(
-    { catPoints, ...createHistoryDto }: PlayerFinishedDto,
-    user: User,
-  ) {
+  async create({ acc, wpm, position, gameId }: PlayerFinishedDto, user: User) {
     try {
+      const catPoints = calculateCPs(wpm, acc, position);
       const gameHistory = await this.prisma.$transaction([
         this.prisma.user.update({
           where: { id: user.id },
@@ -25,7 +24,9 @@ export class HistoriesService {
         }),
         this.prisma.gameHistory.create({
           data: {
-            ...createHistoryDto,
+            wpm,
+            acc,
+            gameId,
             catPoints: user.catPoints + catPoints < 0 ? 0 : catPoints,
             playerId: user.id,
           },
@@ -73,7 +74,6 @@ export class HistoriesService {
   async findByPlayer(username: string, offset: number) {
     const playerHistoriesCount = await this.prisma.gameHistory.count({
       where: { player: { username } },
-      take: 100,
     });
     const playerHistories = await this.prisma.gameHistory.findMany({
       where: { player: { username } },
