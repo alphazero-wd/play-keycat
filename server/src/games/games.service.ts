@@ -8,7 +8,7 @@ import { Prisma, User } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
 import { WsException } from '@nestjs/websockets';
 import { UsersService } from '../users/users.service';
-import { faker } from '@faker-js/faker';
+import { generateParagraph } from './utils';
 
 @Injectable()
 export class GamesService {
@@ -133,7 +133,7 @@ export class GamesService {
   }
 
   private async create(user: User) {
-    const paragraph = await this.generateParagraph();
+    const paragraph = generateParagraph();
 
     const game = await this.prisma.game.create({
       data: {
@@ -143,17 +143,5 @@ export class GamesService {
       },
     });
     return game.id;
-  }
-
-  private async generateParagraph() {
-    try {
-      const response = await fetch(
-        'https://story-shack-cdn-v2.glitch.me/generators/random-paragraph-generator',
-      );
-      const { data } = await response.json();
-      return (data.name as string).split(' | ')[0];
-    } catch (error) {
-      return faker.word.words(30);
-    }
   }
 }
