@@ -8,16 +8,26 @@ import { Prisma, User } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
 import { PrismaService } from '../prisma/prisma.service';
 import { PlayerFinishedDto } from '../games/dto';
-import { calculateCPs } from '../games/utils';
+import { calculateCPs } from './utils';
+import { RankUpdateStatus, getCurrentRank, ranks } from '../ranks';
 
 @Injectable()
 export class HistoriesService {
   constructor(private prisma: PrismaService) {}
 
-  async create({ acc, wpm, position, gameId }: PlayerFinishedDto, user: User) {
+  async create(
+    { acc, wpm, position, gameId }: PlayerFinishedDto,
+    averageCPs: number,
+    user: User,
+  ) {
     try {
-      const catPoints = calculateCPs(wpm, acc, position);
-      const gameHistory = await this.prisma.$transaction([
+      const currentRank = getCurrentRank(averageCPs);
+      const catPoints = calculateCPs(
+        wpm - ranks[currentRank].minWpm,
+        acc - ranks[currentRank].minAcc,
+        position,
+      );
+      const results = await this.prisma.$transaction([
         this.prisma.user.update({
           where: { id: user.id },
           data: { catPoints: Math.max(user.catPoints + catPoints, 0) },
@@ -32,7 +42,7 @@ export class HistoriesService {
           },
         }),
       ]);
-      return gameHistory;
+      return results;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === PrismaError.ForeignViolation)
@@ -89,5 +99,13 @@ export class HistoriesService {
       orderBy: { game: { startedAt: 'desc' } },
     });
     return { playerHistories, playerHistoriesCount };
+  }
+
+  checkRankUpdate(user: User, catPoints: number) {
+    const prevRank = getCurrentRank(user.catPoints - catPoints);
+    const currentRank = getCurrentRank(user.catPoints);
+    const rankUpdateStatus =
+      catPoints < 0 ? RankUpdateStatus.DEMOTED : RankUpdateStatus.PROMOTED;
+    return { prevRank, currentRank, rankUpdateStatus };
   }
 }

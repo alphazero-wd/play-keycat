@@ -3,27 +3,28 @@ import { RankUpdateStatus } from "../types";
 
 interface RankUpdateModalStore {
   isModalOpen: boolean;
-  fromRank: string | null;
-  toRank: string | null;
+  prevRank: string | null;
+  currentRank: string | null;
   status: RankUpdateStatus | null;
-  catPoints: number;
-  onOpen: (
-    fromRank: string,
-    toRank: string,
-    status: RankUpdateStatus,
-    catPoints: number,
-  ) => void;
+  onOpen: (payload: {
+    prevRank: string;
+    currentRank: string;
+    status: RankUpdateStatus;
+  }) => void;
   onClose: () => void;
 }
 
 export const useRankUpdateModal = create<RankUpdateModalStore>((set) => ({
   isModalOpen: false,
-  fromRank: null,
-  toRank: null,
+  prevRank: null,
+  currentRank: null,
   status: null,
-  catPoints: 0,
-  onOpen: (fromRank, toRank, status, catPoints) =>
-    set({ isModalOpen: true, fromRank, toRank, status, catPoints }),
+  onOpen: (payload) => set({ isModalOpen: true, ...payload }),
   onClose: () =>
-    set({ isModalOpen: false, fromRank: null, toRank: null, status: null }),
+    set({
+      isModalOpen: false,
+      prevRank: null,
+      currentRank: null,
+      status: null,
+    }),
 }));

@@ -29,9 +29,9 @@ export class GamesService {
     try {
       const game = await this.prisma.game.findUniqueOrThrow({
         where: { id: gameId },
-        select: { players: true },
+        select: { players: true, startedAt: true },
       });
-      return game.players;
+      return game;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)
         if (error.code === PrismaError.RecordNotFound)

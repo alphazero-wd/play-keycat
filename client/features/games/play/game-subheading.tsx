@@ -11,10 +11,10 @@ export const GameSubheading = () => {
       return "Waiting for opponents with similar levels...";
     if (!startedAt && countdown >= 0)
       return `Game starting in ${countdown} seconds...`;
-    if (startedAt && !endedAt)
+    if (startedAt && !endedAt && countdown > 0)
       return `Time remaining ${format(countdown * 1000, "mm:ss")}`;
     return "Game has ended. Showing game history...";
-  }, [startedAt, countdown]);
+  }, [startedAt, countdown, endedAt]);
 
   return (
     <p className="font-normal text-muted-foreground md:text-lg">{subtitle}</p>

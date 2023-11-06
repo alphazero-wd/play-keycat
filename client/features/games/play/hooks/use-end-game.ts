@@ -57,10 +57,6 @@ export const useEndGame = (
     sendResult,
   ]);
 
-  console.log({
-    hasReachedTheEnd: typingStats.charsTyped === game.paragraph.length,
-  });
-
   useEffect(() => {
     if (endedAt) {
       const timeout = setTimeout(() => {

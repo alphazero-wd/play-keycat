@@ -4,6 +4,7 @@ import { getProgress, usePlayersStore } from "./hooks";
 
 export const Players = ({ user }: { user: User }) => {
   const { players } = usePlayersStore();
+
   return (
     <div className="mt-6 max-w-2xl space-y-4">
       {players.map((player) => (

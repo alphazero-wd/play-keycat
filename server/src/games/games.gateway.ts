@@ -15,6 +15,7 @@ import { PlayerFinishedDto } from './dto';
 import { GamesService } from './games.service';
 import { calculateTimeLimit } from './utils';
 import { calculateAverageCPs } from '../ranks';
+import { MULTIPLAYERS_COUNTDOWN } from '../common/constants';
 
 @WebSocketGateway()
 export class GamesGateway implements OnGatewayDisconnect {
@@ -33,19 +34,19 @@ export class GamesGateway implements OnGatewayDisconnect {
     @MessageBody('gameId', ParseIntPipe) gameId: number,
   ) {
     socket.join(`game:${gameId}`);
-    const players = await this.gamesService.getPlayersInGame(gameId);
+    const { players } = await this.gamesService.getPlayersInGame(gameId);
 
     if (players.length === 3) {
       const averageCPs = calculateAverageCPs(players);
-      this.startCountdown(gameId, 10, async () => {
+
+      this.startCountdown(gameId, MULTIPLAYERS_COUNTDOWN, async () => {
         const game = await this.gamesService.updateTime(gameId, 'startedAt');
-        this.startTimeLimit(
-          gameId,
-          calculateTimeLimit(averageCPs, game.paragraph),
-        );
+        const timeLimit = calculateTimeLimit(averageCPs, game.paragraph);
         this.io.sockets
           .to(`game:${gameId}`)
           .emit('startGame', { startedAt: game.startedAt.toISOString() });
+        this.io.sockets.to(`game:${gameId}`).emit('countdown', timeLimit);
+        this.startTimeLimit(gameId, timeLimit - 1);
       });
     }
 
@@ -100,7 +101,23 @@ export class GamesGateway implements OnGatewayDisconnect {
     @MessageBody() payload: PlayerFinishedDto,
   ) {
     const user = socket.request.user;
-    await this.historiesService.create(payload, user);
+    const { players } = await this.gamesService.getPlayersInGame(
+      payload.gameId,
+    );
+    const averageCPs = calculateAverageCPs(players);
+    const [player, history] = await this.historiesService.create(
+      payload,
+      averageCPs,
+      user,
+    );
+    const { prevRank, currentRank, rankUpdateStatus } =
+      this.historiesService.checkRankUpdate(player, history.catPoints);
+    if (prevRank !== currentRank)
+      socket.emit('rankUpdate', {
+        status: rankUpdateStatus,
+        prevRank,
+        currentRank,
+      });
     this.io.sockets.emit('leaderboardUpdate');
   }
 
@@ -112,10 +129,14 @@ export class GamesGateway implements OnGatewayDisconnect {
     // check for `gameId` because a player might join in on multiple devices causes NestJS to raise an uncanny exception
     if (!gameId) return;
 
-    const playersInGameCount = await this.gamesService.countPlayersInGame(
+    const { players, startedAt } = await this.gamesService.getPlayersInGame(
       gameId,
     );
-    if (playersInGameCount === 0) {
+
+    if (!startedAt)
+      this.io.sockets.to(`game:${gameId}`).emit('players', players);
+
+    if (players.length === 0) {
       await this.gamesService.removeIfEmpty(gameId);
       clearInterval(this.gameTimers.get(`game:${gameId}`));
       this.gameTimers.delete(`game:${gameId}`);

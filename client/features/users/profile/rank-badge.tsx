@@ -8,7 +8,7 @@ interface RankBadgeProps {
 
 const badgeClassesOnSize = {
   md: "h-[200px] w-[200px]",
-  sm: "h-[50px] w-[50px]",
+  sm: "h-[40px] w-[40px]",
 };
 
 export const RankBadge = ({ rank, size = "md" }: RankBadgeProps) => {
