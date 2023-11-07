@@ -29,7 +29,10 @@ export class GamesService {
     try {
       const game = await this.prisma.game.findUniqueOrThrow({
         where: { id: gameId },
-        select: { players: true, startedAt: true },
+        select: {
+          players: { select: { id: true, username: true, catPoints: true } },
+          startedAt: true,
+        },
       });
       return game;
     } catch (error) {

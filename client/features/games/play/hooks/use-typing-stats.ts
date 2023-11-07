@@ -1,4 +1,4 @@
-import { addSeconds, differenceInMilliseconds } from "date-fns";
+import { differenceInMilliseconds } from "date-fns";
 import { useMemo } from "react";
 import { TypingStats } from "../types";
 import { calculateAccuracy, calculateWpm, determinePosition } from "../utils";
@@ -12,7 +12,7 @@ export const useTypingStats = (typingStats: TypingStats, userId: number) => {
   const wpm = useMemo(() => {
     const timeTaken = differenceInMilliseconds(
       new Date(),
-      addSeconds(new Date(startedAt!), 10),
+      new Date(startedAt!),
     );
     return calculateWpm(typingStats.charsTyped, timeTaken);
   }, [typingStats.charsTyped, startedAt]);

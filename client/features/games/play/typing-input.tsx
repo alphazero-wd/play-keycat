@@ -6,7 +6,7 @@ import {
   useEffect,
   useRef,
 } from "react";
-import { useCountdown, useGameStore } from "./hooks";
+import { useGameStore } from "./hooks";
 import { TypingStats } from "./types";
 
 interface TypingInputProps {
@@ -23,12 +23,10 @@ export const TypingInput = ({
   preventCheating,
 }: TypingInputProps) => {
   const typingInputRef = useRef<HTMLInputElement>(null);
-  const { countdown } = useCountdown();
   const startedAt = useGameStore((store) => store.startedAt);
   useEffect(() => {
-    if (startedAt && countdown === 0 && typingInputRef.current)
-      typingInputRef.current.focus();
-  }, [countdown, startedAt, typingInputRef.current]);
+    if (startedAt && typingInputRef.current) typingInputRef.current.focus();
+  }, [startedAt, typingInputRef.current]);
 
   return (
     <Input
@@ -39,7 +37,7 @@ export const TypingInput = ({
       onPaste={preventCheating}
       className="w-full"
       placeholder="Type when the game starts"
-      disabled={!startedAt && countdown > 0}
+      disabled={!startedAt}
     />
   );
 };

@@ -1,6 +1,6 @@
 import { User } from '@prisma/client';
 
-export const calculateAverageCPs = (players: User[]) => {
-  const sumCPs = players.reduce((sum, player) => sum + player.catPoints, 0);
-  return +(sumCPs / players.length).toFixed(0);
+export const calculateAverageCPs = (catPoints: number[]) => {
+  const sumCPs = catPoints.reduce((sum, point) => sum + point, 0);
+  return +(sumCPs / catPoints.length).toFixed(0);
 };

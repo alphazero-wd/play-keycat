@@ -33,23 +33,28 @@ export class GamesGateway implements OnGatewayDisconnect {
     @ConnectedSocket() socket: SocketUser,
     @MessageBody('gameId', ParseIntPipe) gameId: number,
   ) {
-    socket.join(`game:${gameId}`);
+    await socket.join(`game:${gameId}`);
     const { players } = await this.gamesService.getPlayersInGame(gameId);
+    console.log({ user: socket.request.user, players });
 
     if (players.length === 3) {
-      const averageCPs = calculateAverageCPs(players);
+      const averageCPs = calculateAverageCPs(players.map((p) => p.catPoints));
+      this.io.sockets
+        .to(`game:${gameId}`)
+        .emit('countdown', MULTIPLAYERS_COUNTDOWN);
 
-      this.startCountdown(gameId, MULTIPLAYERS_COUNTDOWN, async () => {
-        const game = await this.gamesService.updateTime(gameId, 'startedAt');
-        const timeLimit = calculateTimeLimit(averageCPs, game.paragraph);
-        this.io.sockets
-          .to(`game:${gameId}`)
-          .emit('startGame', { startedAt: game.startedAt.toISOString() });
-        this.io.sockets.to(`game:${gameId}`).emit('countdown', timeLimit);
-        this.startTimeLimit(gameId, timeLimit - 1);
+      this.startCountdown(gameId, MULTIPLAYERS_COUNTDOWN - 1, () => {
+        setTimeout(async () => {
+          const game = await this.gamesService.updateTime(gameId, 'startedAt');
+          const timeLimit = calculateTimeLimit(averageCPs, game.paragraph);
+          this.io.sockets
+            .to(`game:${gameId}`)
+            .emit('startGame', { startedAt: game.startedAt.toISOString() });
+          this.io.sockets.to(`game:${gameId}`).emit('countdown', timeLimit);
+          this.startTimeLimit(gameId, timeLimit - 1);
+        }, 500);
       });
     }
-
     this.io.sockets.to(`game:${gameId}`).emit('players', players);
   }
 
@@ -104,7 +109,7 @@ export class GamesGateway implements OnGatewayDisconnect {
     const { players } = await this.gamesService.getPlayersInGame(
       payload.gameId,
     );
-    const averageCPs = calculateAverageCPs(players);
+    const averageCPs = calculateAverageCPs(players.map((p) => p.catPoints));
     const [player, history] = await this.historiesService.create(
       payload,
       averageCPs,
@@ -133,8 +138,20 @@ export class GamesGateway implements OnGatewayDisconnect {
       gameId,
     );
 
-    if (!startedAt)
+    if (!startedAt) {
       this.io.sockets.to(`game:${gameId}`).emit('players', players);
+      this.io.sockets.to(`game:${gameId}`).emit('resetCountdown');
+      clearInterval(this.gameTimers.get(`game:${gameId}`));
+    } else {
+      /*
+        when the game has started, we don't want to announce any players who've left the game
+        we still assume that they're "ghost" players, so it's easier to calculate ranking
+      */
+      this.io.sockets.to(`game:${gameId}`).emit('playerLeft', {
+        id: currentUser.id,
+        username: currentUser.username,
+      });
+    }
 
     if (players.length === 0) {
       await this.gamesService.removeIfEmpty(gameId);

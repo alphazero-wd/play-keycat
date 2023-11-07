@@ -20,7 +20,7 @@ import { TypingInput } from "./typing-input";
 import { TypingParagraph } from "./typing-paragraph";
 
 export const Gameplay = ({ user, game }: { user: User; game: Game }) => {
-  useGameSocket(game.id);
+  useGameSocket(game.id, user.id);
   const { hasFinished, endedAt } = useGameStore();
   const { countdown } = useCountdown();
 

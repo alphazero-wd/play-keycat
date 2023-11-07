@@ -7,6 +7,7 @@ import { Game, TypingStats } from "../types";
 import { calculateProgress } from "../utils";
 import { useGameStore } from "./use-game-store";
 import { getProgress } from "./use-players-store";
+import { useRankUpdateModal } from "./use-rank-update-modal";
 import { useTypingStats } from "./use-typing-stats";
 
 export const useEndGame = (
@@ -14,10 +15,11 @@ export const useEndGame = (
   typingStats: TypingStats,
   game: Game,
 ) => {
-  const { finishGame, endedAt } = useGameStore();
+  const { finishGame, endedAt, hasFinished } = useGameStore();
   const { acc, wpm, position } = useTypingStats(typingStats, user.id);
   const router = useRouter();
   const { setAlert } = useAlert();
+  const { isModalOpen } = useRankUpdateModal();
 
   const sendResult = useCallback(() => {
     socket.emit("progress", {
@@ -27,9 +29,8 @@ export const useEndGame = (
       ),
       gameId: game.id,
     });
-    if (getProgress(user.id) >= 50) {
+    if (getProgress(user.id) >= 50)
       socket.emit("playerFinished", { wpm, acc, position, gameId: game.id });
-    }
   }, [
     typingStats.charsTyped,
     typingStats.prevError,
@@ -58,9 +59,20 @@ export const useEndGame = (
   ]);
 
   useEffect(() => {
+    const hasTimeup = !hasFinished && endedAt;
+    if (hasTimeup) {
+      sendResult();
+      router.refresh();
+    }
+  }, [endedAt, hasFinished]);
+
+  useEffect(() => {
     if (endedAt) {
       const timeout = setTimeout(() => {
-        router.refresh();
+        if (isModalOpen) {
+          clearTimeout(timeout);
+          return;
+        }
         if (getProgress(user.id) >= 50)
           router.push(`/games/${game.id}/history`);
         else {
@@ -73,5 +85,5 @@ export const useEndGame = (
       }, 3000);
       return () => clearTimeout(timeout);
     }
-  }, [endedAt]);
+  }, [endedAt, isModalOpen]);
 };
