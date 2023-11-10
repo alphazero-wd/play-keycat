@@ -3,3 +3,4 @@ export const STRONG_PASSWORD_REGEX =
   /^(?=.*[A-Z])(?=.*[!@#$%^&*()\-_+.])(?=.*[0-9])(?=.*[a-z]).{6,}$/;
 export const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 export const PAGE_LIMIT = 10;
+export const SPECIAL_CHARACTERS_REGEX = /[^\w\s]+|(?=\s)/;

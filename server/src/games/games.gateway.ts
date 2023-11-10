@@ -71,6 +71,7 @@ export class GamesGateway implements OnGatewayDisconnect {
       } else {
         countdown--;
       }
+      console.log(`Game: ${gameId} timer is running`);
     }, 1000);
     this.gameTimers.set(`game:${gameId}`, interval);
   }
@@ -140,8 +141,6 @@ export class GamesGateway implements OnGatewayDisconnect {
 
     if (!startedAt) {
       this.io.sockets.to(`game:${gameId}`).emit('players', players);
-      this.io.sockets.to(`game:${gameId}`).emit('resetCountdown');
-      clearInterval(this.gameTimers.get(`game:${gameId}`));
     } else {
       /*
         when the game has started, we don't want to announce any players who've left the game
@@ -155,7 +154,9 @@ export class GamesGateway implements OnGatewayDisconnect {
 
     if (players.length === 0) {
       await this.gamesService.removeIfEmpty(gameId);
-      clearInterval(this.gameTimers.get(`game:${gameId}`));
+      const interval = this.gameTimers.get(`game:${gameId}`);
+      clearInterval(interval);
+      console.log({ gameTimers: this.gameTimers });
       this.gameTimers.delete(`game:${gameId}`);
     }
   }

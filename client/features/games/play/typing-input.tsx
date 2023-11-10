@@ -11,7 +11,8 @@ import { TypingStats } from "./types";
 
 interface TypingInputProps {
   typingStats: TypingStats;
-  onKeydown: KeyboardEventHandler<HTMLInputElement>;
+  onKeyDown: KeyboardEventHandler<HTMLInputElement>;
+  onKeyUp: KeyboardEventHandler<HTMLInputElement>;
   preventCheating: ClipboardEventHandler<HTMLInputElement>;
   onChange: ChangeEventHandler<HTMLInputElement>;
 }
@@ -19,7 +20,8 @@ interface TypingInputProps {
 export const TypingInput = ({
   typingStats,
   onChange,
-  onKeydown,
+  onKeyDown,
+  onKeyUp,
   preventCheating,
 }: TypingInputProps) => {
   const typingInputRef = useRef<HTMLInputElement>(null);
@@ -32,8 +34,9 @@ export const TypingInput = ({
     <Input
       ref={typingInputRef}
       value={typingStats.value}
-      onKeyDown={onKeydown}
+      onKeyDown={onKeyDown}
       onChange={onChange}
+      onKeyUp={onKeyUp}
       onPaste={preventCheating}
       className="w-full"
       placeholder="Type when the game starts"

@@ -22,7 +22,10 @@ export const TypingParagraph = ({
             {char}
           </span>
         ))}
-      {game.paragraph.substring(typingStats.charsTyped)}
+      <span className="bg-primary/30">
+        {game.paragraph[typingStats.charsTyped]}
+      </span>
+      {game.paragraph.substring(typingStats.charsTyped + 1)}
     </p>
   );
 };

@@ -3,7 +3,6 @@
 import { Button } from "@/features/ui/button";
 import { User } from "@/features/users/profile";
 import Link from "next/link";
-import { useMemo } from "react";
 import { GameHeading } from "./game-heading";
 import { GameSubheading } from "./game-subheading";
 import {
@@ -24,16 +23,10 @@ export const Gameplay = ({ user, game }: { user: User; game: Game }) => {
   const { hasFinished, endedAt } = useGameStore();
   const { countdown } = useCountdown();
 
-  const { typingStats, preventCheating, onChange, onKeydown } = useTyping(
-    game.paragraph,
-    game.id,
-  );
+  const { typingStats, onKeyUp, preventCheating, onChange, onKeyDown } =
+    useTyping(game.paragraph, game.id);
 
   useEndGame(user, typingStats, game);
-
-  const shouldRender = useMemo(() => {
-    return !hasFinished && isFinite(countdown) && !endedAt;
-  }, [hasFinished, countdown, endedAt]);
 
   return (
     <>
@@ -44,12 +37,13 @@ export const Gameplay = ({ user, game }: { user: User; game: Game }) => {
 
         <Players user={user} />
 
-        {shouldRender && (
+        {!hasFinished && isFinite(countdown) && !endedAt && (
           <>
             <TypingParagraph game={game} typingStats={typingStats} />
             <TypingInput
               onChange={onChange}
-              onKeydown={onKeydown}
+              onKeyUp={onKeyUp}
+              onKeyDown={onKeyDown}
               typingStats={typingStats}
               preventCheating={preventCheating}
             />

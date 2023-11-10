@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useCountdown } from "./use-countdown";
 import { useGameStore } from "./use-game-store";
 import {
+  getProgress,
   onPlayerLeft,
   updateProgress,
   usePlayersStore,
@@ -30,8 +31,10 @@ export const useGameSocket = (gameId: number, userId?: number) => {
     socket.on("connect", onConnect);
     socket.on("players", onPlayers);
     socket.on("playerLeft", ({ id, username }) => {
-      onPlayerLeft(id);
-      if (userId !== id) setAlert("info", `${username} has left the game!`);
+      if (getProgress(id) < 100) {
+        onPlayerLeft(id);
+        if (userId !== id) setAlert("info", `${username} has left the game!`);
+      }
     });
     socket.on("resetCountdown", resetCountdown);
     socket.on("playerProgress", updateProgress);

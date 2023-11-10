@@ -12,6 +12,7 @@ export interface Game {
 export interface TypingStats {
   typos: number;
   charsTyped: number;
+  wordsTyped: number;
   prevError: number | null;
   value: string;
 }
