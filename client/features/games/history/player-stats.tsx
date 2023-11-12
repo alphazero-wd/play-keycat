@@ -18,7 +18,8 @@ export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
   return (
     <Table>
       <TableCaption>
-        Note that players whose progress is below 50% won&apos;t be shown here.
+        Players who is AFK, or whose progress is below 50% won&apos;t be shown
+        here.
       </TableCaption>
       <TableHeader>
         <TableRow>

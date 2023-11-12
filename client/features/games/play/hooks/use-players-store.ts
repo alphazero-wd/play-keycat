@@ -33,7 +33,7 @@ export const updateProgress = ({
   }));
 };
 
-export const onPlayerLeft = (id: number) => {
+export const addLeftPlayer = (id: number) => {
   usePlayersStore.setState((prev) => ({
     leftPlayerIds: new Set(prev.leftPlayerIds).add(id),
   }));

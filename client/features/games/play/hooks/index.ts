@@ -2,6 +2,7 @@ export { useCountdown } from "./use-countdown";
 export { useEndGame } from "./use-end-game";
 export { useGameSocket } from "./use-game-socket";
 export { useGameStore } from "./use-game-store";
+export { useGameSummaryModal } from "./use-game-summary-modal";
 export {
   getProgress,
   updateProgress,

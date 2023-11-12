@@ -87,9 +87,10 @@ export class GamesService {
       const historiesCount = await this.prisma.gameHistory.count({
         where: { gameId },
       });
+      const toBeDeleted = historiesCount === 0;
       // if the game has ended, and everyone has left the game then don't delete the game
-      if (historiesCount === 0)
-        await this.prisma.game.delete({ where: { id: gameId } });
+      if (toBeDeleted) await this.prisma.game.delete({ where: { id: gameId } });
+      return toBeDeleted;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)
         if (error.code === PrismaError.RecordNotFound)
@@ -142,8 +143,9 @@ export class GamesService {
       },
       select: { id: true, _count: { select: { players: true } } },
     });
+    console.log({ idealGame, username: user.username });
 
-    return idealGame && idealGame._count.players < 3 ? idealGame.id : null;
+    return idealGame && idealGame._count.players < 2 ? idealGame.id : null;
   }
 
   private async create(user: User) {

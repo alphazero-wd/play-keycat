@@ -1,33 +1,26 @@
 "use client";
-import { Button } from "@/features/ui/button";
-import { Card, CardContent, CardHeader } from "@/features/ui/card";
-import { Loader2 } from "lucide-react";
-import { useJoinGame } from "./use-join-game";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/features/ui/card";
+import { JoinGameButton } from "./join-game-button";
 
 export const RankedMode = () => {
-  const { loading, joinGame } = useJoinGame();
   return (
     <Card className="max-w-3xl">
       <CardHeader>
-        <h5 className="text-xl font-bold tracking-tight text-card-foreground">
+        <CardTitle className="text-xl font-bold tracking-tight text-card-foreground">
           Ranked match
-        </h5>
-        <p className="font-normal text-muted-foreground">
+        </CardTitle>
+        <CardDescription className="font-normal text-muted-foreground">
           Compete with other players at your rank.
-        </p>
+        </CardDescription>
       </CardHeader>
-
       <CardContent>
-        <Button disabled={loading} onClick={joinGame}>
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Joining game...
-            </>
-          ) : (
-            "Join game"
-          )}
-        </Button>
+        <JoinGameButton />
       </CardContent>
     </Card>
   );

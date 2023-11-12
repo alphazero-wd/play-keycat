@@ -2,10 +2,12 @@
 import { Label } from "@/features/ui/label";
 import {
   CalendarDaysIcon,
+  ClockIcon,
   DocumentTextIcon,
   HashtagIcon,
+  MinusIcon,
 } from "@heroicons/react/24/outline";
-import { addSeconds, format } from "date-fns";
+import { differenceInMilliseconds, format } from "date-fns";
 import { useMemo } from "react";
 import { Game } from "../play";
 
@@ -15,16 +17,30 @@ export const Overview = ({ game }: { game: Game }) => {
       { icon: HashtagIcon, text: game.id, label: "ID" },
       {
         icon: CalendarDaysIcon,
-        text: format(
-          addSeconds(new Date(game.startedAt), 10),
-          "d MMM, Y h:mm a",
-        ),
-        label: "Started at",
+        text: `${format(new Date(game.startedAt), "d MMM, Y h:mm a")}`,
+        label: "Played at",
+      },
+      {
+        icon: ClockIcon,
+        text: `${
+          game.endedAt ? (
+            format(
+              differenceInMilliseconds(
+                new Date(game.endedAt),
+                new Date(game.startedAt),
+              ),
+              "m:ss",
+            )
+          ) : (
+            <MinusIcon className="h-5 w-5" />
+          )
+        }`,
+        label: "Duration",
       },
       {
         icon: DocumentTextIcon,
         text: <p>{game.paragraph}</p>,
-        label: "Typing text",
+        label: "Text",
       },
     ],
     [game],

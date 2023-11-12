@@ -22,11 +22,7 @@ export class HistoriesService {
   ) {
     try {
       const currentRank = getCurrentRank(averageCPs);
-      const catPoints = calculateCPs(
-        wpm - ranks[currentRank].minWpm,
-        acc - ranks[currentRank].minAcc,
-        position,
-      );
+      const catPoints = calculateCPs(wpm, acc, position, currentRank);
       const results = await this.prisma.$transaction([
         this.prisma.user.update({
           where: { id: user.id },

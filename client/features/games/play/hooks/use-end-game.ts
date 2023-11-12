@@ -7,7 +7,6 @@ import { Game, TypingStats } from "../types";
 import { calculateProgress } from "../utils";
 import { useGameStore } from "./use-game-store";
 import { getProgress } from "./use-players-store";
-import { useRankUpdateModal } from "./use-rank-update-modal";
 import { useTypingStats } from "./use-typing-stats";
 
 export const useEndGame = (
@@ -19,7 +18,6 @@ export const useEndGame = (
   const { acc, wpm, position } = useTypingStats(typingStats, user.id);
   const router = useRouter();
   const { setAlert } = useAlert();
-  const { isModalOpen } = useRankUpdateModal();
 
   const sendResult = useCallback(() => {
     socket.emit("progress", {
@@ -63,27 +61,9 @@ export const useEndGame = (
     if (hasTimeup) {
       sendResult();
       router.refresh();
+
+      if (getProgress(user.id) < 50)
+        setAlert("info", "Your progress is not saved because it is below 50%");
     }
   }, [endedAt, hasFinished]);
-
-  useEffect(() => {
-    if (endedAt) {
-      const timeout = setTimeout(() => {
-        if (isModalOpen) {
-          clearTimeout(timeout);
-          return;
-        }
-        if (getProgress(user.id) >= 50)
-          router.push(`/games/${game.id}/history`);
-        else {
-          setAlert(
-            "info",
-            "Your progress is not saved because it is below 50%",
-          );
-          router.push("/");
-        }
-      }, 3000);
-      return () => clearTimeout(timeout);
-    }
-  }, [endedAt, isModalOpen]);
 };

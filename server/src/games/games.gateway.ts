@@ -31,13 +31,13 @@ export class GamesGateway implements OnGatewayDisconnect {
   @SubscribeMessage('joinGame')
   async joinGame(
     @ConnectedSocket() socket: SocketUser,
-    @MessageBody('gameId', ParseIntPipe) gameId: number,
+    @MessageBody('gameId') gameId: number,
   ) {
-    await socket.join(`game:${gameId}`);
+    socket.join(`game:${gameId}`);
     const { players } = await this.gamesService.getPlayersInGame(gameId);
-    console.log({ user: socket.request.user, players });
+    console.log({ players, gameId });
 
-    if (players.length === 3) {
+    if (players.length === 2) {
       const averageCPs = calculateAverageCPs(players.map((p) => p.catPoints));
       this.io.sockets
         .to(`game:${gameId}`)
@@ -71,14 +71,20 @@ export class GamesGateway implements OnGatewayDisconnect {
       } else {
         countdown--;
       }
-      console.log(`Game: ${gameId} timer is running`);
     }, 1000);
     this.gameTimers.set(`game:${gameId}`, interval);
+  }
+
+  stopCountdown(gameId: number) {
+    clearInterval(this.gameTimers.get(`game:${gameId}`));
+    this.gameTimers.delete(`game:${gameId}`);
   }
 
   startTimeLimit(gameId: number, countdown: number) {
     this.startCountdown(gameId, countdown, async () => {
       // end game here
+      const interval = this.gameTimers.get(`game:${gameId}`);
+      if (!interval) return;
       const game = await this.gamesService.updateTime(gameId, 'endedAt');
       this.io.sockets
         .to(`game:${gameId}`)
@@ -111,6 +117,7 @@ export class GamesGateway implements OnGatewayDisconnect {
       payload.gameId,
     );
     const averageCPs = calculateAverageCPs(players.map((p) => p.catPoints));
+    await this.gamesService.removePlayer(user.id);
     const [player, history] = await this.historiesService.create(
       payload,
       averageCPs,
@@ -118,6 +125,12 @@ export class GamesGateway implements OnGatewayDisconnect {
     );
     const { prevRank, currentRank, rankUpdateStatus } =
       this.historiesService.checkRankUpdate(player, history.catPoints);
+    socket.emit('gameSummary', {
+      wpm: payload.wpm,
+      acc: payload.acc,
+      position: payload.position,
+      catPoints: history.catPoints,
+    });
     if (prevRank !== currentRank)
       socket.emit('rankUpdate', {
         status: rankUpdateStatus,
@@ -153,11 +166,15 @@ export class GamesGateway implements OnGatewayDisconnect {
     }
 
     if (players.length === 0) {
-      await this.gamesService.removeIfEmpty(gameId);
-      const interval = this.gameTimers.get(`game:${gameId}`);
-      clearInterval(interval);
-      console.log({ gameTimers: this.gameTimers });
-      this.gameTimers.delete(`game:${gameId}`);
+      const hasDeleted = await this.gamesService.removeIfEmpty(gameId);
+      /*
+        Suppose all players in a game left, there are 2 possible cases:
+        If there are no associated histories, we'll delete the time ref.
+        Otherwise, we might not want to delete the time ref.
+        =====> The role of the time ref is to check if a game is currently underway OR has been dissolved
+        After which we can officially end the game (if exists)
+      */
+      if (hasDeleted) this.stopCountdown(gameId);
     }
   }
 }

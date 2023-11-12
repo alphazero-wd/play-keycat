@@ -22,6 +22,7 @@ export default async function GameHistoryPage({
   const user = await getCurrentUser();
   const game = await getGameHistory(id);
   if (!game) redirect("/not-found");
+  if (game.histories.length === 0) redirect(`/games/${game.id}/play`);
 
   return (
     <div className="container max-w-5xl">

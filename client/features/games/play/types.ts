@@ -6,6 +6,7 @@ export interface Game {
   maxPoints: number;
   paragraph: string;
   startedAt: string;
+  endedAt: string;
   histories: GameHistory[];
 }
 

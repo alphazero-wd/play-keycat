@@ -13,6 +13,7 @@ export default async function GamePage({ params: { id } }: GamePageProps) {
   if (!user) redirect("/auth/login");
   const game = await getGame(id);
   if (!game) redirect("/not-found");
+  console.log({ gameId: game.id });
 
   return <Gameplay user={user} game={game} />;
 }

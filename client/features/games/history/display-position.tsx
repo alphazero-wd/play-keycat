@@ -7,6 +7,9 @@ export const displayPosition = (position: number) => {
     case 3:
       return <div className="text-2xl">🥉</div>;
     default:
-      return position;
+      const englishOrdinalRules = new Intl.PluralRules("en", {
+        type: "ordinal",
+      });
+      return englishOrdinalRules.select(position);
   }
 };
