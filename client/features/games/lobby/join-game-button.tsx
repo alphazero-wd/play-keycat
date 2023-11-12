@@ -12,10 +12,10 @@ export const JoinGameButton = () => {
       {loading ? (
         <>
           <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-          Joining game...
+          Finding game...
         </>
       ) : (
-        "Join game"
+        "Find game"
       )}
       <ArrowRightIcon className="ml-2 h-5 w-5" />
     </Button>

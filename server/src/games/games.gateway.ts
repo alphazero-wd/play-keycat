@@ -35,7 +35,6 @@ export class GamesGateway implements OnGatewayDisconnect {
   ) {
     socket.join(`game:${gameId}`);
     const { players } = await this.gamesService.getPlayersInGame(gameId);
-    console.log({ players, gameId });
 
     if (players.length === 2) {
       const averageCPs = calculateAverageCPs(players.map((p) => p.catPoints));

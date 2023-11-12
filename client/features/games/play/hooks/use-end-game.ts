@@ -29,6 +29,7 @@ export const useEndGame = (
     });
     if (getProgress(user.id) >= 50)
       socket.emit("playerFinished", { wpm, acc, position, gameId: game.id });
+    else setAlert("info", "Your progress is not saved because it is below 50%");
   }, [
     typingStats.charsTyped,
     typingStats.prevError,
@@ -61,9 +62,6 @@ export const useEndGame = (
     if (hasTimeup) {
       sendResult();
       router.refresh();
-
-      if (getProgress(user.id) < 50)
-        setAlert("info", "Your progress is not saved because it is below 50%");
     }
   }, [endedAt, hasFinished]);
 };

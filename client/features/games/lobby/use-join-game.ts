@@ -1,5 +1,6 @@
 import { API_URL } from "@/features/constants";
 import { useAlert } from "@/features/ui/alert";
+import { socket } from "@/lib/socket";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -10,6 +11,7 @@ export const useJoinGame = () => {
   const router = useRouter();
   const joinGame = async () => {
     try {
+      socket.disconnect();
       setLoading(true);
       const { data: gameId } = await axios.post(
         `${API_URL}/games/join`,

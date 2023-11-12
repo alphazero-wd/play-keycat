@@ -9,11 +9,10 @@ interface GamePageProps {
 }
 
 export default async function GamePage({ params: { id } }: GamePageProps) {
-  const user = await getCurrentUser();
-  if (!user) redirect("/auth/login");
   const game = await getGame(id);
   if (!game) redirect("/not-found");
-  console.log({ gameId: game.id });
+  const user = await getCurrentUser();
+  if (!user) redirect("/auth/login");
 
   return <Gameplay user={user} game={game} />;
 }
