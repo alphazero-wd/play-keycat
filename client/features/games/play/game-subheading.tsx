@@ -13,7 +13,7 @@ export const GameSubheading = () => {
       return `Game starting in ${countdown} seconds...`;
     if (startedAt && !endedAt && countdown > 0)
       return `Time remaining ${format(countdown * 1000, "mm:ss")}`;
-    return "Game has ended. Showing game history...";
+    return "Game has ended. Have a look at the history or, maybe another game?";
   }, [startedAt, countdown, endedAt]);
 
   return (

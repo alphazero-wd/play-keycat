@@ -17,10 +17,7 @@ import { displayPosition } from "./display-position";
 export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
   return (
     <Table>
-      <TableCaption>
-        Players who is AFK, or whose progress is below 50% won&apos;t be shown
-        here.
-      </TableCaption>
+      <TableCaption>Players who are AFK won&apos;t be shown here.</TableCaption>
       <TableHeader>
         <TableRow>
           <TableHead className="w-[50px] text-right">#</TableHead>

@@ -21,7 +21,13 @@ export const SignupForm = () => {
                 label="Username"
                 inputProps={{ ...field, placeholder: "sample_username" }}
                 desc={
-                  "Your username is public to other players.\nBetween 1-30 characters long\nContain only letters, numbers and underscores (_)."
+                  <>
+                    Your username is public to other players.
+                    <br />
+                    Between 1-30 characters long
+                    <br />
+                    Contain only letters, numbers and underscores (_).
+                  </>
                 }
               />
             </FormItem>
@@ -58,7 +64,15 @@ export const SignupForm = () => {
                   placeholder: "••••••",
                 }}
                 desc={
-                  "At least 6 characters\nAt least 1 lower letter and 1 uppercase letter\nAt least 1 number\nAt least 1 special character"
+                  <>
+                    At least 6 characters
+                    <br />
+                    At least 1 lower letter and 1 uppercase letter
+                    <br />
+                    At least 1 number
+                    <br />
+                    At least 1 special character
+                  </>
                 }
               />
             </FormItem>

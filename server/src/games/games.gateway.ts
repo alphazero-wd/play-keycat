@@ -130,6 +130,9 @@ export class GamesGateway implements OnGatewayDisconnect {
       position: payload.position,
       catPoints: history.catPoints,
     });
+    this.io.sockets
+      .to(`game:${payload.gameId}`)
+      .emit('updatePosition', { id: player.id, position: payload.position });
     if (prevRank !== currentRank)
       socket.emit('rankUpdate', {
         status: rankUpdateStatus,

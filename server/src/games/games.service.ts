@@ -9,6 +9,7 @@ import { PrismaError } from '../prisma/prisma-error';
 import { WsException } from '@nestjs/websockets';
 import { UsersService } from '../users/users.service';
 import { generateParagraph } from './utils';
+import { MAX_PLAYERS_COUNT } from '../common/constants';
 
 @Injectable()
 export class GamesService {
@@ -22,7 +23,6 @@ export class GamesService {
     let gameIdToJoin = await this.findOne(user);
     if (!gameIdToJoin) gameIdToJoin = await this.create(user);
     await this.addPlayer(gameIdToJoin, user.id);
-    console.log({ gameIdToJoin, userId: user.id });
     return gameIdToJoin;
   }
 
@@ -136,17 +136,18 @@ export class GamesService {
   }
 
   private async findOne(user: User) {
-    const idealGame = await this.prisma.game.findFirst({
-      where: {
-        minPoints: { lte: user.catPoints },
-        maxPoints: { gte: user.catPoints },
-        startedAt: null,
-      },
-      select: { id: true, _count: { select: { players: true } } },
-    });
-    console.log({ idealGame, username: user.username });
-
-    return idealGame && idealGame._count.players < 2 ? idealGame.id : null;
+    const result = await this.prisma.$queryRaw<[] | [{ id: number }]>`
+      SELECT g."id" FROM "Game" g
+      LEFT JOIN "User" u
+      ON u."inGameId" = g."id"
+      WHERE g."minPoints" <= ${user.catPoints}
+      AND g."maxPoints" >= ${user.catPoints}
+      AND g."startedAt" IS NULL
+      GROUP BY g."id"
+      HAVING COUNT(u."id") < ${MAX_PLAYERS_COUNT}
+      LIMIT 1;
+    `;
+    return result[0]?.id;
   }
 
   private async create(user: User) {

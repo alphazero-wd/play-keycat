@@ -8,13 +8,14 @@ import { useGameSummaryModal } from "./use-game-summary-modal";
 import {
   addLeftPlayer,
   getProgress,
+  updatePosition,
   updateProgress,
   usePlayersStore,
 } from "./use-players-store";
 import { useRankUpdateModal } from "./use-rank-update-modal";
 
 export const useGameSocket = (game: Game, userId?: number) => {
-  const { onPlayers, clearProgress } = usePlayersStore();
+  const { onPlayers, resetPlayers } = usePlayersStore();
   const { startGame, resetGame, endGame, endedAt } = useGameStore();
   const { updateCountdown, resetCountdown } = useCountdown();
   const { onOpen: onRankUpdateModalOpen, onClose: onRankUpdateModalClose } =
@@ -50,11 +51,12 @@ export const useGameSocket = (game: Game, userId?: number) => {
     socket.on("startGame", startGame);
     socket.on("countdown", updateCountdown);
     socket.on("endGame", endGame);
+    socket.on("updatePosition", updatePosition);
     socket.on("gameSummary", onGameSummaryModalOpen);
     socket.on("rankUpdate", onRankUpdateModalOpen);
 
     return () => {
-      clearProgress();
+      resetPlayers();
       resetGame();
       resetCountdown();
       onRankUpdateModalClose();

@@ -1,11 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/features/ui/avatar";
 import { ProfileCard, User } from "@/features/users/profile";
 import { cn } from "@/lib/utils";
-import { getProgress, usePlayersStore } from "./hooks";
+import { displayPosition } from "../history";
+import { getPosition, getProgress, usePlayersStore } from "./hooks";
 
 export const Players = ({ user }: { user: User }) => {
-  const { players, leftPlayerIds } = usePlayersStore();
-  console.log({ players });
+  const { players, leftPlayerIds, playersPosition } = usePlayersStore();
 
   return (
     <div className="mt-6 max-w-2xl space-y-4">
@@ -32,9 +32,15 @@ export const Players = ({ user }: { user: User }) => {
             </Avatar>
           </div>
 
-          <span className="flex-shrink-0 text-muted-foreground">
-            {getProgress(player.id)}%
-          </span>
+          <div className="relative left-8 flex-shrink-0 text-muted-foreground">
+            <div className="mt-3 flex items-center gap-x-4">
+              {getProgress(player.id)}%
+              <div className="w-full flex-shrink-0">
+                {getPosition(player.id) > 0 &&
+                  displayPosition(getPosition(player.id)!)}
+              </div>
+            </div>
+          </div>
         </div>
       ))}
     </div>

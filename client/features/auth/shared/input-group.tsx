@@ -7,11 +7,12 @@ import {
   FormMessage,
 } from "@/features/ui/form";
 import { Input } from "@/features/ui/input";
+import { ReactNode } from "react";
 
 interface InputGroupProps {
   label: string;
   inputProps: React.InputHTMLAttributes<HTMLInputElement>;
-  desc?: string;
+  desc?: ReactNode;
 }
 
 export const InputGroup = ({ label, inputProps, desc }: InputGroupProps) => {

@@ -1,23 +1,26 @@
-import { useAlert } from "@/features/ui/alert";
 import { User } from "@/features/users/profile";
 import { socket } from "@/lib/socket";
+import { differenceInMilliseconds } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
 import { Game, TypingStats } from "../types";
-import { calculateProgress } from "../utils";
+import {
+  calculateAccuracy,
+  calculateProgress,
+  calculateWpm,
+  determinePosition,
+} from "../utils";
 import { useGameStore } from "./use-game-store";
-import { getProgress } from "./use-players-store";
-import { useTypingStats } from "./use-typing-stats";
+import { usePlayersStore } from "./use-players-store";
 
 export const useEndGame = (
   user: User,
   typingStats: TypingStats,
   game: Game,
 ) => {
-  const { finishGame, endedAt, hasFinished } = useGameStore();
-  const { acc, wpm, position } = useTypingStats(typingStats, user.id);
+  const { finishGame, endedAt, hasFinished, startedAt } = useGameStore();
+  const { playersProgress } = usePlayersStore();
   const router = useRouter();
-  const { setAlert } = useAlert();
 
   const sendResult = useCallback(() => {
     socket.emit("progress", {
@@ -27,18 +30,16 @@ export const useEndGame = (
       ),
       gameId: game.id,
     });
-    if (getProgress(user.id) >= 50)
-      socket.emit("playerFinished", { wpm, acc, position, gameId: game.id });
-    else setAlert("info", "Your progress is not saved because it is below 50%");
-  }, [
-    typingStats.charsTyped,
-    typingStats.prevError,
-    wpm,
-    acc,
-    position,
-    game.paragraph,
-    game.id,
-  ]);
+    socket.emit("playerFinished", {
+      wpm: calculateWpm(
+        typingStats.charsTyped,
+        differenceInMilliseconds(new Date(), new Date(startedAt!)),
+      ),
+      acc: calculateAccuracy(typingStats.typos, typingStats.charsTyped),
+      position: determinePosition(playersProgress, user.id),
+      gameId: game.id,
+    });
+  }, [typingStats.charsTyped, typingStats.prevError, game.paragraph, game.id]);
 
   useEffect(() => {
     const hasReachedTheEnd =

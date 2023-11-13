@@ -17,7 +17,7 @@ export const AlertPopup = () => {
   if (!status || !message) return null;
 
   return (
-    <Alert className="fixed right-4 top-4 max-w-[400px]" variant={status}>
+    <Alert className="fixed right-4 top-4 z-50 max-w-[400px]" variant={status}>
       {status === "success" && <CheckCircleIcon className="h-5 w-5" />}
       {(status === "error" || status === "info") && (
         <ExclamationCircleIcon className="h-5 w-5" />

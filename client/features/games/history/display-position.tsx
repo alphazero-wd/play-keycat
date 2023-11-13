@@ -7,9 +7,14 @@ export const displayPosition = (position: number) => {
     case 3:
       return <div className="text-2xl">🥉</div>;
     default:
+      const suffixes = { one: "st", two: "nd", few: "rd", other: "th" };
       const englishOrdinalRules = new Intl.PluralRules("en", {
         type: "ordinal",
       });
-      return englishOrdinalRules.select(position);
+      const category = englishOrdinalRules.select(
+        position,
+      ) as keyof typeof suffixes;
+      const suffix = suffixes[category];
+      return position + suffix;
   }
 };

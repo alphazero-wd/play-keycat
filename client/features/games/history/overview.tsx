@@ -5,7 +5,6 @@ import {
   ClockIcon,
   DocumentTextIcon,
   HashtagIcon,
-  MinusIcon,
 } from "@heroicons/react/24/outline";
 import { differenceInMilliseconds, format } from "date-fns";
 import { useMemo } from "react";
@@ -22,19 +21,13 @@ export const Overview = ({ game }: { game: Game }) => {
       },
       {
         icon: ClockIcon,
-        text: `${
-          game.endedAt ? (
-            format(
-              differenceInMilliseconds(
-                new Date(game.endedAt),
-                new Date(game.startedAt),
-              ),
-              "m:ss",
-            )
-          ) : (
-            <MinusIcon className="h-5 w-5" />
-          )
-        }`,
+        text: `${format(
+          differenceInMilliseconds(
+            new Date(game.endedAt),
+            new Date(game.startedAt),
+          ),
+          "m:ss",
+        )}`,
         label: "Duration",
       },
       {

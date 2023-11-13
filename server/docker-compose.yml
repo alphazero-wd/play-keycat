@@ -1,6 +1,7 @@
 version: '3'
 services:
   postgres:
+    container_name: keycat_pg
     image: postgres:alpine
     ports:
       - 5432:5432
@@ -9,6 +10,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=keycat
   redis:
+    container_name: keycat_redis
     image: redis:alpine
     ports:
       - 6379:6379

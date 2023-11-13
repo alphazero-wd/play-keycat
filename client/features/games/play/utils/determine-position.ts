@@ -10,10 +10,8 @@ export const determinePosition = (
   const sortedProgressSetDesc = Array.from(new Set(progress)).sort(
     (a, b) => b - a,
   );
-
-  return (
-    sortedProgressSetDesc.findIndex(
-      (prog) => playersProgress.get(playerId) === prog,
-    ) + 1
+  const position = sortedProgressSetDesc.findIndex(
+    (prog) => playersProgress.get(playerId) === prog,
   );
+  return position === -1 ? sortedProgressSetDesc.length : position + 1;
 };
