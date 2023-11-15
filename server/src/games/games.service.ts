@@ -60,11 +60,11 @@ export class GamesService {
     }
   }
 
-  async updateTime(gameId: number, field: 'startedAt' | 'endedAt') {
+  async updateTime(gameId: number, field: 'startedAt' | 'endedAt', date: Date) {
     try {
       const game = await this.prisma.game.update({
         where: { id: gameId },
-        data: { [field]: new Date() },
+        data: { [field]: date },
       });
 
       return game;
@@ -85,11 +85,14 @@ export class GamesService {
 
   async removeIfEmpty(gameId: number) {
     try {
+      const playersCount = await this.prisma.user.count({
+        where: { inGameId: gameId },
+      });
       const historiesCount = await this.prisma.gameHistory.count({
         where: { gameId },
       });
-      const toBeDeleted = historiesCount === 0;
-      // if the game has ended, and everyone has left the game then don't delete the game
+      const toBeDeleted = historiesCount === 0 && playersCount === 0;
+      // if the game has ended, but everyone has left the game then don't delete the game
       if (toBeDeleted) await this.prisma.game.delete({ where: { id: gameId } });
       return toBeDeleted;
     } catch (error) {

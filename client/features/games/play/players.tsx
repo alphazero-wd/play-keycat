@@ -1,28 +1,26 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/features/ui/avatar";
 import { ProfileCard, User } from "@/features/users/profile";
-import { cn } from "@/lib/utils";
 import { displayPosition } from "../history";
-import { getPosition, getProgress, usePlayersStore } from "./hooks";
+import {
+  getPlayerPosition,
+  getPlayerProgress,
+  getPlayerWpm,
+  usePlayersStore,
+} from "./hooks";
 
 export const Players = ({ user }: { user: User }) => {
-  const { players, leftPlayerIds, playersPosition } = usePlayersStore();
+  const { players } = usePlayersStore();
 
   return (
     <div className="mt-6 max-w-2xl space-y-4">
       {players.map((player) => (
-        <div
-          key={player.id}
-          className={cn(
-            "flex items-center justify-between",
-            leftPlayerIds.has(player.id) && "opacity-50",
-          )}
-        >
+        <div key={player.id} className="flex items-center justify-between">
           <div className="flex w-[200px] items-center justify-between">
             <ProfileCard player={player} userId={user.id} />
             <Avatar
               className="transition-transform"
               style={{
-                transform: `translateX(${getProgress(player.id) * 10}%)`,
+                transform: `translateX(${getPlayerProgress(player.id) * 10}%)`,
               }}
             >
               <AvatarImage src="/icons/sprout.jpg" />
@@ -32,12 +30,17 @@ export const Players = ({ user }: { user: User }) => {
             </Avatar>
           </div>
 
-          <div className="relative left-8 flex-shrink-0 text-muted-foreground">
-            <div className="mt-3 flex items-center gap-x-4">
-              {getProgress(player.id)}%
-              <div className="w-full flex-shrink-0">
-                {getPosition(player.id) > 0 &&
-                  displayPosition(getPosition(player.id)!)}
+          <div className="relative left-16 flex-shrink-0 text-muted-foreground">
+            <div className="mt-3 flex items-center gap-x-3">
+              <div className="whitespace-nowrap text-muted-foreground">
+                <span className="text-lg font-semibold">
+                  {getPlayerWpm(player.id)}
+                </span>{" "}
+                WPM
+              </div>
+              <div className="w-full flex-shrink-0 text-sm font-medium text-secondary-foreground">
+                {getPlayerProgress(player.id) > 0 &&
+                  displayPosition(getPlayerPosition(player.id))}
               </div>
             </div>
           </div>

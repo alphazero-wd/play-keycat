@@ -11,6 +11,7 @@ interface GamePageProps {
 export default async function GamePage({ params: { id } }: GamePageProps) {
   const game = await getGame(id);
   if (!game) redirect("/not-found");
+  if (game.endedAt) redirect(`/games/${game.id}/history`);
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
 

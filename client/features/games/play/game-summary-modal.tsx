@@ -1,3 +1,4 @@
+"use client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,19 +9,22 @@ import {
   AlertDialogTitle,
 } from "@/features/ui/alert-dialog";
 import { Label } from "@/features/ui/label";
+import { useUserMenu } from "@/features/ui/navbar/use-user-menu";
 import {
   BoltIcon,
   ChartBarIcon,
   SparklesIcon,
   StarIcon,
 } from "@heroicons/react/24/outline";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { displayCPsEarned, displayPosition } from "../history";
 import { useGameSummaryModal } from "./hooks";
 
 export const GameSummaryModal = () => {
   const { isModalOpen, wpm, acc, catPoints, position, onClose } =
     useGameSummaryModal();
+
+  const { setUser, currentUser } = useUserMenu();
 
   const playerStats = useMemo(
     () => [
@@ -47,6 +51,10 @@ export const GameSummaryModal = () => {
     ],
     [wpm, acc, catPoints, position],
   );
+  useEffect(() => {
+    if (currentUser && isModalOpen)
+      setUser({ ...currentUser, catPoints: currentUser.catPoints + catPoints });
+  }, [catPoints, isModalOpen]);
 
   return (
     <AlertDialog open={isModalOpen} onOpenChange={onClose}>

@@ -10,7 +10,7 @@ import {
   UserIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import {
   DropdownMenu,
@@ -21,6 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../dropdown";
+import { useUserMenu } from "./use-user-menu";
 
 interface UserMenuProps {
   user: User;
@@ -28,6 +29,7 @@ interface UserMenuProps {
 
 export const UserMenu = ({ user }: UserMenuProps) => {
   const { logout } = useLogout();
+  const { currentUser, setUser, clearUser } = useUserMenu();
   const userMenuItems = useMemo(
     () => [
       {
@@ -47,6 +49,15 @@ export const UserMenu = ({ user }: UserMenuProps) => {
     [user.username],
   );
 
+  useEffect(() => {
+    setUser(user);
+  }, [user]);
+
+  const onLogout = useCallback(async () => {
+    await logout();
+    clearUser();
+  }, []);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
@@ -59,7 +70,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
         <DropdownMenuGroup>
           <DropdownMenuLabel>{user.username}</DropdownMenuLabel>
           <DropdownMenuLabel className="font-normal">
-            {user.catPoints} CPs
+            {currentUser?.catPoints || "-"} CPs
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
@@ -75,7 +86,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={logout}>
+          <DropdownMenuItem onClick={onLogout}>
             <ArrowRightOnRectangleIcon className="mr-2 h-5 w-5 text-muted-foreground" />
             <span>Log out</span>
           </DropdownMenuItem>

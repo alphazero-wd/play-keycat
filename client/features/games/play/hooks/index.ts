@@ -4,8 +4,9 @@ export { useGameSocket } from "./use-game-socket";
 export { useGameStore } from "./use-game-store";
 export { useGameSummaryModal } from "./use-game-summary-modal";
 export {
-  getPosition,
-  getProgress,
+  getPlayerPosition,
+  getPlayerProgress,
+  getPlayerWpm,
   updatePosition,
   updateProgress,
   usePlayersStore,

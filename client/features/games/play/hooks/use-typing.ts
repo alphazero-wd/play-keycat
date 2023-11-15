@@ -1,5 +1,6 @@
 import { SPECIAL_CHARACTERS_REGEX } from "@/features/constants";
 import { useAlert } from "@/features/ui/alert";
+import { User } from "@/features/users/profile";
 import { socket } from "@/lib/socket";
 import {
   ChangeEventHandler,
@@ -11,8 +12,9 @@ import {
 } from "react";
 import { TypingStats } from "../types";
 import { calculateProgress } from "../utils";
+import { useTypingStats } from "./use-typing-stats";
 
-export const useTyping = (paragraph: string, gameId: number) => {
+export const useTyping = (paragraph: string, gameId: number, user: User) => {
   const [typingStats, setTypingStats] = useState<TypingStats>({
     typos: 0,
     charsTyped: 0,
@@ -20,6 +22,7 @@ export const useTyping = (paragraph: string, gameId: number) => {
     wordsTyped: 0,
     value: "",
   });
+  const { wpm, pos } = useTypingStats(typingStats, user);
   const words = useMemo(() => paragraph.split(" "), [paragraph]);
   const { setAlert } = useAlert();
   const [prevKeyPressed, setPrevKeyPressed] = useState<Set<string>>(new Set());
@@ -98,6 +101,8 @@ export const useTyping = (paragraph: string, gameId: number) => {
         });
         socket.emit("progress", {
           progress: calculateProgress(typingStats.charsTyped, paragraph),
+          wpm,
+          pos,
           gameId,
         });
         updateTypingStats({ charsTyped: typingStats.charsTyped + 1 });

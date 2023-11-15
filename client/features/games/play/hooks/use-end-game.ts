@@ -1,26 +1,24 @@
 import { User } from "@/features/users/profile";
 import { socket } from "@/lib/socket";
-import { differenceInMilliseconds } from "date-fns";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
 import { Game, TypingStats } from "../types";
 import {
   calculateAccuracy,
   calculateProgress,
-  calculateWpm,
   determinePosition,
 } from "../utils";
 import { useGameStore } from "./use-game-store";
 import { usePlayersStore } from "./use-players-store";
+import { useTypingStats } from "./use-typing-stats";
 
 export const useEndGame = (
   user: User,
   typingStats: TypingStats,
   game: Game,
 ) => {
-  const { finishGame, endedAt, hasFinished, startedAt } = useGameStore();
-  const { playersProgress } = usePlayersStore();
-  const router = useRouter();
+  const { finishGame, endedAt, hasFinished } = useGameStore();
+  const { playersProgress, leftPlayerIds } = usePlayersStore();
+  const { wpm, pos } = useTypingStats(typingStats, user);
 
   const sendResult = useCallback(() => {
     socket.emit("progress", {
@@ -28,18 +26,26 @@ export const useEndGame = (
         typingStats.charsTyped - +!!typingStats.prevError,
         game.paragraph,
       ),
+      wpm,
+      pos,
       gameId: game.id,
     });
     socket.emit("playerFinished", {
-      wpm: calculateWpm(
-        typingStats.charsTyped,
-        differenceInMilliseconds(new Date(), new Date(startedAt!)),
-      ),
+      wpm,
       acc: calculateAccuracy(typingStats.typos, typingStats.charsTyped),
       position: determinePosition(playersProgress, user.id),
       gameId: game.id,
+      leftPlayersCount: leftPlayerIds.size,
     });
-  }, [typingStats.charsTyped, typingStats.prevError, game.paragraph, game.id]);
+  }, [
+    wpm,
+    typingStats.charsTyped,
+    typingStats.typos,
+    typingStats.prevError,
+    leftPlayerIds.size,
+    game.paragraph,
+    game.id,
+  ]);
 
   useEffect(() => {
     const hasReachedTheEnd =
@@ -49,7 +55,6 @@ export const useEndGame = (
     if (hasReachedTheEnd) {
       finishGame();
       sendResult();
-      router.refresh();
     }
   }, [
     typingStats.charsTyped,
@@ -62,7 +67,6 @@ export const useEndGame = (
     const hasTimeup = !hasFinished && endedAt;
     if (hasTimeup) {
       sendResult();
-      router.refresh();
     }
   }, [endedAt, hasFinished]);
 };

@@ -52,6 +52,14 @@ export class HistoriesService {
     }
   }
 
+  async countPlayersFinished(gameId: number) {
+    const gameHistoriesCount = await this.prisma.gameHistory.count({
+      where: { gameId },
+    });
+
+    return gameHistoriesCount;
+  }
+
   async findByGame(gameId: number) {
     try {
       const game = await this.prisma.game.findUniqueOrThrow({

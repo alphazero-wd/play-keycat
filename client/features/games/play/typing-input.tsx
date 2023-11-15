@@ -40,7 +40,7 @@ export const TypingInput = ({
       onPaste={preventCheating}
       className="w-full"
       placeholder="Type when the game starts"
-      disabled={!startedAt}
+      // disabled={!startedAt}
     />
   );
 };

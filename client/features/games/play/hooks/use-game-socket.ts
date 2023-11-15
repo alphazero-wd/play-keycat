@@ -7,7 +7,7 @@ import { useGameStore } from "./use-game-store";
 import { useGameSummaryModal } from "./use-game-summary-modal";
 import {
   addLeftPlayer,
-  getProgress,
+  getPlayerProgress,
   updatePosition,
   updateProgress,
   usePlayersStore,
@@ -37,7 +37,7 @@ export const useGameSocket = (game: Game, userId?: number) => {
       id: number;
       username: string;
     }) {
-      if (getProgress(id) < 100 && !endedAt) {
+      if (getPlayerProgress(id) < 100 && !endedAt) {
         addLeftPlayer(id);
         if (userId !== id) setAlert("info", `${username} has left the game!`);
       }

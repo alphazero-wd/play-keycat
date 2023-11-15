@@ -11,11 +11,11 @@ import { Server } from 'socket.io';
 import { WsCookieAuthGuard } from '../auth/guards';
 import { SocketUser } from '../common/types';
 import { HistoriesService } from '../histories/histories.service';
-import { PlayerFinishedDto } from './dto';
+import { PlayerFinishedDto, PlayerProgressDto } from './dto';
 import { GamesService } from './games.service';
-import { calculateTimeLimit } from './utils';
+import { addSeconds, calculateTimeLimit } from './utils';
 import { calculateAverageCPs } from '../ranks';
-import { MULTIPLAYERS_COUNTDOWN } from '../common/constants';
+import { MAX_PLAYERS_COUNT, MULTIPLAYERS_COUNTDOWN } from '../common/constants';
 
 @WebSocketGateway()
 export class GamesGateway implements OnGatewayDisconnect {
@@ -38,20 +38,18 @@ export class GamesGateway implements OnGatewayDisconnect {
 
     if (players.length === 2) {
       const averageCPs = calculateAverageCPs(players.map((p) => p.catPoints));
-      this.io.sockets
-        .to(`game:${gameId}`)
-        .emit('countdown', MULTIPLAYERS_COUNTDOWN);
-
-      this.startCountdown(gameId, MULTIPLAYERS_COUNTDOWN - 1, () => {
-        setTimeout(async () => {
-          const game = await this.gamesService.updateTime(gameId, 'startedAt');
-          const timeLimit = calculateTimeLimit(averageCPs, game.paragraph);
-          this.io.sockets
-            .to(`game:${gameId}`)
-            .emit('startGame', { startedAt: game.startedAt.toISOString() });
-          this.io.sockets.to(`game:${gameId}`).emit('countdown', timeLimit);
-          this.startTimeLimit(gameId, timeLimit - 1);
-        }, 500);
+      const game = await this.gamesService.updateTime(
+        gameId,
+        'startedAt',
+        addSeconds(MULTIPLAYERS_COUNTDOWN),
+      );
+      this.startCountdown(gameId, MULTIPLAYERS_COUNTDOWN, () => {
+        const timeLimit = calculateTimeLimit(averageCPs, game.paragraph);
+        this.io.sockets
+          .to(`game:${gameId}`)
+          .emit('startGame', { startedAt: game.startedAt.toISOString() });
+        this.io.sockets.to(`game:${gameId}`).emit('countdown', timeLimit);
+        this.startTimeLimit(gameId, timeLimit - 1);
       });
     }
     this.io.sockets.to(`game:${gameId}`).emit('players', players);
@@ -83,26 +81,32 @@ export class GamesGateway implements OnGatewayDisconnect {
     this.startCountdown(gameId, countdown, async () => {
       // end game here
       const interval = this.gameTimers.get(`game:${gameId}`);
-      if (!interval) return;
-      const game = await this.gamesService.updateTime(gameId, 'endedAt');
-      this.io.sockets
-        .to(`game:${gameId}`)
-        .emit('endGame', { endedAt: game.endedAt.toISOString() });
-      this.gameTimers.delete(`game:${gameId}`);
+      if (interval) this.endGame(gameId);
     });
+  }
+
+  async endGame(gameId: number) {
+    const game = await this.gamesService.updateTime(
+      gameId,
+      'endedAt',
+      new Date(),
+    );
+    this.io.sockets
+      .to(`game:${gameId}`)
+      .emit('endGame', { endedAt: game.endedAt.toISOString() });
+    this.gameTimers.delete(`game:${gameId}`);
   }
 
   @UseGuards(WsCookieAuthGuard)
   @SubscribeMessage('progress')
   async reflectProgress(
     @ConnectedSocket() socket: SocketUser,
-    @MessageBody('progress', ParseIntPipe) progress: number,
-    @MessageBody('gameId', ParseIntPipe) gameId: number,
+    @MessageBody() { gameId, ...payload }: PlayerProgressDto,
   ) {
     const user = socket.request.user;
     this.io.sockets
       .to(`game:${gameId}`)
-      .emit('playerProgress', { id: user.id, progress });
+      .emit('playerProgress', { id: user.id, ...payload });
   }
 
   @UseGuards(WsCookieAuthGuard)
@@ -110,6 +114,7 @@ export class GamesGateway implements OnGatewayDisconnect {
   async onPlayerFinished(
     @ConnectedSocket() socket: SocketUser,
     @MessageBody() payload: PlayerFinishedDto,
+    @MessageBody('leftPlayersCount', ParseIntPipe) leftPlayersCount: number,
   ) {
     const user = socket.request.user;
     const { players } = await this.gamesService.getPlayersInGame(
@@ -139,7 +144,20 @@ export class GamesGateway implements OnGatewayDisconnect {
         prevRank,
         currentRank,
       });
+    this.endGameEarly(payload.gameId, leftPlayersCount);
     this.io.sockets.emit('leaderboardUpdate');
+  }
+
+  async endGameEarly(gameId: number, leftPlayersCount: number) {
+    /* end early if all involved players have finished the game
+      - 5 players total: 2 AFKs, 2 finished, 1 unfinished
+      - check if players finished aka histories count = MAX_PLAYERS - leftPlayersCount
+    */
+    const playersFinishedCount =
+      await this.historiesService.countPlayersFinished(gameId);
+    if (playersFinishedCount !== MAX_PLAYERS_COUNT - leftPlayersCount) return;
+    this.endGame(gameId);
+    this.stopCountdown(gameId);
   }
 
   async handleDisconnect(socket: SocketUser) {
@@ -150,33 +168,19 @@ export class GamesGateway implements OnGatewayDisconnect {
     // check for `gameId` because a player might join in on multiple devices causes NestJS to raise an uncanny exception
     if (!gameId) return;
 
-    const { players, startedAt } = await this.gamesService.getPlayersInGame(
-      gameId,
-    );
+    this.io.sockets.to(`game:${gameId}`).emit('playerLeft', {
+      id: currentUser.id,
+      username: currentUser.username,
+    });
 
-    if (!startedAt) {
-      this.io.sockets.to(`game:${gameId}`).emit('players', players);
-    } else {
-      /*
-        when the game has started, we don't want to announce any players who've left the game
-        we still assume that they're "ghost" players, so it's easier to calculate ranking
-      */
-      this.io.sockets.to(`game:${gameId}`).emit('playerLeft', {
-        id: currentUser.id,
-        username: currentUser.username,
-      });
-    }
-
-    if (players.length === 0) {
-      const hasDeleted = await this.gamesService.removeIfEmpty(gameId);
-      /*
+    const hasDeleted = await this.gamesService.removeIfEmpty(gameId);
+    /*
         Suppose all players in a game left, there are 2 possible cases:
         If there are no associated histories, we'll delete the time ref.
         Otherwise, we might not want to delete the time ref.
         =====> The role of the time ref is to check if a game is currently underway OR has been dissolved
         After which we can officially end the game (if exists)
       */
-      if (hasDeleted) this.stopCountdown(gameId);
-    }
+    if (hasDeleted) this.stopCountdown(gameId);
   }
 }
