@@ -1,8 +1,5 @@
-import {
-  getGameHistory,
-  Overview,
-  PlayerStats,
-} from "@/features/games/history";
+import { Overview, PlayerStats } from "@/features/games/history";
+import { getGameHistory } from "@/features/games/history/get-game-history";
 import { getCurrentUser } from "@/features/users/me";
 import { redirect } from "next/navigation";
 
