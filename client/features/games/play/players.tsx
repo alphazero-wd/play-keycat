@@ -39,7 +39,7 @@ export const Players = ({ user }: { user: User }) => {
                 WPM
               </div>
               <div className="w-full flex-shrink-0 text-sm font-medium text-secondary-foreground">
-                {getPlayerProgress(player.id) > 0 &&
+                {getPlayerPosition(player.id) > 0 &&
                   displayPosition(getPlayerPosition(player.id))}
               </div>
             </div>

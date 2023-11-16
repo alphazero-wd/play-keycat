@@ -25,6 +25,13 @@ export const useGameSocket = (game: Game, userId?: number) => {
   const { setAlert } = useAlert();
 
   useEffect(() => {
+    function reset() {
+      resetPlayers();
+      resetGame();
+      resetCountdown();
+      onRankUpdateModalClose();
+      onGameSummaryModalClose();
+    }
     socket.connect();
     function onConnect() {
       if (game.id) socket.emit("joinGame", { gameId: game.id });
@@ -46,7 +53,6 @@ export const useGameSocket = (game: Game, userId?: number) => {
     socket.on("connect", onConnect);
     socket.on("players", onPlayers);
     socket.on("playerLeft", handlePlayerLeft);
-    socket.on("resetCountdown", resetCountdown);
     socket.on("playerProgress", updateProgress);
     socket.on("startGame", startGame);
     socket.on("countdown", updateCountdown);
@@ -56,15 +62,10 @@ export const useGameSocket = (game: Game, userId?: number) => {
     socket.on("rankUpdate", onRankUpdateModalOpen);
 
     return () => {
-      resetPlayers();
-      resetGame();
-      resetCountdown();
-      onRankUpdateModalClose();
-      onGameSummaryModalClose();
+      reset();
       socket.off("connect", onConnect);
       socket.off("players", onPlayers);
       socket.off("playerLeft", handlePlayerLeft);
-      socket.off("resetCountdown", resetCountdown);
       socket.off("playerProgress", updateProgress);
       socket.off("startGame", startGame);
       socket.off("countdown", updateCountdown);

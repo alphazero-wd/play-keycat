@@ -1,10 +1,19 @@
-import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { HistoriesService } from './histories.service';
+import { CookieAuthGuard } from '../auth/guards';
 
 @Controller()
 export class HistoriesController {
   constructor(private historiesService: HistoriesService) {}
 
+  @UseGuards(CookieAuthGuard)
   @Get('games/:id/history')
   async findByGame(@Param('id', ParseIntPipe) gameId: number) {
     const gameHistories = await this.historiesService.findByGame(gameId);

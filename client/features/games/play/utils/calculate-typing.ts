@@ -1,3 +1,5 @@
+import { differenceInMilliseconds } from "date-fns";
+
 const calculateNumberOfWordsTyped = (charsTyped: number) => {
   return charsTyped / 5;
 };
@@ -6,7 +8,8 @@ const convertToMinutes = (ms: number) => {
   return ms / 1000 / 60;
 };
 
-export const calculateWpm = (charsTyped: number, timeTaken: number) => {
+export const calculateWpm = (charsTyped: number, startedAt: Date) => {
+  const timeTaken = differenceInMilliseconds(new Date(), startedAt);
   return Math.trunc(
     calculateNumberOfWordsTyped(charsTyped) / convertToMinutes(timeTaken),
   );

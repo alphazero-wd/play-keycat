@@ -27,7 +27,7 @@ export const Gameplay = ({ user, game }: { user: User; game: Game }) => {
   const { countdown } = useCountdown();
 
   const { typingStats, onKeyUp, preventCheating, onChange, onKeyDown } =
-    useTyping(game.paragraph, game.id, user);
+    useTyping(game.paragraph, game.id);
 
   useEndGame(user, typingStats, game);
 

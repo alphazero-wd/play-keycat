@@ -1,6 +1,5 @@
 import { SPECIAL_CHARACTERS_REGEX } from "@/features/constants";
 import { useAlert } from "@/features/ui/alert";
-import { User } from "@/features/users/profile";
 import { socket } from "@/lib/socket";
 import {
   ChangeEventHandler,
@@ -11,10 +10,11 @@ import {
   useState,
 } from "react";
 import { TypingStats } from "../types";
-import { calculateProgress } from "../utils";
-import { useTypingStats } from "./use-typing-stats";
+import { calculateProgress, calculateWpm } from "../utils";
+import { useGameStore } from "./use-game-store";
 
-export const useTyping = (paragraph: string, gameId: number, user: User) => {
+export const useTyping = (paragraph: string, gameId: number) => {
+  const { startedAt } = useGameStore();
   const [typingStats, setTypingStats] = useState<TypingStats>({
     typos: 0,
     charsTyped: 0,
@@ -22,7 +22,6 @@ export const useTyping = (paragraph: string, gameId: number, user: User) => {
     wordsTyped: 0,
     value: "",
   });
-  const { wpm, pos } = useTypingStats(typingStats, user);
   const words = useMemo(() => paragraph.split(" "), [paragraph]);
   const { setAlert } = useAlert();
   const [prevKeyPressed, setPrevKeyPressed] = useState<Set<string>>(new Set());
@@ -101,8 +100,7 @@ export const useTyping = (paragraph: string, gameId: number, user: User) => {
         });
         socket.emit("progress", {
           progress: calculateProgress(typingStats.charsTyped, paragraph),
-          wpm,
-          pos,
+          wpm: calculateWpm(typingStats.charsTyped, new Date(startedAt!)),
           gameId,
         });
         updateTypingStats({ charsTyped: typingStats.charsTyped + 1 });

@@ -2,43 +2,39 @@ import { User } from "@/features/users/profile";
 import { socket } from "@/lib/socket";
 import { useCallback, useEffect } from "react";
 import { Game, TypingStats } from "../types";
-import {
-  calculateAccuracy,
-  calculateProgress,
-  determinePosition,
-} from "../utils";
+import { calculateAccuracy, calculateProgress, calculateWpm } from "../utils";
+import { useCountdown } from "./use-countdown";
 import { useGameStore } from "./use-game-store";
-import { usePlayersStore } from "./use-players-store";
-import { useTypingStats } from "./use-typing-stats";
+import { determinePosition, usePlayersStore } from "./use-players-store";
 
 export const useEndGame = (
   user: User,
   typingStats: TypingStats,
   game: Game,
 ) => {
-  const { finishGame, endedAt, hasFinished } = useGameStore();
-  const { playersProgress, leftPlayerIds } = usePlayersStore();
-  const { wpm, pos } = useTypingStats(typingStats, user);
+  const { finishGame, endedAt, hasFinished, startedAt } = useGameStore();
+  const { countdown } = useCountdown();
+  const { leftPlayerIds } = usePlayersStore();
 
   const sendResult = useCallback(() => {
+    const wpm = calculateWpm(typingStats.charsTyped, new Date(startedAt!));
     socket.emit("progress", {
       progress: calculateProgress(
         typingStats.charsTyped - +!!typingStats.prevError,
         game.paragraph,
       ),
       wpm,
-      pos,
       gameId: game.id,
     });
     socket.emit("playerFinished", {
       wpm,
       acc: calculateAccuracy(typingStats.typos, typingStats.charsTyped),
-      position: determinePosition(playersProgress, user.id),
+      position: determinePosition(user.id),
       gameId: game.id,
       leftPlayersCount: leftPlayerIds.size,
     });
   }, [
-    wpm,
+    user.id,
     typingStats.charsTyped,
     typingStats.typos,
     typingStats.prevError,
@@ -64,9 +60,9 @@ export const useEndGame = (
   ]);
 
   useEffect(() => {
-    const hasTimeup = !hasFinished && endedAt;
+    const hasTimeup = !hasFinished && countdown === 0 && endedAt;
     if (hasTimeup) {
       sendResult();
     }
-  }, [endedAt, hasFinished]);
+  }, [endedAt, hasFinished, countdown]);
 };

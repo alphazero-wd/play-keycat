@@ -101,12 +101,12 @@ export class GamesGateway implements OnGatewayDisconnect {
   @SubscribeMessage('progress')
   async reflectProgress(
     @ConnectedSocket() socket: SocketUser,
-    @MessageBody() { gameId, ...payload }: PlayerProgressDto,
+    @MessageBody() { gameId, wpm, progress }: PlayerProgressDto,
   ) {
     const user = socket.request.user;
     this.io.sockets
       .to(`game:${gameId}`)
-      .emit('playerProgress', { id: user.id, ...payload });
+      .emit('playerProgress', { id: user.id, wpm, progress });
   }
 
   @UseGuards(WsCookieAuthGuard)

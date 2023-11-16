@@ -14,21 +14,18 @@ type Action = {
   resetPlayers: () => void;
 };
 
-export const usePlayersStore = create<State & Action>()((set) => ({
+const initialState: State = {
   players: [],
   playersProgress: new Map(),
   playersPosition: new Map(),
   playersWpm: new Map(),
   leftPlayerIds: new Set(),
+};
+
+export const usePlayersStore = create<State & Action>()((set) => ({
+  ...initialState,
   onPlayers: (updatedPlayers) => set({ players: updatedPlayers }),
-  resetPlayers: () =>
-    set({
-      playersProgress: new Map(),
-      playersPosition: new Map(),
-      playersWpm: new Map(),
-      leftPlayerIds: new Set(),
-      players: [],
-    }),
+  resetPlayers: () => set(initialState),
 }));
 
 export const updateProgress = ({
@@ -80,4 +77,20 @@ export const getPlayerWpm = (id: number) => {
 export const getPlayerPosition = (id: number) => {
   const position = usePlayersStore.getState().playersPosition.get(id);
   return position || 0;
+};
+
+export const determinePosition = (id: number) => {
+  // Input: {1: 50, 2: 75, 3: 60, 4: 75, 5: 100}, playerId = 3
+  // Set + Sorted DESC: [100, 75, 60, 50]
+  // Output: 3
+
+  const playersProgress = usePlayersStore.getState().playersProgress;
+  const progress = playersProgress.values();
+  const sortedProgressSetDesc = Array.from(new Set(progress)).sort(
+    (a, b) => b - a,
+  );
+  const position = sortedProgressSetDesc.findIndex(
+    (prog) => playersProgress.get(id) === prog,
+  );
+  return position === -1 ? sortedProgressSetDesc.length : position + 1;
 };

@@ -12,10 +12,10 @@ import { CurrentUser } from '../users/decorators';
 import { User } from '@prisma/client';
 
 @Controller('games')
+@UseGuards(CookieAuthGuard)
 export class GamesController {
   constructor(private gamesService: GamesService) {}
 
-  @UseGuards(CookieAuthGuard)
   @Post('join')
   async join(@CurrentUser() user: User) {
     const gameId = await this.gamesService.join(user);
@@ -23,8 +23,11 @@ export class GamesController {
   }
 
   @Get(':id')
-  async findById(@Param('id', ParseIntPipe) id: number) {
-    const game = await this.gamesService.findById(id);
+  async findById(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: User,
+  ) {
+    const game = await this.gamesService.findById(id, user);
     return game;
   }
 }

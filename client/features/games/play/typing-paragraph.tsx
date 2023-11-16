@@ -16,7 +16,7 @@ export const TypingParagraph = ({
           className={cn(
             "mb-2 mr-0.5 font-mono text-foreground",
             index < (typingStats.prevError || typingStats.charsTyped) &&
-              "text-muted-foreground",
+              "text-lime-500 dark:text-lime-300",
             typingStats.prevError === index && "bg-red-600 text-white",
             typingStats.charsTyped === index && "bg-primary text-white",
           )}

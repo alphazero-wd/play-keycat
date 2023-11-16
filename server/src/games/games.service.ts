@@ -103,9 +103,11 @@ export class GamesService {
     }
   }
 
-  async findById(id: number) {
+  async findById(id: number, user: User) {
     try {
-      const game = await this.prisma.game.findUniqueOrThrow({ where: { id } });
+      const game = await this.prisma.game.findUniqueOrThrow({
+        where: { id, players: { some: { id: user.id } } },
+      });
       return game;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)

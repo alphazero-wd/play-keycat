@@ -18,7 +18,7 @@ export const useJoinGame = () => {
         {},
         { withCredentials: true },
       );
-      router.push(`/games/${gameId}/play`);
+      router.replace(`/games/${gameId}/play`);
     } catch (error: any) {
       const message: string = error.response.data.message;
       setAlert("error", message);
