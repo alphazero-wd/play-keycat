@@ -21,10 +21,15 @@ import { displayCPsEarned, displayPosition } from "../history";
 import { useGameSummaryModal } from "./hooks";
 
 export const GameSummaryModal = () => {
-  const { isModalOpen, wpm, acc, catPoints, position, onClose } =
-    useGameSummaryModal();
+  const isModalOpen = useGameSummaryModal.use.isModalOpen();
+  const wpm = useGameSummaryModal.use.wpm();
+  const acc = useGameSummaryModal.use.acc();
+  const catPoints = useGameSummaryModal.use.catPoints();
+  const position = useGameSummaryModal.use.position();
+  const onClose = useGameSummaryModal.use.onClose();
 
-  const { setUser, currentUser } = useUserMenu();
+  const setCatPoints = useUserMenu.use.setCatPoints();
+  const currentCPs = useUserMenu.use.catPoints();
 
   const playerStats = useMemo(
     () => [
@@ -36,7 +41,7 @@ export const GameSummaryModal = () => {
       {
         label: "Accuracy",
         icon: SparklesIcon,
-        value: <div className="text-lg">{acc}</div>,
+        value: <div className="text-lg">{acc}%</div>,
       },
       {
         label: "Position",
@@ -52,8 +57,7 @@ export const GameSummaryModal = () => {
     [wpm, acc, catPoints, position],
   );
   useEffect(() => {
-    if (currentUser && isModalOpen)
-      setUser({ ...currentUser, catPoints: currentUser.catPoints + catPoints });
+    if (isModalOpen) setCatPoints(currentCPs + catPoints);
   }, [catPoints, isModalOpen]);
 
   return (

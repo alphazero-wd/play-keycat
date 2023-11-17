@@ -2,8 +2,9 @@ import { useMemo } from "react";
 import { useCountdown, useGameStore } from "./hooks";
 
 export const GameHeading = () => {
-  const { countdown } = useCountdown();
-  const { startedAt, endedAt } = useGameStore();
+  const countdown = useCountdown.use.countdown();
+  const startedAt = useGameStore.use.startedAt();
+  const endedAt = useGameStore.use.endedAt();
 
   const title = useMemo(() => {
     if (!startedAt && !isFinite(countdown)) return "Game Lobby";

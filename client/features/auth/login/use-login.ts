@@ -1,6 +1,7 @@
 "use client";
 
 import { useAlert } from "@/features/ui/alert";
+import { timeout } from "@/features/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -16,7 +17,7 @@ const formSchema = z.object({
 });
 
 export const useLogin = () => {
-  const { setAlert } = useAlert();
+  const setAlert = useAlert.use.setAlert();
   const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -26,12 +27,13 @@ export const useLogin = () => {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
+    await timeout(1000);
     try {
       const { data: user } = await login(values);
       setAlert("success", `Welcome back, ${user.username}!`);
       form.reset();
-      router.push("/");
       router.refresh();
+      router.replace("/");
     } catch (error: any) {
       const message: string = error.response.data.message;
       setAlert("error", message);

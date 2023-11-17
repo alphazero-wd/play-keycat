@@ -14,7 +14,7 @@ import { calculateProgress, calculateWpm } from "../utils";
 import { useGameStore } from "./use-game-store";
 
 export const useTyping = (paragraph: string, gameId: number) => {
-  const { startedAt } = useGameStore();
+  const startedAt = useGameStore.use.startedAt();
   const [typingStats, setTypingStats] = useState<TypingStats>({
     typos: 0,
     charsTyped: 0,
@@ -23,7 +23,7 @@ export const useTyping = (paragraph: string, gameId: number) => {
     value: "",
   });
   const words = useMemo(() => paragraph.split(" "), [paragraph]);
-  const { setAlert } = useAlert();
+  const setAlert = useAlert.use.setAlert();
   const [prevKeyPressed, setPrevKeyPressed] = useState<Set<string>>(new Set());
 
   const updateTypingStats = useCallback((updated: Partial<TypingStats>) => {

@@ -5,6 +5,7 @@ import {
   VALID_USERNAME_REGEX,
 } from "@/features/constants";
 import { useAlert } from "@/features/ui/alert";
+import { timeout } from "@/features/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -29,7 +30,7 @@ const formSchema = z.object({
 });
 
 export const useSignup = () => {
-  const { setAlert } = useAlert();
+  const setAlert = useAlert.use.setAlert();
   const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,6 +40,7 @@ export const useSignup = () => {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
+    await timeout(2000);
     try {
       await signup(values);
       await login({
@@ -47,8 +49,8 @@ export const useSignup = () => {
       });
       setAlert("success", "Account created successfully 🎉");
       form.reset();
-      router.push("/");
       router.refresh();
+      router.replace("/");
     } catch (error: any) {
       const message: string = error.response.data.message;
       // error about username/email duplication

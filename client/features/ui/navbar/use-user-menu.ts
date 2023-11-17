@@ -1,18 +1,17 @@
 "use client";
-import { User } from "@/features/users/profile";
+import { createSelectors } from "@/lib/create-selectors";
 import { create } from "zustand";
 
 type State = {
-  currentUser: User | null;
+  catPoints: number;
 };
 
 type Action = {
-  setUser: (user: User) => void;
-  clearUser: () => void;
+  setCatPoints: (catPoints: number) => void;
 };
 
-export const useUserMenu = create<State & Action>((set) => ({
-  currentUser: null,
-  setUser: (user) => set({ currentUser: user }),
-  clearUser: () => set({ currentUser: null }),
+const useUserMenuBase = create<State & Action>((set) => ({
+  catPoints: 0,
+  setCatPoints: (catPoints) => set({ catPoints }),
 }));
+export const useUserMenu = createSelectors(useUserMenuBase);

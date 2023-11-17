@@ -1,11 +1,15 @@
+import { createSelectors } from "@/lib/create-selectors";
 import { create } from "zustand";
 
-interface GameSummaryModalStore {
+type State = {
   isModalOpen: boolean;
   wpm: number;
   acc: number;
   position: number;
   catPoints: number;
+};
+
+type Action = {
   onOpen: (payload: {
     wpm: number;
     acc: number;
@@ -13,21 +17,18 @@ interface GameSummaryModalStore {
     catPoints: number;
   }) => void;
   onClose: () => void;
-}
-
-export const useGameSummaryModal = create<GameSummaryModalStore>((set) => ({
+};
+const initialState: State = {
   isModalOpen: false,
   wpm: 0,
   acc: 0,
   catPoints: 0,
   position: 0,
-  onOpen: (payload) => set({ isModalOpen: true, ...payload }),
-  onClose: () =>
-    set({
-      isModalOpen: false,
-      wpm: 0,
-      acc: 0,
-      catPoints: 0,
-      position: 0,
-    }),
+};
+
+const useGameSummaryModalBase = create<State & Action>((set) => ({
+  ...initialState,
+  onOpen: (payload) => set(() => ({ isModalOpen: true, ...payload })),
+  onClose: () => set(() => initialState),
 }));
+export const useGameSummaryModal = createSelectors(useGameSummaryModalBase);

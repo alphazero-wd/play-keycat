@@ -12,8 +12,12 @@ import { useRankUpdateModal } from "./hooks";
 import { RankUpdateStatus } from "./types";
 
 export const RankUpdateModal = () => {
-  const { isModalOpen, status, onClose, prevRank, currentRank } =
-    useRankUpdateModal();
+  const isModalOpen = useRankUpdateModal.use.isModalOpen();
+  const status = useRankUpdateModal.use.status();
+  const onClose = useRankUpdateModal.use.onClose();
+  const prevRank = useRankUpdateModal.use.prevRank();
+  const currentRank = useRankUpdateModal.use.currentRank();
+
   if (!prevRank || !currentRank) return null;
 
   return (

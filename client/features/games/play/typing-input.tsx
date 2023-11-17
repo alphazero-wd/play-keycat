@@ -25,7 +25,7 @@ export const TypingInput = ({
   preventCheating,
 }: TypingInputProps) => {
   const typingInputRef = useRef<HTMLInputElement>(null);
-  const startedAt = useGameStore((store) => store.startedAt);
+  const startedAt = useGameStore.use.startedAt();
   useEffect(() => {
     if (startedAt && typingInputRef.current) typingInputRef.current.focus();
   }, [startedAt, typingInputRef.current]);

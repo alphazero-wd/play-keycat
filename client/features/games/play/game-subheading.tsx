@@ -3,8 +3,9 @@ import { useMemo } from "react";
 import { useCountdown, useGameStore } from "./hooks";
 
 export const GameSubheading = () => {
-  const { startedAt, endedAt } = useGameStore();
-  const { countdown } = useCountdown();
+  const countdown = useCountdown.use.countdown();
+  const startedAt = useGameStore.use.startedAt();
+  const endedAt = useGameStore.use.endedAt();
 
   const subtitle = useMemo(() => {
     if (!startedAt && !isFinite(countdown))

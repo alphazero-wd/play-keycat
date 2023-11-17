@@ -29,7 +29,8 @@ interface UserMenuProps {
 
 export const UserMenu = ({ user }: UserMenuProps) => {
   const { logout } = useLogout();
-  const { currentUser, setUser, clearUser } = useUserMenu();
+  const catPoints = useUserMenu.use.catPoints();
+  const setCatPoints = useUserMenu.use.setCatPoints();
   const userMenuItems = useMemo(
     () => [
       {
@@ -50,12 +51,11 @@ export const UserMenu = ({ user }: UserMenuProps) => {
   );
 
   useEffect(() => {
-    setUser(user);
+    setCatPoints(user.catPoints);
   }, [user]);
 
   const onLogout = useCallback(async () => {
     await logout();
-    clearUser();
   }, []);
 
   return (
@@ -70,7 +70,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
         <DropdownMenuGroup>
           <DropdownMenuLabel>{user.username}</DropdownMenuLabel>
           <DropdownMenuLabel className="font-normal">
-            {currentUser?.catPoints || "-"} CPs
+            {catPoints} CPs
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

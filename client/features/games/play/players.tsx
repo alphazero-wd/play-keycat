@@ -9,7 +9,7 @@ import {
 } from "./hooks";
 
 export const Players = ({ user }: { user: User }) => {
-  const { players } = usePlayersStore();
+  const players = usePlayersStore.use.players();
 
   return (
     <div className="mt-6 max-w-2xl space-y-4">

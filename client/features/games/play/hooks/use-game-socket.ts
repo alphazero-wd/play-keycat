@@ -1,4 +1,3 @@
-import { useAlert } from "@/features/ui/alert";
 import { socket } from "@/lib/socket";
 import { useEffect } from "react";
 import { Game } from "../types";
@@ -14,40 +13,29 @@ import {
 } from "./use-players-store";
 import { useRankUpdateModal } from "./use-rank-update-modal";
 
-export const useGameSocket = (game: Game, userId?: number) => {
-  const { onPlayers, resetPlayers } = usePlayersStore();
-  const { startGame, resetGame, endGame, endedAt } = useGameStore();
-  const { updateCountdown, resetCountdown } = useCountdown();
-  const { onOpen: onRankUpdateModalOpen, onClose: onRankUpdateModalClose } =
-    useRankUpdateModal();
-  const { onOpen: onGameSummaryModalOpen, onClose: onGameSummaryModalClose } =
-    useGameSummaryModal();
-  const { setAlert } = useAlert();
+export const useGameSocket = (game: Game) => {
+  const endedAt = useGameStore.use.endedAt();
+
+  const onPlayers = usePlayersStore.use.onPlayers();
+
+  const startGame = useGameStore.use.startGame();
+  const endGame = useGameStore.use.endGame();
+
+  const updateCountdown = useCountdown.use.updateCountdown();
+
+  const onGameSummaryModalOpen = useGameSummaryModal.use.onOpen();
+
+  const onRankUpdateModalOpen = useRankUpdateModal.use.onOpen();
 
   useEffect(() => {
-    function reset() {
-      resetPlayers();
-      resetGame();
-      resetCountdown();
-      onRankUpdateModalClose();
-      onGameSummaryModalClose();
-    }
     socket.connect();
+
     function onConnect() {
       if (game.id) socket.emit("joinGame", { gameId: game.id });
     }
 
-    function handlePlayerLeft({
-      id,
-      username,
-    }: {
-      id: number;
-      username: string;
-    }) {
-      if (getPlayerProgress(id) < 100 && !endedAt) {
-        addLeftPlayer(id);
-        if (userId !== id) setAlert("info", `${username} has left the game!`);
-      }
+    function handlePlayerLeft({ id }: { id: number }) {
+      if (getPlayerProgress(id) < 100 && !endedAt) addLeftPlayer(id);
     }
 
     socket.on("connect", onConnect);
@@ -62,7 +50,6 @@ export const useGameSocket = (game: Game, userId?: number) => {
     socket.on("rankUpdate", onRankUpdateModalOpen);
 
     return () => {
-      reset();
       socket.off("connect", onConnect);
       socket.off("players", onPlayers);
       socket.off("playerLeft", handlePlayerLeft);

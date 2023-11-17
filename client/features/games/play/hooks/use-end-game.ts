@@ -3,7 +3,6 @@ import { socket } from "@/lib/socket";
 import { useCallback, useEffect } from "react";
 import { Game, TypingStats } from "../types";
 import { calculateAccuracy, calculateProgress, calculateWpm } from "../utils";
-import { useCountdown } from "./use-countdown";
 import { useGameStore } from "./use-game-store";
 import { determinePosition, usePlayersStore } from "./use-players-store";
 
@@ -12,17 +11,20 @@ export const useEndGame = (
   typingStats: TypingStats,
   game: Game,
 ) => {
-  const { finishGame, endedAt, hasFinished, startedAt } = useGameStore();
-  const { countdown } = useCountdown();
-  const { leftPlayerIds } = usePlayersStore();
+  const finishGame = useGameStore.use.finishGame();
+  const hasFinished = useGameStore.use.hasFinished();
+  const startedAt = useGameStore.use.startedAt();
+  const endedAt = useGameStore.use.endedAt();
+  const leftPlayerIds = usePlayersStore.use.leftPlayerIds();
 
   const sendResult = useCallback(() => {
     const wpm = calculateWpm(typingStats.charsTyped, new Date(startedAt!));
+    const progress = calculateProgress(
+      typingStats.charsTyped - +!!typingStats.prevError,
+      game.paragraph,
+    );
     socket.emit("progress", {
-      progress: calculateProgress(
-        typingStats.charsTyped - +!!typingStats.prevError,
-        game.paragraph,
-      ),
+      progress,
       wpm,
       gameId: game.id,
     });
@@ -60,9 +62,9 @@ export const useEndGame = (
   ]);
 
   useEffect(() => {
-    const hasTimeup = !hasFinished && countdown === 0 && endedAt;
+    const hasTimeup = !hasFinished && endedAt;
     if (hasTimeup) {
       sendResult();
     }
-  }, [endedAt, hasFinished, countdown]);
+  }, [endedAt, hasFinished]);
 };

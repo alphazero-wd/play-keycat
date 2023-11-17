@@ -4,7 +4,7 @@ import { Button } from "@/features/ui/button";
 import { User } from "@/features/users/profile";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { JoinGameButton } from "../lobby";
+import { JoinGameButton, useJoinGame } from "../lobby";
 import { GameHeading } from "./game-heading";
 import { GameSubheading } from "./game-subheading";
 import { GameSummaryModal } from "./game-summary-modal";
@@ -22,9 +22,12 @@ import { TypingInput } from "./typing-input";
 import { TypingParagraph } from "./typing-paragraph";
 
 export const Gameplay = ({ user, game }: { user: User; game: Game }) => {
-  useGameSocket(game, user.id);
-  const { hasFinished, endedAt } = useGameStore();
-  const { countdown } = useCountdown();
+  useGameSocket(game);
+  const { loading, joinGame } = useJoinGame();
+  const hasFinished = useGameStore.use.hasFinished();
+  const endedAt = useGameStore.use.endedAt();
+
+  const countdown = useCountdown.use.countdown();
 
   const { typingStats, onKeyUp, preventCheating, onChange, onKeyDown } =
     useTyping(game.paragraph, game.id);
@@ -62,7 +65,9 @@ export const Gameplay = ({ user, game }: { user: User; game: Game }) => {
               {hasFinished || endedAt ? "Go to history" : "Leave game"}
             </Link>
           </Button>
-          {(hasFinished || endedAt) && <JoinGameButton />}
+          {(hasFinished || endedAt) && (
+            <JoinGameButton loading={loading} joinGame={joinGame} />
+          )}
         </div>
       </div>
     </>
