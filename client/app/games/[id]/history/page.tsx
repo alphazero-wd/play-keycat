@@ -10,7 +10,7 @@ interface GameHistoryPageProps {
 }
 
 export const metadata = {
-  title: "Game History",
+  title: "Game history",
 };
 
 export default async function GameHistoryPage({

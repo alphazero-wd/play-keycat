@@ -52,7 +52,9 @@ export default async function PlayerProfilePage({
               <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-4xl">
                 {player.username}
               </h2>
-              <p className="font-medium text-primary">@{player.username}</p>
+              <p className="font-medium text-muted-foreground">
+                @{player.username}
+              </p>
             </div>
             <ProfileShares player={player} />
           </div>

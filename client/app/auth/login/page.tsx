@@ -21,7 +21,10 @@ export default async function SignupPage() {
         <LoginForm />
         <div className="mt-3 text-center text-sm text-secondary-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/auth/signup" className="font-medium text-primary">
+          <Link
+            href="/auth/signup"
+            className="font-medium text-primary hover:underline"
+          >
             Sign up
           </Link>
         </div>

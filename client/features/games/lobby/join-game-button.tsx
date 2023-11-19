@@ -2,11 +2,14 @@
 import { Button } from "@/features/ui/button";
 import { ArrowRightIcon } from "@heroicons/react/20/solid";
 import { Loader2 } from "lucide-react";
-import { useJoinGame } from "./use-join-game";
 
-export const JoinGameButton = () => {
-  const { loading, joinGame } = useJoinGame();
-
+export const JoinGameButton = ({
+  loading,
+  joinGame,
+}: {
+  loading: boolean;
+  joinGame: () => Promise<void>;
+}) => {
   return (
     <Button disabled={loading} onClick={joinGame}>
       {loading ? (

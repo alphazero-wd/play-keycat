@@ -1,5 +1,6 @@
 import { Alert } from "@/features/ui/alert";
 import { Navbar } from "@/features/ui/navbar";
+import { ThemeProvider } from "@/features/ui/theme";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -20,10 +21,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <Navbar />
-        <Alert />
-        <main className="px-4 py-16 sm:px-6 lg:px-8">{children}</main>
+      <body className={`${inter.className} bg-background`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Navbar />
+          <Alert />
+          <main className="px-4 py-16 sm:px-6 lg:px-8">{children}</main>
+        </ThemeProvider>
       </body>
     </html>
   );

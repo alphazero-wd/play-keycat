@@ -40,7 +40,7 @@ export const ProfileCard = ({
         <div>
           <Link
             href={`/player/${player.username}/profile`}
-            className="font-medium text-primary hover:underline"
+            className="font-medium text-sky-500 hover:underline dark:text-sky-300"
           >
             @{player.username}
           </Link>{" "}
@@ -58,7 +58,7 @@ export const ProfileCard = ({
         <div className="space-y-1">
           <div className="flex items-baseline gap-x-2">
             <h4 className="text-lg font-semibold">{profile.username}</h4>
-            <p className="text-primary">@{profile.username}</p>
+            <p className="text-muted-foreground">@{profile.username}</p>
           </div>
           <div className="flex items-center text-foreground">
             <PresentationChartBarIcon className="mr-2 h-5 w-5 text-muted-foreground" />{" "}

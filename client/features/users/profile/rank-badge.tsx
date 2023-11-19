@@ -8,7 +8,7 @@ interface RankBadgeProps {
 
 const badgeClassesOnSize = {
   md: "h-[200px] w-[200px]",
-  sm: "h-[40px] w-[40px]",
+  sm: "h-[50px] w-[50px]",
 };
 
 export const RankBadge = ({ rank, size = "md" }: RankBadgeProps) => {
@@ -25,9 +25,9 @@ export const RankBadge = ({ rank, size = "md" }: RankBadgeProps) => {
   return (
     <Image
       src={`/images/${rank.split(" ")[0].toLowerCase()}.png`}
-      width={size === "md" ? 200 : 40}
+      width={size === "md" ? 200 : 50}
       className="mx-auto"
-      height={size === "md" ? 200 : 40}
+      height={size === "md" ? 200 : 50}
       alt={rank}
     />
   );

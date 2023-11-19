@@ -8,6 +8,10 @@ interface GamePageProps {
   };
 }
 
+export const metadata = {
+  title: "Playing game...",
+};
+
 export default async function GamePage({ params: { id } }: GamePageProps) {
   const game = await getGame(id);
   if (!game) redirect("/not-found");

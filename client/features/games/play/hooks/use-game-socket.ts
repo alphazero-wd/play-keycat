@@ -29,7 +29,6 @@ export const useGameSocket = (game: Game) => {
 
   useEffect(() => {
     socket.connect();
-
     function onConnect() {
       if (game.id) socket.emit("joinGame", { gameId: game.id });
     }
