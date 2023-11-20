@@ -86,11 +86,7 @@ export class GamesGateway implements OnGatewayDisconnect {
   }
 
   async endGame(gameId: number) {
-    const game = await this.gamesService.updateTime(
-      gameId,
-      'endedAt',
-      new Date(),
-    );
+    const game = await this.gamesService.updateTime(gameId, 'endedAt');
     this.io.sockets
       .to(`game:${gameId}`)
       .emit('endGame', { endedAt: game.endedAt.toISOString() });

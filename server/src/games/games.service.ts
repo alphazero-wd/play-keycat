@@ -60,7 +60,11 @@ export class GamesService {
     }
   }
 
-  async updateTime(gameId: number, field: 'startedAt' | 'endedAt', date: Date) {
+  async updateTime(
+    gameId: number,
+    field: 'startedAt' | 'endedAt',
+    date = new Date(),
+  ) {
     try {
       const game = await this.prisma.game.update({
         where: { id: gameId },

@@ -44,9 +44,9 @@ export const Overview = ({ game }: { game: Game }) => {
         {attributes.map((attr) => (
           <li
             key={attr.label}
-            className="grid grid-cols-8 gap-x-4 sm:grid-cols-6 lg:grid-cols-4"
+            className="grid grid-cols-8 items-baseline gap-x-4 sm:grid-cols-6 lg:grid-cols-4"
           >
-            <div className="flex items-center gap-x-4 text-muted-foreground">
+            <div className="relative top-1 flex items-center gap-x-4 text-muted-foreground">
               <attr.icon className="h-5 w-5 flex-shrink-0" />
               <Label className="hidden lg:block">{attr.label}</Label>
             </div>

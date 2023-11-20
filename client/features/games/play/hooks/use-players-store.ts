@@ -33,17 +33,14 @@ export const updateProgress = ({
   id,
   progress,
   wpm,
-  pos,
 }: {
   id: number;
   progress: number;
   wpm: number;
-  pos: number;
 }) => {
   usePlayersStoreBase.setState((prev) => ({
     playersProgress: new Map(prev.playersProgress).set(id, progress),
     playersWpm: new Map(prev.playersWpm).set(id, wpm),
-    playersPosition: new Map(prev.playersPosition).set(id, pos),
   }));
 };
 
