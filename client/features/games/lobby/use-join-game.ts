@@ -7,6 +7,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCountdown, useGameStore, usePlayersStore } from "../play/hooks";
+import { GameMode } from "../play/types";
 
 export const useJoinGame = () => {
   const [loading, setLoading] = useState(false);
@@ -15,15 +16,15 @@ export const useJoinGame = () => {
   const resetPlayers = usePlayersStore.use.resetPlayers();
   const resetGame = useGameStore.use.resetGame();
   const resetCountdown = useCountdown.use.resetCountdown();
-  const joinGame = async () => {
+  const joinGame = async (gameMode: GameMode) => {
     socket.disconnect();
 
     setLoading(true);
     await timeout(1000);
     try {
       const { data: gameId } = await axios.post(
-        `${API_URL}/games/join`,
-        {},
+        `${API_URL}/games/find`,
+        { gameMode },
         { withCredentials: true },
       );
       resetPlayers();

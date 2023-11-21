@@ -13,9 +13,10 @@ import { SocketUser } from '../common/types';
 import { HistoriesService } from '../histories/histories.service';
 import { PlayerFinishedDto, PlayerProgressDto } from './dto';
 import { GamesService } from './games.service';
-import { addSeconds, calculateTimeLimit } from './utils';
-import { calculateAverageCPs } from '../ranks';
-import { MAX_PLAYERS_COUNT, MULTIPLAYERS_COUNTDOWN } from '../common/constants';
+import { addSeconds, calculateTimeLimit, determineBasedOnMode } from './utils';
+import { calculateAverageCPs, getCurrentRank } from '../ranks';
+import { GameMode } from '@prisma/client';
+import { calculateCPs } from '../histories/utils';
 
 @WebSocketGateway()
 export class GamesGateway implements OnGatewayDisconnect {
@@ -34,16 +35,17 @@ export class GamesGateway implements OnGatewayDisconnect {
     @MessageBody('gameId') gameId: number,
   ) {
     socket.join(`game:${gameId}`);
-    const { players } = await this.gamesService.getPlayersInGame(gameId);
+    const { players, mode } = await this.gamesService.getDisplayInfo(gameId);
+    const { countdown, maxPlayersCount } = determineBasedOnMode(mode);
 
-    if (players.length === MAX_PLAYERS_COUNT) {
+    if (players.length === maxPlayersCount) {
       const averageCPs = calculateAverageCPs(players.map((p) => p.catPoints));
       const game = await this.gamesService.updateTime(
         gameId,
         'startedAt',
-        addSeconds(MULTIPLAYERS_COUNTDOWN),
+        addSeconds(countdown),
       );
-      this.startCountdown(gameId, MULTIPLAYERS_COUNTDOWN, () => {
+      this.startCountdown(gameId, countdown, () => {
         const timeLimit = calculateTimeLimit(averageCPs, game.paragraph);
         this.io.sockets
           .to(`game:${gameId}`)
@@ -113,13 +115,14 @@ export class GamesGateway implements OnGatewayDisconnect {
     @MessageBody('leftPlayersCount', ParseIntPipe) leftPlayersCount: number,
   ) {
     const user = socket.request.user;
-    const { players } = await this.gamesService.getPlayersInGame(
+    const { players, mode } = await this.gamesService.getDisplayInfo(
       payload.gameId,
     );
     const averageCPs = calculateAverageCPs(players.map((p) => p.catPoints));
     await this.gamesService.removePlayer(user.id);
     const [player, history] = await this.historiesService.create(
       payload,
+      mode,
       averageCPs,
       user,
     );
@@ -140,18 +143,19 @@ export class GamesGateway implements OnGatewayDisconnect {
         prevRank,
         currentRank,
       });
-    this.endGameEarly(payload.gameId, leftPlayersCount);
+    this.endGameEarly(payload.gameId, mode, leftPlayersCount);
     this.io.sockets.emit('leaderboardUpdate');
   }
 
-  async endGameEarly(gameId: number, leftPlayersCount: number) {
+  async endGameEarly(gameId: number, mode: GameMode, leftPlayersCount: number) {
     /* end early if all involved players have finished the game
       - 5 players total: 2 AFKs, 2 finished, 1 unfinished
       - check if players finished aka histories count = MAX_PLAYERS - leftPlayersCount
     */
+    const { maxPlayersCount } = determineBasedOnMode(mode);
     const playersFinishedCount =
       await this.historiesService.countPlayersFinished(gameId);
-    if (playersFinishedCount !== MAX_PLAYERS_COUNT - leftPlayersCount) return;
+    if (playersFinishedCount !== maxPlayersCount - leftPlayersCount) return;
     this.endGame(gameId);
     this.stopCountdown(gameId);
   }

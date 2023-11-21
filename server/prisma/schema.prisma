@@ -30,6 +30,7 @@ model Game {
   maxPoints Int
   paragraph String    @db.Text
   startedAt DateTime?
+  mode      GameMode  @default(RANKED)
   endedAt   DateTime?
 
   players   User[]
@@ -47,4 +48,10 @@ model GameHistory {
   player User @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   @@id([gameId, playerId])
+}
+
+enum GameMode {
+  RANKED
+  CASUAL
+  PRACTICE
 }

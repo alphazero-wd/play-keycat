@@ -1,4 +1,4 @@
-export const displayPosition = (position: number) => {
+export const Position = ({ position }: { position: number }) => {
   switch (position) {
     case 1:
       return <div className="text-2xl">🥇</div>;

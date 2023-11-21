@@ -4,12 +4,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma, User } from '@prisma/client';
+import { Game, GameMode, Prisma, User } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
 import { WsException } from '@nestjs/websockets';
 import { UsersService } from '../users/users.service';
-import { generateParagraph } from './utils';
-import { MAX_PLAYERS_COUNT } from '../common/constants';
+import { determineBasedOnMode, generateParagraph } from './utils';
+import { FindOrCreateGameDto } from './dto';
 
 @Injectable()
 export class GamesService {
@@ -18,21 +18,21 @@ export class GamesService {
     private usersService: UsersService,
   ) {}
 
-  async join(user: User) {
+  async findOrCreate(user: User, { gameMode }: FindOrCreateGameDto) {
     await this.checkPlayerAlreadyInGame(user.id);
-    let gameIdToJoin = await this.findOne(user);
-    if (!gameIdToJoin) gameIdToJoin = await this.create(user);
+    let gameIdToJoin = await this.findOne(user, gameMode);
+    if (!gameIdToJoin) gameIdToJoin = await this.create(user, gameMode);
     await this.addPlayer(gameIdToJoin, user.id);
     return gameIdToJoin;
   }
 
-  async getPlayersInGame(gameId: number) {
+  async getDisplayInfo(gameId: number) {
     try {
       const game = await this.prisma.game.findUniqueOrThrow({
         where: { id: gameId },
         select: {
+          mode: true,
           players: { select: { id: true, username: true, catPoints: true } },
-          startedAt: true,
         },
       });
       return game;
@@ -110,7 +110,7 @@ export class GamesService {
   async findById(id: number, user: User) {
     try {
       const game = await this.prisma.game.findUniqueOrThrow({
-        where: { id, players: { some: { id: user.id } } },
+        where: { id, players: { some: { id: user.id } } }, // prevent players who aren't currently in the game from joining
       });
       return game;
     } catch (error) {
@@ -144,7 +144,9 @@ export class GamesService {
     }
   }
 
-  private async findOne(user: User) {
+  private async findOne(user: User, gameMode: GameMode) {
+    const { maxPlayersCount } = determineBasedOnMode(gameMode);
+
     const result = await this.prisma.$queryRaw<[] | [{ id: number }]>`
       SELECT g."id" FROM "Game" g
       LEFT JOIN "User" u
@@ -152,14 +154,15 @@ export class GamesService {
       WHERE g."minPoints" <= ${user.catPoints}
       AND g."maxPoints" >= ${user.catPoints}
       AND g."startedAt" IS NULL
+      AND g."mode"::text = ${gameMode}
       GROUP BY g."id"
-      HAVING COUNT(u."id") < ${MAX_PLAYERS_COUNT}
+      HAVING COUNT(u."id") < ${maxPlayersCount}
       LIMIT 1;
     `;
     return result[0]?.id;
   }
 
-  private async create(user: User) {
+  private async create(user: User, gameMode: GameMode) {
     const paragraph = generateParagraph();
 
     const game = await this.prisma.game.create({
@@ -167,6 +170,7 @@ export class GamesService {
         minPoints: Math.max(user.catPoints - 250, 0),
         maxPoints: user.catPoints + 250,
         paragraph,
+        mode: gameMode,
       },
     });
     return game.id;

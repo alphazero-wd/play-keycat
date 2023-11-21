@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/features/ui/avatar";
 import { ProfileCard, User } from "@/features/users/profile";
-import { displayPosition } from "../history";
+import { Position } from "../history";
 import {
   getPlayerPosition,
   getPlayerProgress,
@@ -39,8 +39,9 @@ export const Players = ({ user }: { user: User }) => {
                 WPM
               </div>
               <div className="w-full flex-shrink-0 text-sm font-medium text-secondary-foreground">
-                {getPlayerPosition(player.id) > 0 &&
-                  displayPosition(getPlayerPosition(player.id))}
+                {getPlayerPosition(player.id) > 0 && (
+                  <Position position={getPlayerPosition(player.id)} />
+                )}
               </div>
             </div>
           </div>

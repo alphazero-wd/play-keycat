@@ -23,7 +23,7 @@ export default async function SignupPage() {
           Don&apos;t have an account?{" "}
           <Link
             href="/auth/signup"
-            className="font-medium text-primary hover:underline"
+            className="font-medium text-muted-foreground hover:underline"
           >
             Sign up
           </Link>

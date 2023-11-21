@@ -8,6 +8,13 @@ export interface Game {
   startedAt: string;
   endedAt: string;
   histories: GameHistory[];
+  mode: GameMode;
+}
+
+export enum GameMode {
+  RANKED = "RANKED",
+  CASUAL = "CASUAL",
+  PRACTICE = "PRACTICE",
 }
 
 export interface TypingStats {

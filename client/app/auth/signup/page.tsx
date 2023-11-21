@@ -23,7 +23,7 @@ export default async function SignupPage() {
           Already have an account?{" "}
           <Link
             href="/auth/login"
-            className="font-medium text-primary hover:underline"
+            className="font-medium text-muted-foreground hover:underline"
           >
             Log in
           </Link>

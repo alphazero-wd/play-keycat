@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/features/ui/card";
+import { GameMode } from "../play/types";
 import { JoinGameButton } from "./join-game-button";
 import { useJoinGame } from "./use-join-game";
 
@@ -22,7 +23,11 @@ export const RankedMode = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <JoinGameButton loading={loading} joinGame={joinGame} />
+        <JoinGameButton
+          gameMode={GameMode.RANKED}
+          loading={loading}
+          joinGame={joinGame}
+        />
       </CardContent>
     </Card>
   );

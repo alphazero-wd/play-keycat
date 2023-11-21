@@ -4,12 +4,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
-import { Prisma, User } from '@prisma/client';
+import { GameMode, Prisma, User } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
 import { PrismaService } from '../prisma/prisma.service';
 import { PlayerFinishedDto } from '../games/dto';
 import { calculateCPs } from './utils';
-import { RankUpdateStatus, getCurrentRank, ranks } from '../ranks';
+import { RankUpdateStatus, getCurrentRank } from '../ranks';
 
 @Injectable()
 export class HistoriesService {
@@ -17,12 +17,16 @@ export class HistoriesService {
 
   async create(
     { acc, wpm, position, gameId }: PlayerFinishedDto,
+    gameMode: GameMode,
     averageCPs: number,
     user: User,
   ) {
     try {
       const currentRank = getCurrentRank(averageCPs);
-      const catPoints = calculateCPs(wpm, acc, position, currentRank);
+      const catPoints =
+        gameMode === GameMode.RANKED
+          ? calculateCPs(wpm, acc, position, currentRank)
+          : 0;
       const results = await this.prisma.$transaction([
         this.prisma.user.update({
           where: { id: user.id },
@@ -98,7 +102,7 @@ export class HistoriesService {
         wpm: true,
         acc: true,
         catPoints: true,
-        game: { select: { startedAt: true } },
+        game: { select: { startedAt: true, mode: true } },
       },
       orderBy: { game: { startedAt: 'desc' } },
     });

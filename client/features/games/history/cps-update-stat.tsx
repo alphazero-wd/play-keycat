@@ -4,7 +4,7 @@ import {
   MinusIcon,
 } from "@heroicons/react/24/outline";
 
-export const displayCPsEarned = (catPoints: number) => {
+export const CPsUpdateStat = ({ catPoints }: { catPoints: number }) => {
   if (catPoints > 0) {
     return (
       <span className="inline-flex items-center rounded-md bg-green-100 px-4 py-1 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-300">

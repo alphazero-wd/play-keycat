@@ -1,16 +1,16 @@
 "use client";
-import { GameHistory, displayCPsEarned } from "@/features/games/history";
-import { EyeIcon } from "@heroicons/react/24/outline";
-import { ColumnDef } from "@tanstack/react-table";
-import { format } from "date-fns";
-import Link from "next/link";
-import { Button } from "../../ui/button";
+import { CPsUpdateStat, GameHistory } from "@/features/games/history";
+import { Button } from "@/features/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "../../ui/tooltip";
+} from "@/features/ui/tooltip";
+import { EyeIcon } from "@heroicons/react/24/outline";
+import { ColumnDef } from "@tanstack/react-table";
+import { format } from "date-fns";
+import Link from "next/link";
 
 export const columns: ColumnDef<GameHistory>[] = [
   {
@@ -41,7 +41,7 @@ export const columns: ColumnDef<GameHistory>[] = [
     header: () => <div className="text-right">CPs earned</div>,
     cell: ({ row }) => (
       <div className="text-right">
-        {displayCPsEarned(row.original.catPoints)}
+        <CPsUpdateStat catPoints={row.original.catPoints} />
       </div>
     ),
   },

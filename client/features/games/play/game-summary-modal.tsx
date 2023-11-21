@@ -17,7 +17,7 @@ import {
   StarIcon,
 } from "@heroicons/react/24/outline";
 import { useEffect, useMemo } from "react";
-import { displayCPsEarned, displayPosition } from "../history";
+import { CPsUpdateStat, Position } from "../history";
 import { useGameSummaryModal } from "./hooks";
 
 export const GameSummaryModal = () => {
@@ -46,12 +46,12 @@ export const GameSummaryModal = () => {
       {
         label: "Position",
         icon: ChartBarIcon,
-        value: displayPosition(position),
+        value: <Position position={position} />,
       },
       {
         label: "Cat Points",
         icon: StarIcon,
-        value: displayCPsEarned(catPoints),
+        value: <CPsUpdateStat catPoints={catPoints} />,
       },
     ],
     [wpm, acc, catPoints, position],

@@ -11,8 +11,8 @@ import {
 } from "@/features/ui/table";
 import { User } from "@/features/users/profile";
 import { Game } from "../play";
-import { displayCPsEarned } from "./display-cps-earned";
-import { displayPosition } from "./display-position";
+import { CPsUpdateStat } from "./cps-update-stat";
+import { Position } from "./position";
 
 export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
   return (
@@ -44,13 +44,17 @@ export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
             <TableCell className="text-right">{history.acc}%</TableCell>
             <TableCell>
               <div className="mx-auto w-fit text-center">
-                {index > 0 && history.wpm === game.histories[index - 1].wpm
-                  ? displayPosition(index)
-                  : displayPosition(index + 1)}
+                <Position
+                  position={
+                    index > 0 && history.wpm === game.histories[index - 1].wpm
+                      ? index
+                      : index + 1
+                  }
+                />
               </div>
             </TableCell>
             <TableCell className="text-right">
-              {displayCPsEarned(history.catPoints)}
+              <CPsUpdateStat catPoints={history.catPoints} />
             </TableCell>
           </TableRow>
         ))}
