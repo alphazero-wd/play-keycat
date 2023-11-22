@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/features/ui/table";
 import { User } from "@/features/users/profile";
-import { Game } from "../play";
+import { Game } from "../play/types";
 import { CPsUpdateStat } from "./cps-update-stat";
 import { Position } from "./position";
 
@@ -26,7 +26,6 @@ export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
           <TableHead className="text-right">Accuracy</TableHead>
           <TableHead className="text-center">Position</TableHead>
           <TableHead className="text-right">Cat Points</TableHead>
-          {/* add player position here */}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -36,7 +35,11 @@ export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
               {index + 1}
             </TableCell>
             <TableCell className="flex items-center gap-x-3">
-              <PlayerCell player={history.player} user={user} />
+              <PlayerCell
+                gameMode={game.mode}
+                player={history.player}
+                user={user}
+              />
             </TableCell>
             <TableCell className="text-right text-base font-medium">
               {history.wpm}

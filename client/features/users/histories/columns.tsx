@@ -1,5 +1,9 @@
 "use client";
-import { CPsUpdateStat, GameHistory } from "@/features/games/history";
+import {
+  CPsUpdateStat,
+  GameHistory,
+  ModeBadge,
+} from "@/features/games/history";
 import { Button } from "@/features/ui/button";
 import {
   Tooltip,
@@ -16,6 +20,15 @@ export const columns: ColumnDef<GameHistory>[] = [
   {
     accessorKey: "gameId",
     header: "#",
+  },
+  {
+    accessorKey: "mode",
+    header: () => <div className="text-center">Mode</div>,
+    cell: ({ row }) => (
+      <div className="text-center">
+        <ModeBadge mode={row.original.game.mode} />
+      </div>
+    ),
   },
   {
     accessorKey: "startedAt",
@@ -36,6 +49,7 @@ export const columns: ColumnDef<GameHistory>[] = [
     header: () => <div className="text-right">Accuracy</div>,
     cell: ({ row }) => <div className="text-right">{row.original.acc}%</div>,
   },
+
   {
     accessorKey: "catPoints",
     header: () => <div className="text-right">CPs earned</div>,

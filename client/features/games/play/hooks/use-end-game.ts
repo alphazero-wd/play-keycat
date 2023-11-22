@@ -1,8 +1,12 @@
 import { User } from "@/features/users/profile";
 import { socket } from "@/lib/socket";
 import { useCallback, useEffect } from "react";
+import {
+  calculateAccuracy,
+  calculateProgress,
+  calculateWpm,
+} from "../calculate-typing";
 import { Game, TypingStats } from "../types";
-import { calculateAccuracy, calculateProgress, calculateWpm } from "../utils";
 import { useGameStore } from "./use-game-store";
 import { determinePosition, usePlayersStore } from "./use-players-store";
 

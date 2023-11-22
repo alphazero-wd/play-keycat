@@ -1,5 +1,16 @@
 import { cn } from "@/lib/utils";
+import { Roboto_Mono } from "next/font/google";
 import { Game, TypingStats } from "./types";
+
+const robotoMono = Roboto_Mono({ subsets: ["latin"] });
+
+const colorBasedOnGameMode = {
+  RANKED: "border-primary text-primary",
+  CASUAL:
+    "border-blue-600 dark:border-blue-300 text-blue-600 dark:text-blue-300",
+  PRACTICE:
+    "border-purple-600 dark:border-purple-300 text-purple-600 dark:text-purple-300",
+} as const;
 
 export const TypingParagraph = ({
   game,
@@ -14,13 +25,14 @@ export const TypingParagraph = ({
         <span
           key={index}
           className={cn(
-            "mb-2 mr-0.5 font-mono text-foreground",
+            robotoMono.className,
+            "mb-2 text-foreground",
             index < (typingStats.prevError || typingStats.charsTyped) &&
-              "text-green-500 dark:text-green-300",
+              "bg-green-100 text-green-700 dark:bg-green-200",
             typingStats.prevError === index &&
-              "bg-red-600 text-primary-foreground dark:bg-red-300",
+              "bg-red-100 text-red-700 dark:bg-red-200",
             typingStats.charsTyped === index &&
-              "bg-primary text-primary-foreground",
+              cn("border-b-4", colorBasedOnGameMode[game.mode]),
           )}
         >
           {char}

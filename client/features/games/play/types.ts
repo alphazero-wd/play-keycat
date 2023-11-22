@@ -20,9 +20,7 @@ export enum GameMode {
 export interface TypingStats {
   typos: number;
   charsTyped: number;
-  wordsTyped: number;
   prevError: number | null;
-  value: string;
 }
 
 export enum RankUpdateStatus {

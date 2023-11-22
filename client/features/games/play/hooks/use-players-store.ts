@@ -23,7 +23,7 @@ const initialState: State = {
   leftPlayerIds: new Set(),
 };
 
-export const usePlayersStoreBase = create<State & Action>()((set) => ({
+const usePlayersStoreBase = create<State & Action>()((set) => ({
   ...initialState,
   onPlayers: (updatedPlayers) => set(() => ({ players: updatedPlayers })),
   resetPlayers: () => set(() => initialState),

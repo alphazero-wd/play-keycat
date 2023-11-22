@@ -1,16 +1,26 @@
 import { useMemo } from "react";
 import { useCountdown, useGameStore } from "./hooks";
+import { GameMode } from "./types";
 
-export const GameHeading = () => {
+export const GameHeading = ({ gameMode }: { gameMode: GameMode }) => {
   const countdown = useCountdown.use.countdown();
   const startedAt = useGameStore.use.startedAt();
   const endedAt = useGameStore.use.endedAt();
 
   const title = useMemo(() => {
-    if (!startedAt && !isFinite(countdown)) return "Game Lobby";
-    if (!startedAt && countdown >= 0) return "Game starting...";
-    if (startedAt && !endedAt && countdown > 0) return "Game has flared up 🔥";
-    return "Game ended";
+    if (!startedAt && !isFinite(countdown)) {
+      if (gameMode === GameMode.PRACTICE) return "Setting things up 🪄";
+      return "Finding players 🔍";
+    }
+    if (!startedAt && countdown >= 0) {
+      if (countdown <= 3) return "Headstart coming up 🚀";
+      return "Game starting soonly 🏁";
+    }
+    if (startedAt && !endedAt && countdown > 0) {
+      if (countdown <= 10) return "Game ending soonly ⌛";
+      return "Game flared up 🔥";
+    }
+    return "Game ended ✋";
   }, [startedAt, countdown, endedAt]);
 
   return (

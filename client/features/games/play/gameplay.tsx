@@ -2,7 +2,7 @@
 
 import { Button } from "@/features/ui/button";
 import { User } from "@/features/users/profile";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import { JoinGameButton, useJoinGame } from "../lobby";
 import { GameHeading } from "./game-heading";
@@ -18,42 +18,33 @@ import {
 import { Players } from "./players";
 import { RankUpdateModal } from "./rank-update-modal";
 import { Game } from "./types";
-import { TypingInput } from "./typing-input";
 import { TypingParagraph } from "./typing-paragraph";
 
 export const Gameplay = ({ user, game }: { user: User; game: Game }) => {
   useGameSocket(game);
-  const { loading, joinGame } = useJoinGame();
+  const { loading, joinGame } = useJoinGame(game.mode);
   const hasFinished = useGameStore.use.hasFinished();
   const endedAt = useGameStore.use.endedAt();
 
   const countdown = useCountdown.use.countdown();
 
-  const { typingStats, onKeyUp, preventCheating, onChange, onKeyDown } =
-    useTyping(game.paragraph, game.id);
+  const typingStats = useTyping(game.paragraph, game.id, user.id);
 
   useEndGame(user, typingStats, game);
 
   return (
     <>
       <RankUpdateModal />
-      <GameSummaryModal />
+      <GameSummaryModal gameMode={game.mode} />
       <div className="container max-w-3xl">
-        <GameHeading />
-        <GameSubheading />
+        <GameHeading gameMode={game.mode} />
+        <GameSubheading gameMode={game.mode} />
 
-        <Players user={user} />
+        <Players gameMode={game.mode} user={user} />
 
         {!hasFinished && isFinite(countdown) && !endedAt && (
           <>
             <TypingParagraph game={game} typingStats={typingStats} />
-            <TypingInput
-              onChange={onChange}
-              onKeyUp={onKeyUp}
-              onKeyDown={onKeyDown}
-              typingStats={typingStats}
-              preventCheating={preventCheating}
-            />
           </>
         )}
         <div className="mt-3 flex justify-between gap-x-4">
@@ -61,12 +52,16 @@ export const Gameplay = ({ user, game }: { user: User; game: Game }) => {
             <Link
               href={hasFinished || endedAt ? `/games/${game.id}/history` : "/"}
             >
-              <ArrowLeftIcon className="mr-2 h-5 w-5" />
+              <ArrowLeftIcon className="mr-2 h-4 w-4" />
               {hasFinished || endedAt ? "Go to history" : "Leave game"}
             </Link>
           </Button>
           {(hasFinished || endedAt) && (
-            <JoinGameButton loading={loading} joinGame={joinGame} />
+            <JoinGameButton
+              gameMode={game.mode}
+              loading={loading}
+              joinGame={joinGame}
+            />
           )}
         </div>
       </div>

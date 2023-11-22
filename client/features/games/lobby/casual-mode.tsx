@@ -10,22 +10,22 @@ import { GameMode } from "../play/types";
 import { JoinGameButton } from "./join-game-button";
 import { useJoinGame } from "./use-join-game";
 
-export const RankedMode = () => {
-  const { loading, joinGame } = useJoinGame(GameMode.RANKED);
+export const CasualMode = () => {
+  const { loading, joinGame } = useJoinGame(GameMode.CASUAL);
   return (
-    <Card className="col-span-2">
+    <Card>
       <CardHeader>
         <CardTitle className="text-xl font-bold tracking-tight text-card-foreground">
-          Ranked match
+          Casual match
         </CardTitle>
         <CardDescription className="font-normal text-muted-foreground">
-          Want to compete against other typists for the 🌈? It&apos;s waiting
-          for &apos;ya to be attained.
+          Still want some flavor from a ranked game with{" "}
+          <span className="font-semibold">NO risk</span>? Pick casual mode.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <JoinGameButton
-          gameMode={GameMode.RANKED}
+          gameMode={GameMode.CASUAL}
           loading={loading}
           joinGame={joinGame}
         />

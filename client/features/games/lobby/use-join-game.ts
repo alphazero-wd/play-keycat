@@ -9,14 +9,14 @@ import { useState } from "react";
 import { useCountdown, useGameStore, usePlayersStore } from "../play/hooks";
 import { GameMode } from "../play/types";
 
-export const useJoinGame = () => {
+export const useJoinGame = (gameMode: GameMode) => {
   const [loading, setLoading] = useState(false);
   const setAlert = useAlert.use.setAlert();
   const router = useRouter();
   const resetPlayers = usePlayersStore.use.resetPlayers();
   const resetGame = useGameStore.use.resetGame();
   const resetCountdown = useCountdown.use.resetCountdown();
-  const joinGame = async (gameMode: GameMode) => {
+  const joinGame = async () => {
     socket.disconnect();
 
     setLoading(true);

@@ -1,13 +1,13 @@
 "use client";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/features/ui/alert-dialog";
+import { GameModeButton } from "@/features/ui/button";
 import { Label } from "@/features/ui/label";
 import { useUserMenu } from "@/features/ui/navbar/use-user-menu";
 import {
@@ -19,8 +19,9 @@ import {
 import { useEffect, useMemo } from "react";
 import { CPsUpdateStat, Position } from "../history";
 import { useGameSummaryModal } from "./hooks";
+import { GameMode } from "./types";
 
-export const GameSummaryModal = () => {
+export const GameSummaryModal = ({ gameMode }: { gameMode: GameMode }) => {
   const isModalOpen = useGameSummaryModal.use.isModalOpen();
   const wpm = useGameSummaryModal.use.wpm();
   const acc = useGameSummaryModal.use.acc();
@@ -70,19 +71,25 @@ export const GameSummaryModal = () => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <ul className="space-y-4">
-          {playerStats.map((stat) => (
-            <li key={stat.label} className="flex justify-between">
-              <div className="flex flex-1 items-center gap-x-4 text-muted-foreground">
-                <stat.icon className="h-5 w-5" />
-                <Label>{stat.label}</Label>
-              </div>
+          {playerStats.map(
+            (stat) =>
+              // don't show the position in practice mode
+              (gameMode !== GameMode.PRACTICE || stat.label !== "Position") && (
+                <li key={stat.label} className="flex justify-between">
+                  <div className="flex flex-1 items-center gap-x-4 text-muted-foreground">
+                    <stat.icon className="h-5 w-5" />
+                    <Label>{stat.label}</Label>
+                  </div>
 
-              <div className="text-right">{stat.value}</div>
-            </li>
-          ))}
+                  <div className="text-right">{stat.value}</div>
+                </li>
+              ),
+          )}
         </ul>
         <AlertDialogFooter>
-          <AlertDialogAction>Confirm</AlertDialogAction>
+          <GameModeButton onClick={onClose} gameMode={gameMode}>
+            Confirm
+          </GameModeButton>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

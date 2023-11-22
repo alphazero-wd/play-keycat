@@ -31,11 +31,8 @@ export class GamesController {
   }
 
   @Get(':id')
-  async findById(
-    @Param('id', ParseIntPipe) id: number,
-    @CurrentUser() user: User,
-  ) {
-    const game = await this.gamesService.findById(id, user);
+  async findById(@Param('id', ParseIntPipe) id: number) {
+    const game = await this.gamesService.findById(id);
     return game;
   }
 }

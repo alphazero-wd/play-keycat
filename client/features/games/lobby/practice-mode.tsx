@@ -10,22 +10,22 @@ import { GameMode } from "../play/types";
 import { JoinGameButton } from "./join-game-button";
 import { useJoinGame } from "./use-join-game";
 
-export const RankedMode = () => {
-  const { loading, joinGame } = useJoinGame(GameMode.RANKED);
+export const PracticeMode = () => {
+  const { loading, joinGame } = useJoinGame(GameMode.PRACTICE);
   return (
-    <Card className="col-span-2">
+    <Card>
       <CardHeader>
         <CardTitle className="text-xl font-bold tracking-tight text-card-foreground">
-          Ranked match
+          Practice match
         </CardTitle>
         <CardDescription className="font-normal text-muted-foreground">
-          Want to compete against other typists for the 🌈? It&apos;s waiting
-          for &apos;ya to be attained.
+          Just want to brush up on your typing skills by yourself? Do some solo
+          practice here.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <JoinGameButton
-          gameMode={GameMode.RANKED}
+          gameMode={GameMode.PRACTICE}
           loading={loading}
           joinGame={joinGame}
         />

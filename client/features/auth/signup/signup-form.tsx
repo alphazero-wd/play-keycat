@@ -2,7 +2,7 @@
 
 import { Button } from "@/features/ui/button";
 import { Form, FormField, FormItem } from "@/features/ui/form";
-import { Loader2 } from "lucide-react";
+import { Loader } from "@/features/ui/loader";
 import { InputGroup } from "../shared";
 import { useSignup } from "./use-signup";
 
@@ -82,7 +82,7 @@ export const SignupForm = () => {
         <Button disabled={loading} type="submit">
           {loading ? (
             <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              <Loader className="mr-2 h-5 w-5 animate-spin" />
               Creating account...
             </>
           ) : (

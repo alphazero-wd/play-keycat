@@ -5,15 +5,22 @@ import {
   ClockIcon,
   DocumentTextIcon,
   HashtagIcon,
+  Squares2X2Icon,
 } from "@heroicons/react/24/outline";
 import { differenceInMilliseconds, format } from "date-fns";
 import { useMemo } from "react";
-import { Game } from "../play";
+import { Game } from "../play/types";
+import { ModeBadge } from "./mode-badge";
 
 export const Overview = ({ game }: { game: Game }) => {
   const attributes = useMemo(
     () => [
       { icon: HashtagIcon, text: game.id, label: "ID" },
+      {
+        icon: Squares2X2Icon,
+        text: <ModeBadge mode={game.mode} />,
+        label: "Mode",
+      },
       {
         icon: CalendarDaysIcon,
         text: `${format(new Date(game.startedAt), "d MMM, Y h:mm a")}`,

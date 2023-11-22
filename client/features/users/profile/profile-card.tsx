@@ -1,10 +1,12 @@
 "use client";
+import { GameMode } from "@/features/games/play/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/features/ui/avatar";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/features/ui/hover-card";
+import { cn } from "@/lib/utils";
 import {
   BoltIcon,
   BookOpenIcon,
@@ -22,9 +24,11 @@ import { User } from "./types";
 export const ProfileCard = ({
   player,
   userId,
+  gameMode,
 }: {
   player: User;
   userId?: number;
+  gameMode: GameMode;
 }) => {
   const [profile, setProfile] = useState<User | undefined>();
 
@@ -40,7 +44,14 @@ export const ProfileCard = ({
         <div>
           <Link
             href={`/player/${player.username}/profile`}
-            className="font-medium text-sky-500 hover:underline dark:text-sky-300"
+            className={cn(
+              gameMode === GameMode.RANKED && "text-primary",
+              gameMode === GameMode.CASUAL &&
+                "text-blue-600 dark:text-blue-300",
+              gameMode === GameMode.PRACTICE &&
+                "text-purple-600 dark:text-purple-300",
+              "font-medium hover:underline",
+            )}
           >
             @{player.username}
           </Link>{" "}
@@ -58,7 +69,9 @@ export const ProfileCard = ({
         <div className="space-y-1">
           <div className="flex items-baseline gap-x-2">
             <h4 className="text-lg font-semibold">{profile.username}</h4>
-            <p className="text-muted-foreground">@{profile.username}</p>
+            <p className="font-medium text-muted-foreground">
+              @{profile.username}
+            </p>
           </div>
           <div className="flex items-center text-foreground">
             <PresentationChartBarIcon className="mr-2 h-5 w-5 text-muted-foreground" />{" "}

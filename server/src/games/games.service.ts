@@ -107,10 +107,10 @@ export class GamesService {
     }
   }
 
-  async findById(id: number, user: User) {
+  async findById(id: number) {
     try {
       const game = await this.prisma.game.findUniqueOrThrow({
-        where: { id, players: { some: { id: user.id } } }, // prevent players who aren't currently in the game from joining
+        where: { id },
       });
       return game;
     } catch (error) {

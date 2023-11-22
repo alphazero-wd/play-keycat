@@ -1,6 +1,9 @@
 import { Overview, PlayerStats } from "@/features/games/history";
 import { getGameHistory } from "@/features/games/history/get-game-history";
+import { Button } from "@/features/ui/button";
 import { getCurrentUser } from "@/features/users/me";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 interface GameHistoryPageProps {
@@ -31,10 +34,17 @@ export default async function GameHistoryPage({
       </p>
       <Overview game={game} />
 
-      <div>
+      <div className="mb-5">
         <h3 className="mb-1 font-medium">Leaderboard</h3>
         <PlayerStats user={user} game={game} />
       </div>
+
+      <Button variant="outline" asChild>
+        <Link href="/">
+          <ArrowLeftIcon className="mr-2 h-4 w-4" />
+          Back to lobby
+        </Link>
+      </Button>
     </div>
   );
 }

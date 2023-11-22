@@ -11,13 +11,13 @@ export default async function Home() {
   if (!user) redirect("/auth/login");
 
   return (
-    <div className="container max-w-screen-xl">
+    <div className="container max-w-4xl">
       <h1 className="mb-1 text-2xl font-bold leading-tight tracking-tight text-foreground md:text-3xl">
         Welcome back, {user.username}
       </h1>
 
       <p className="mb-5 text-secondary-foreground">
-        Let&apos;s have some typing games
+        Ready for some highly competitive typing games?
       </p>
 
       <GameModes />
