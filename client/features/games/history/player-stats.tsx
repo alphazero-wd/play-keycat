@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/features/ui/table";
 import { User } from "@/features/users/profile";
-import { Game } from "../play/types";
+import { Game, GameMode } from "../play/types";
 import { CPsUpdateStat } from "./cps-update-stat";
 import { Position } from "./position";
 
@@ -24,7 +24,9 @@ export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
           <TableHead>Player</TableHead>
           <TableHead className="text-right">WPM</TableHead>
           <TableHead className="text-right">Accuracy</TableHead>
-          <TableHead className="text-center">Position</TableHead>
+          {game.mode !== GameMode.PRACTICE && (
+            <TableHead className="text-center">Position</TableHead>
+          )}
           <TableHead className="text-right">Cat Points</TableHead>
         </TableRow>
       </TableHeader>
@@ -45,17 +47,19 @@ export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
               {history.wpm}
             </TableCell>
             <TableCell className="text-right">{history.acc}%</TableCell>
-            <TableCell>
-              <div className="mx-auto w-fit text-center">
-                <Position
-                  position={
-                    index > 0 && history.wpm === game.histories[index - 1].wpm
-                      ? index
-                      : index + 1
-                  }
-                />
-              </div>
-            </TableCell>
+            {game.mode !== GameMode.PRACTICE && (
+              <TableCell>
+                <div className="mx-auto w-fit text-center">
+                  <Position
+                    position={
+                      index > 0 && history.wpm === game.histories[index - 1].wpm
+                        ? index
+                        : index + 1
+                    }
+                  />
+                </div>
+              </TableCell>
+            )}
             <TableCell className="text-right">
               <CPsUpdateStat catPoints={history.catPoints} />
             </TableCell>

@@ -1,6 +1,10 @@
 import { TopPlayersTable } from "@/features/leaderboards";
 import { getCurrentUser } from "@/features/users/me";
 
+export const metadata = {
+  title: "Leaderboards",
+};
+
 export default async function LeaderboardsPage() {
   const user = await getCurrentUser();
 
