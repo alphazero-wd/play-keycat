@@ -62,7 +62,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
     <DropdownMenu>
       <DropdownMenuTrigger>
         <Avatar>
-          <AvatarImage src="/icons/sprout.jpg" alt="@shadcn" />
+          <AvatarImage src="/icons/beginner.jpg" alt="@shadcn" />
           <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>

@@ -61,7 +61,7 @@ export const ProfileCard = ({
       <HoverCardContent className="w-80 space-y-3">
         <div className="flex w-fit items-center gap-x-3">
           <Avatar>
-            <AvatarImage src="/icons/sprout.jpg" />
+            <AvatarImage src="/icons/beginner.jpg" />
             <AvatarFallback>{profile.username[0].toUpperCase()}</AvatarFallback>
           </Avatar>
           <RankBadge rank={profile.rank} size="sm" />

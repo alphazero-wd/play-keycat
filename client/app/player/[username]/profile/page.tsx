@@ -42,7 +42,7 @@ export default async function PlayerProfilePage({
     <div className="container max-w-3xl space-y-6">
       <div className="flex items-center gap-x-8">
         <Avatar className="h-36 w-36">
-          <AvatarImage className="object-cover" src="/icons/sprout.jpg" />
+          <AvatarImage className="object-cover" src="/icons/beginner.jpg" />
           <AvatarFallback>{player.username[0].toUpperCase()}</AvatarFallback>
         </Avatar>
 

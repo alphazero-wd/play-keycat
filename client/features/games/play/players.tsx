@@ -34,7 +34,7 @@ export const Players = ({
                 transform: `translateX(${getPlayerProgress(player.id) * 10}%)`,
               }}
             >
-              <AvatarImage src="/icons/sprout.jpg" />
+              <AvatarImage src="/icons/beginner.jpg" />
               <AvatarFallback>
                 {player.username[0].toUpperCase()}
               </AvatarFallback>

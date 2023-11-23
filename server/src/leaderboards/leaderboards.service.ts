@@ -39,9 +39,8 @@ export class LeaderboardsService {
           ...player,
           rank: getCurrentRank(player.catPoints),
           highestWpm,
-          lastTenAverageWpm: Math.trunc(
-            sumWpm / Math.min(10, histories.length),
-          ),
+          lastTenAverageWpm:
+            Math.trunc(sumWpm / Math.min(10, histories.length)) || 0,
           gamesPlayed: _count.histories,
         };
       }),
