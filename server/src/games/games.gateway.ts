@@ -16,7 +16,7 @@ import { GamesService } from './games.service';
 import { addSeconds, calculateTimeLimit, determineBasedOnMode } from './utils';
 import { calculateAverageCPs, getCurrentRank } from '../ranks';
 import { GameMode } from '@prisma/client';
-import { calculateCPs } from '../histories/utils';
+import { calculateXPs } from '../histories/utils';
 
 @WebSocketGateway()
 export class GamesGateway implements OnGatewayDisconnect {
@@ -111,39 +111,55 @@ export class GamesGateway implements OnGatewayDisconnect {
   @SubscribeMessage('playerFinished')
   async onPlayerFinished(
     @ConnectedSocket() socket: SocketUser,
-    @MessageBody() payload: PlayerFinishedDto,
+    @MessageBody() { gameId, ...payload }: PlayerFinishedDto,
     @MessageBody('leftPlayersCount', ParseIntPipe) leftPlayersCount: number,
   ) {
     const user = socket.request.user;
-    const { players, mode } = await this.gamesService.getDisplayInfo(
-      payload.gameId,
+    const { players, mode, paragraph } = await this.gamesService.getDisplayInfo(
+      gameId,
     );
     const averageCPs = calculateAverageCPs(players.map((p) => p.catPoints));
     await this.gamesService.removePlayer(user.id);
-    const [player, history] = await this.historiesService.create(
-      payload,
+    const xpsBonus =
+      mode !== GameMode.PRACTICE ? calculateXPs(payload, paragraph) : 0;
+
+    const { hasLevelUp, history, player } = await this.historiesService.create(
+      { ...payload, gameId },
       mode,
-      averageCPs,
+      getCurrentRank(averageCPs),
+      xpsBonus,
       user,
     );
+
     const { prevRank, currentRank, rankUpdateStatus } =
-      this.historiesService.checkRankUpdate(player, history.catPoints);
+      this.historiesService.checkRankUpdate(user, history.catPoints);
+
     socket.emit('gameSummary', {
       wpm: payload.wpm,
       acc: payload.acc,
       position: payload.position,
       catPoints: history.catPoints,
+      xpsGained: player.xpsGained,
     });
+
     this.io.sockets
-      .to(`game:${payload.gameId}`)
+      .to(`game:${gameId}`)
       .emit('updatePosition', { id: player.id, position: payload.position });
+
     if (prevRank !== currentRank)
       socket.emit('rankUpdate', {
         status: rankUpdateStatus,
         prevRank,
         currentRank,
       });
-    this.endGameEarly(payload.gameId, mode, leftPlayersCount);
+
+    if (hasLevelUp)
+      socket.emit('levelUp', {
+        currentLevel: player.currentLevel,
+        xpsGained: player.xpsGained,
+      });
+
+    this.endGameEarly(gameId, mode, leftPlayersCount);
     this.io.sockets.emit('leaderboardUpdate');
   }
 

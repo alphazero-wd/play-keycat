@@ -2,7 +2,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/features/ui/avatar";
 import { PlayerGameHistories } from "@/features/users/histories";
 import {
   About,
+  ProfileLevel,
   ProfileShares,
+  ProfileXPs,
   getPlayerProfile,
 } from "@/features/users/profile";
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
@@ -48,13 +50,23 @@ export default async function PlayerProfilePage({
 
         <div className="w-full flex-1">
           <div className="flex items-center justify-between gap-x-4">
-            <div>
-              <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-4xl">
-                {player.username}
-              </h2>
-              <p className="font-medium text-muted-foreground">
-                @{player.username}
-              </p>
+            <div className="w-full space-y-2">
+              <div className="flex items-baseline gap-x-3">
+                <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-4xl">
+                  {player.username}
+                </h2>
+                <p className="font-medium text-muted-foreground">
+                  @{player.username}
+                </p>
+              </div>
+
+              <div className="flex w-full items-center gap-x-4 sm:w-[60%]">
+                <ProfileLevel currentLevel={player.currentLevel} />
+                <ProfileXPs
+                  xpsGained={player.xpsGained}
+                  xpsRequired={player.xpsRequired}
+                />
+              </div>
             </div>
             <ProfileShares player={player} />
           </div>

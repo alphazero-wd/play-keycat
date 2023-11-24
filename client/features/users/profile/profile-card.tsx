@@ -11,13 +11,14 @@ import {
   BoltIcon,
   BookOpenIcon,
   CalendarDaysIcon,
-  PresentationChartBarIcon,
   PresentationChartLineIcon,
 } from "@heroicons/react/20/solid";
 import { format } from "date-fns";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getPlayerProfile } from "./get-player-profile";
+import { ProfileLevel } from "./profile-level";
+import { ProfileXPs } from "./profile-xps";
 import { RankBadge } from "./rank-badge";
 import { User } from "./types";
 
@@ -59,28 +60,36 @@ export const ProfileCard = ({
         </div>
       </HoverCardTrigger>
       <HoverCardContent className="w-80 space-y-3">
-        <div className="flex w-fit items-center gap-x-3">
+        <div className="flex items-center gap-x-3">
           <Avatar>
             <AvatarImage src="/icons/beginner.jpg" />
             <AvatarFallback>{profile.username[0].toUpperCase()}</AvatarFallback>
           </Avatar>
-          <RankBadge rank={profile.rank} size="sm" />
+          <div className="w-full">
+            <div className="flex items-baseline gap-x-2">
+              <h4 className="text-lg font-semibold">{profile.username}</h4>
+              <p className="font-medium text-muted-foreground">
+                @{profile.username}
+              </p>
+            </div>
+            <div className="flex w-full items-center gap-x-4">
+              <ProfileLevel currentLevel={profile.currentLevel} />
+              <ProfileXPs
+                xpsGained={profile.xpsGained}
+                xpsRequired={profile.xpsRequired}
+              />
+            </div>
+          </div>
         </div>
         <div className="space-y-1">
-          <div className="flex items-baseline gap-x-2">
-            <h4 className="text-lg font-semibold">{profile.username}</h4>
-            <p className="font-medium text-muted-foreground">
-              @{profile.username}
-            </p>
-          </div>
-          <div className="flex items-center text-foreground">
-            <PresentationChartBarIcon className="mr-2 h-5 w-5 text-muted-foreground" />{" "}
-            <span>
-              <span className="text-base font-semibold">{profile.rank}</span>{" "}
-              <span className="text-sm text-muted-foreground">
+          <div className="flex w-fit items-center gap-x-3">
+            <RankBadge rank={profile.rank} size="sm" />
+            <div className="text-foreground">
+              <div className="text-base font-semibold">{profile.rank}</div>{" "}
+              <div className="text-sm text-muted-foreground">
                 {profile.catPoints} CPs
-              </span>
-            </span>
+              </div>
+            </div>
           </div>
           <div className="flex items-center pt-2 text-secondary-foreground">
             <BookOpenIcon className="mr-2 h-5 w-5 text-muted-foreground" />{" "}

@@ -7,15 +7,11 @@ type State = {
   acc: number;
   position: number;
   catPoints: number;
+  xpsGained: number;
 };
 
 type Action = {
-  onOpen: (payload: {
-    wpm: number;
-    acc: number;
-    position: number;
-    catPoints: number;
-  }) => void;
+  onOpen: (payload: Omit<State, "isModalOpen">) => void;
   onClose: () => void;
 };
 const initialState: State = {
@@ -24,6 +20,7 @@ const initialState: State = {
   acc: 0,
   catPoints: 0,
   position: 0,
+  xpsGained: 0,
 };
 
 const useGameSummaryModalBase = create<State & Action>((set) => ({

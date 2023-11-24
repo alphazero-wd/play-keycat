@@ -36,7 +36,6 @@ export const useTyping = (paragraph: string, gameId: number) => {
         });
       }
     } else {
-      console.log({ charsTyped });
       setPrevError(charsTyped);
       setTypos((prev) => prev + 1);
     }

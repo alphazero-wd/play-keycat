@@ -4,6 +4,7 @@ import { Game } from "../types";
 import { useCountdown } from "./use-countdown";
 import { useGameStore } from "./use-game-store";
 import { useGameSummaryModal } from "./use-game-summary-modal";
+import { useLevelUpModal } from "./use-level-up-modal";
 import {
   addLeftPlayer,
   getPlayerProgress,
@@ -26,6 +27,7 @@ export const useGameSocket = (game: Game) => {
   const onGameSummaryModalOpen = useGameSummaryModal.use.onOpen();
 
   const onRankUpdateModalOpen = useRankUpdateModal.use.onOpen();
+  const onLevelUpModalOpen = useLevelUpModal.use.onOpen();
 
   useEffect(() => {
     socket.connect();
@@ -42,6 +44,7 @@ export const useGameSocket = (game: Game) => {
     socket.on("playerLeft", handlePlayerLeft);
     socket.on("playerProgress", updateProgress);
     socket.on("startGame", startGame);
+    socket.on("levelUp", onLevelUpModalOpen);
     socket.on("countdown", updateCountdown);
     socket.on("endGame", endGame);
     socket.on("updatePosition", updatePosition);

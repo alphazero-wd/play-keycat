@@ -15,6 +15,7 @@ import {
   useGameStore,
   useTyping,
 } from "./hooks";
+import { LevelUpModal } from "./level-up-modal";
 import { Players } from "./players";
 import { RankUpdateModal } from "./rank-update-modal";
 import { Game } from "./types";
@@ -28,12 +29,12 @@ export const Gameplay = ({ user, game }: { user: User; game: Game }) => {
 
   const countdown = useCountdown.use.countdown();
 
-  const typingStats = useTyping(game.paragraph, game.id, user.id);
+  const typingStats = useTyping(game.paragraph, game.id);
 
   useEndGame(user, typingStats, game);
-
   return (
     <>
+      <LevelUpModal gameMode={game.mode} user={user} />
       <RankUpdateModal />
       <GameSummaryModal gameMode={game.mode} />
       <div className="container max-w-3xl">

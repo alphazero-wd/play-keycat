@@ -1,6 +1,11 @@
 "use client";
 import { useLogout } from "@/features/auth/logout";
-import { User } from "@/features/users/profile";
+import {
+  ProfileLevel,
+  ProfileXPs,
+  RankBadge,
+  User,
+} from "@/features/users/profile";
 import {
   ArrowRightOnRectangleIcon,
   ChartBarIcon,
@@ -68,9 +73,27 @@ export const UserMenu = ({ user }: UserMenuProps) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuGroup>
-          <DropdownMenuLabel>{user.username}</DropdownMenuLabel>
-          <DropdownMenuLabel className="font-normal">
-            {catPoints} CPs
+          <DropdownMenuLabel className="flex items-center gap-x-4">
+            {user.username}
+            <ProfileLevel currentLevel={user.currentLevel} />
+          </DropdownMenuLabel>
+
+          <div className="px-2 py-1.5">
+            <ProfileXPs
+              xpsGained={user.xpsGained}
+              xpsRequired={user.xpsRequired}
+            />
+          </div>
+        </DropdownMenuGroup>
+        <DropdownMenuGroup className="flex items-center gap-x-3 px-2 py-1.5">
+          <div>
+            <RankBadge size="sm" rank={user.rank} />
+          </div>
+          <DropdownMenuLabel>
+            <div className="text-base">{user.rank}</div>{" "}
+            <div className="font-normal text-muted-foreground">
+              {catPoints} CPs
+            </div>
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

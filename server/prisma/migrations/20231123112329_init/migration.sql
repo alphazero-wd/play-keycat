@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "GameMode" AS ENUM ('RANKED', 'CASUAL', 'PRACTICE');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
@@ -7,6 +10,8 @@ CREATE TABLE "User" (
     "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "inGameId" INTEGER,
+    "currentLevel" INTEGER NOT NULL DEFAULT 1,
+    "xpsGained" INTEGER NOT NULL DEFAULT 0,
     "catPoints" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
@@ -19,6 +24,7 @@ CREATE TABLE "Game" (
     "maxPoints" INTEGER NOT NULL,
     "paragraph" TEXT NOT NULL,
     "startedAt" TIMESTAMP(3),
+    "mode" "GameMode" NOT NULL DEFAULT 'RANKED',
     "endedAt" TIMESTAMP(3),
 
     CONSTRAINT "Game_pkey" PRIMARY KEY ("id")

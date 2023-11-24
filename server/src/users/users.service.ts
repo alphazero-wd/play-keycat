@@ -4,11 +4,12 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto } from './dto';
-import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
+import { PrismaService } from '../prisma/prisma.service';
 import { getCurrentRank } from '../ranks';
+import { CreateUserDto, UpdateUserDto } from './dto';
+import { determineXPsRequired } from './utils';
 
 @Injectable()
 export class UsersService {
@@ -59,9 +60,20 @@ export class UsersService {
     try {
       const user = await this.prisma.user.findUniqueOrThrow({
         where: { id },
-        select: { id: true, inGameId: true, catPoints: true, username: true },
+        select: {
+          id: true,
+          inGameId: true,
+          catPoints: true,
+          xpsGained: true,
+          currentLevel: true,
+          username: true,
+        },
       });
-      return { ...user, rank: getCurrentRank(user.catPoints) };
+      return {
+        ...user,
+        rank: getCurrentRank(user.catPoints),
+        xpsRequired: determineXPsRequired(user.currentLevel),
+      };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)
         if (error.code === PrismaError.RecordNotFound)
@@ -79,6 +91,8 @@ export class UsersService {
           username: true,
           joinedAt: true,
           catPoints: true,
+          currentLevel: true,
+          xpsGained: true,
         },
       });
 
@@ -106,6 +120,7 @@ export class UsersService {
         highestWpm: highestWpm || 0,
         lastTenAverageWpm: lastTenAverageWpm || 0,
         gamesPlayed: gamesPlayed || 0,
+        xpsRequired: determineXPsRequired(user.currentLevel),
       };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)

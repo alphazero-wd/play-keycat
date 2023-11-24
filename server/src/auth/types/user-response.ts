@@ -16,4 +16,6 @@ export class UserResponse implements User {
   updatedAt: Date;
   inGameId: number;
   catPoints: number;
+  currentLevel: number;
+  xpsGained: number;
 }

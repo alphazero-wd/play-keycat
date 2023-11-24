@@ -11,14 +11,16 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  email     String   @unique
-  password  String
-  joinedAt  DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  inGameId  Int?
-  catPoints Int      @default(0)
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  email        String   @unique
+  password     String
+  joinedAt     DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  inGameId     Int?
+  currentLevel Int      @default(1)
+  xpsGained    Int      @default(0)
+  catPoints    Int      @default(0)
 
   inGame    Game?         @relation(fields: [inGameId], references: [id], onDelete: SetNull)
   histories GameHistory[]

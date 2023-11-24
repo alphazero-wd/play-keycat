@@ -10,6 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { PlayerFinishedDto } from '../games/dto';
 import { calculateCPs } from './utils';
 import { RankUpdateStatus, getCurrentRank } from '../ranks';
+import { levelUp } from './utils';
 
 @Injectable()
 export class HistoriesService {
@@ -18,21 +19,26 @@ export class HistoriesService {
   async create(
     { acc, wpm, position, gameId }: PlayerFinishedDto,
     gameMode: GameMode,
-    averageCPs: number,
+    currentRank: string,
+    xpsBonus: number,
     user: User,
   ) {
     try {
-      const currentRank = getCurrentRank(averageCPs);
       const catPoints =
         gameMode === GameMode.RANKED
           ? calculateCPs(wpm, acc, position, currentRank)
           : 0;
-      const results = await this.prisma.$transaction([
-        this.prisma.user.update({
+      const results = await this.prisma.$transaction(async (client) => {
+        const { newLevel, newXPsGained, hasLevelUp } = levelUp(user, xpsBonus);
+        const player = await client.user.update({
           where: { id: user.id },
-          data: { catPoints: Math.max(user.catPoints + catPoints, 0) },
-        }),
-        this.prisma.gameHistory.create({
+          data: {
+            currentLevel: newLevel,
+            xpsGained: newXPsGained,
+            catPoints: Math.max(user.catPoints + catPoints, 0),
+          },
+        });
+        const history = await client.gameHistory.create({
           data: {
             wpm,
             acc,
@@ -40,8 +46,9 @@ export class HistoriesService {
             catPoints: user.catPoints + catPoints < 0 ? 0 : catPoints,
             playerId: user.id,
           },
-        }),
-      ]);
+        });
+        return { hasLevelUp, player, history };
+      });
       return results;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {

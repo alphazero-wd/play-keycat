@@ -12,6 +12,7 @@ import { Label } from "@/features/ui/label";
 import { useUserMenu } from "@/features/ui/navbar/use-user-menu";
 import {
   BoltIcon,
+  BookOpenIcon,
   ChartBarIcon,
   SparklesIcon,
   StarIcon,
@@ -27,9 +28,11 @@ export const GameSummaryModal = ({ gameMode }: { gameMode: GameMode }) => {
   const acc = useGameSummaryModal.use.acc();
   const catPoints = useGameSummaryModal.use.catPoints();
   const position = useGameSummaryModal.use.position();
+  const xpsGained = useGameSummaryModal.use.xpsGained();
   const onClose = useGameSummaryModal.use.onClose();
 
   const setCatPoints = useUserMenu.use.setCatPoints();
+  const updateXPs = useUserMenu.use.updateXPs();
   const currentCPs = useUserMenu.use.catPoints();
 
   const playerStats = useMemo(
@@ -50,6 +53,13 @@ export const GameSummaryModal = ({ gameMode }: { gameMode: GameMode }) => {
         value: <Position position={position} />,
       },
       {
+        label: "XPs Gained",
+        icon: BookOpenIcon,
+        value: (
+          <div className="text-blue-700 dark:text-blue-300">{xpsGained}</div>
+        ),
+      },
+      {
         label: "Cat Points",
         icon: StarIcon,
         value: <CPsUpdateStat catPoints={catPoints} />,
@@ -58,7 +68,10 @@ export const GameSummaryModal = ({ gameMode }: { gameMode: GameMode }) => {
     [wpm, acc, catPoints, position],
   );
   useEffect(() => {
-    if (isModalOpen) setCatPoints(currentCPs + catPoints);
+    if (isModalOpen) {
+      setCatPoints(currentCPs + catPoints);
+      updateXPs(xpsGained);
+    }
   }, [catPoints, isModalOpen]);
 
   return (

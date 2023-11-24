@@ -3,6 +3,7 @@ export { useEndGame } from "./use-end-game";
 export { useGameSocket } from "./use-game-socket";
 export { useGameStore } from "./use-game-store";
 export { useGameSummaryModal } from "./use-game-summary-modal";
+export { useLevelUpModal } from "./use-level-up-modal";
 export {
   determinePosition,
   getPlayerPosition,

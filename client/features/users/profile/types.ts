@@ -8,4 +8,7 @@ export interface User {
   rank: string;
   lastTenAverageWpm: number;
   gamesPlayed: number;
+  currentLevel: number;
+  xpsGained: number;
+  xpsRequired: number;
 }
