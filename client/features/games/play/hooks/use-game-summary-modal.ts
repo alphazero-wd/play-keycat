@@ -7,7 +7,8 @@ type State = {
   acc: number;
   position: number;
   catPoints: number;
-  xpsGained: number;
+  totalXPsBonus: number; // dismiss xps subtracted upon level up
+  newXPsGained: number;
 };
 
 type Action = {
@@ -20,12 +21,13 @@ const initialState: State = {
   acc: 0,
   catPoints: 0,
   position: 0,
-  xpsGained: 0,
+  totalXPsBonus: 0,
+  newXPsGained: 0,
 };
 
 const useGameSummaryModalBase = create<State & Action>((set) => ({
   ...initialState,
   onOpen: (payload) => set(() => ({ isModalOpen: true, ...payload })),
-  onClose: () => set(() => initialState),
+  onClose: () => set(() => ({ isModalOpen: false })),
 }));
 export const useGameSummaryModal = createSelectors(useGameSummaryModalBase);

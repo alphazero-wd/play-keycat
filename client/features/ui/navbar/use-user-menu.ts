@@ -6,20 +6,24 @@ type State = {
   catPoints: number;
   currentLevel: number;
   xpsGained: number;
+  xpsRequired: number;
 };
 
 type Action = {
   setCatPoints: (catPoints: number) => void;
-  updateXPs: (xpsGained: number) => void;
-  levelUp: (newLevel: number) => void;
+  setXPs: (xpsGained: number) => void;
+  setLevel: (newLevel: number) => void;
+  setXPsRequired: (xpsRequired: number) => void;
 };
 
 const useUserMenuBase = create<State & Action>((set) => ({
   catPoints: 0,
   currentLevel: 1,
   xpsGained: 0,
-  setCatPoints: (catPoints) => set({ catPoints }),
-  updateXPs: (xpsGained) => set({ xpsGained }),
-  levelUp: (newLevel) => set({ currentLevel: newLevel }),
+  xpsRequired: 0,
+  setCatPoints: (catPoints) => set(() => ({ catPoints })),
+  setXPs: (xpsGained) => set(() => ({ xpsGained })),
+  setLevel: (newLevel) => set(() => ({ currentLevel: newLevel })),
+  setXPsRequired: (xpsRequired) => set(() => ({ xpsRequired })),
 }));
 export const useUserMenu = createSelectors(useUserMenuBase);

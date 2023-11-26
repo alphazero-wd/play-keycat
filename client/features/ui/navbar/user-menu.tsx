@@ -35,7 +35,13 @@ interface UserMenuProps {
 export const UserMenu = ({ user }: UserMenuProps) => {
   const { logout } = useLogout();
   const catPoints = useUserMenu.use.catPoints();
+  const xpsGained = useUserMenu.use.xpsGained();
+  const currentLevel = useUserMenu.use.currentLevel();
   const setCatPoints = useUserMenu.use.setCatPoints();
+  const setXPs = useUserMenu.use.setXPs();
+  const setLevel = useUserMenu.use.setLevel();
+  const setXPsRequired = useUserMenu.use.setXPsRequired();
+  const xpsRequired = useUserMenu.use.xpsRequired();
   const userMenuItems = useMemo(
     () => [
       {
@@ -57,6 +63,9 @@ export const UserMenu = ({ user }: UserMenuProps) => {
 
   useEffect(() => {
     setCatPoints(user.catPoints);
+    setXPs(user.xpsGained);
+    setLevel(user.currentLevel);
+    setXPsRequired(user.xpsRequired);
   }, [user]);
 
   const onLogout = useCallback(async () => {
@@ -75,14 +84,11 @@ export const UserMenu = ({ user }: UserMenuProps) => {
         <DropdownMenuGroup>
           <DropdownMenuLabel className="flex items-center gap-x-4">
             {user.username}
-            <ProfileLevel currentLevel={user.currentLevel} />
+            <ProfileLevel currentLevel={currentLevel} />
           </DropdownMenuLabel>
 
           <div className="px-2 py-1.5">
-            <ProfileXPs
-              xpsGained={user.xpsGained}
-              xpsRequired={user.xpsRequired}
-            />
+            <ProfileXPs xpsGained={xpsGained} xpsRequired={xpsRequired} />
           </div>
         </DropdownMenuGroup>
         <DropdownMenuGroup className="flex items-center gap-x-3 px-2 py-1.5">

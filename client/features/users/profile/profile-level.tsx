@@ -1,4 +1,4 @@
-import { AcademicCapIcon } from "@heroicons/react/20/solid";
+import { Badge as BadgeIcon } from "lucide-react";
 
 interface ProfileLevelProps {
   currentLevel: number;
@@ -7,7 +7,7 @@ interface ProfileLevelProps {
 export const ProfileLevel = ({ currentLevel }: ProfileLevelProps) => {
   return (
     <div className="flex items-center gap-x-1 font-medium text-blue-600 dark:text-blue-300">
-      <AcademicCapIcon className="h-5 w-5" />
+      <BadgeIcon className="h-5 w-5" />
       {currentLevel}
     </div>
   );

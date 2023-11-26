@@ -7,8 +7,7 @@ import {
   AlertDialogTitle,
 } from "@/features/ui/alert-dialog";
 import { useUserMenu } from "@/features/ui/navbar/use-user-menu";
-import { Progress } from "@/features/ui/progress";
-import { User } from "@/features/users/profile";
+import { ProfileXPs, User } from "@/features/users/profile";
 import { useEffect, useState } from "react";
 import { GameModeButton } from "../../ui/button";
 import { useLevelUpModal } from "./hooks";
@@ -23,9 +22,11 @@ export const LevelUpModal = ({
 }) => {
   const isModalOpen = useLevelUpModal.use.isModalOpen();
   const onClose = useLevelUpModal.use.onClose();
-  const currentLevel = useLevelUpModal.use.currentLevel();
+  const newLevel = useLevelUpModal.use.currentLevel();
   const xpsGained = useLevelUpModal.use.xpsGained();
-  const levelUp = useUserMenu.use.levelUp();
+  const levelUp = useUserMenu.use.setLevel();
+  const xpsRequired = useLevelUpModal.use.xpsRequired();
+  const setXPsRequired = useUserMenu.use.setXPsRequired();
   const [xpsGainedChange, setXPsGainedChange] = useState(0);
 
   useEffect(() => {
@@ -34,11 +35,12 @@ export const LevelUpModal = ({
       () => setXPsGainedChange(xpsGained),
       500,
     );
-    levelUp(currentLevel);
+    levelUp(newLevel);
+    setXPsRequired(xpsRequired);
     return () => {
       clearTimeout(xpsRemainingTimer);
     };
-  }, [isModalOpen, xpsGained]);
+  }, [isModalOpen, xpsGained, xpsRequired, newLevel]);
 
   return (
     <AlertDialog open={isModalOpen} onOpenChange={onClose}>
@@ -46,14 +48,13 @@ export const LevelUpModal = ({
         <AlertDialogHeader>
           <AlertDialogTitle>Level Up</AlertDialogTitle>
           <AlertDialogDescription>
-            Congrats, you&apos;ve reached level {currentLevel} 🎉
+            Congrats, you&apos;ve reached level {newLevel} 🎉
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="my-5 flex items-center justify-between gap-x-4">
-          <Progress
-            className="w-[80%]"
-            value={(xpsGainedChange / user.xpsRequired) * 100}
-          />
+          <div className="w-[80%]">
+            <ProfileXPs xpsGained={xpsGainedChange} xpsRequired={xpsRequired} />
+          </div>
           <div className="font-medium text-secondary-foreground">
             {xpsGained} / {user.xpsRequired}
           </div>

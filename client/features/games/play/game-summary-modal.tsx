@@ -12,11 +12,11 @@ import { Label } from "@/features/ui/label";
 import { useUserMenu } from "@/features/ui/navbar/use-user-menu";
 import {
   BoltIcon,
-  BookOpenIcon,
   ChartBarIcon,
   SparklesIcon,
   StarIcon,
 } from "@heroicons/react/24/outline";
+import { Badge as BadgeIcon } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { CPsUpdateStat, Position } from "../history";
 import { useGameSummaryModal } from "./hooks";
@@ -28,11 +28,12 @@ export const GameSummaryModal = ({ gameMode }: { gameMode: GameMode }) => {
   const acc = useGameSummaryModal.use.acc();
   const catPoints = useGameSummaryModal.use.catPoints();
   const position = useGameSummaryModal.use.position();
-  const xpsGained = useGameSummaryModal.use.xpsGained();
+  const totalXPsBonus = useGameSummaryModal.use.totalXPsBonus();
+  const newXPsGained = useGameSummaryModal.use.newXPsGained();
   const onClose = useGameSummaryModal.use.onClose();
 
   const setCatPoints = useUserMenu.use.setCatPoints();
-  const updateXPs = useUserMenu.use.updateXPs();
+  const setXPs = useUserMenu.use.setXPs();
   const currentCPs = useUserMenu.use.catPoints();
 
   const playerStats = useMemo(
@@ -53,10 +54,12 @@ export const GameSummaryModal = ({ gameMode }: { gameMode: GameMode }) => {
         value: <Position position={position} />,
       },
       {
-        label: "XPs Gained",
-        icon: BookOpenIcon,
+        label: "Experience",
+        icon: BadgeIcon,
         value: (
-          <div className="text-blue-700 dark:text-blue-300">{xpsGained}</div>
+          <div className="text-sm font-medium text-blue-700 dark:text-blue-300">
+            +{totalXPsBonus} XP
+          </div>
         ),
       },
       {
@@ -65,14 +68,14 @@ export const GameSummaryModal = ({ gameMode }: { gameMode: GameMode }) => {
         value: <CPsUpdateStat catPoints={catPoints} />,
       },
     ],
-    [wpm, acc, catPoints, position],
+    [wpm, acc, catPoints, position, totalXPsBonus],
   );
   useEffect(() => {
     if (isModalOpen) {
       setCatPoints(currentCPs + catPoints);
-      updateXPs(xpsGained);
+      setXPs(newXPsGained);
     }
-  }, [catPoints, isModalOpen]);
+  }, [catPoints, isModalOpen, newXPsGained]);
 
   return (
     <AlertDialog open={isModalOpen} onOpenChange={onClose}>

@@ -18,4 +18,5 @@ export class UserResponse implements User {
   catPoints: number;
   currentLevel: number;
   xpsGained: number;
+  xpsRequired: number;
 }

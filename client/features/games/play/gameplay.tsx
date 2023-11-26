@@ -44,9 +44,7 @@ export const Gameplay = ({ user, game }: { user: User; game: Game }) => {
         <Players gameMode={game.mode} user={user} />
 
         {!hasFinished && isFinite(countdown) && !endedAt && (
-          <>
-            <TypingParagraph game={game} typingStats={typingStats} />
-          </>
+          <TypingParagraph game={game} typingStats={typingStats} />
         )}
         <div className="mt-3 flex justify-between gap-x-4">
           <Button variant="outline" asChild>

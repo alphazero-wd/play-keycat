@@ -17,6 +17,7 @@ import { addSeconds, calculateTimeLimit, determineBasedOnMode } from './utils';
 import { calculateAverageCPs, getCurrentRank } from '../ranks';
 import { GameMode } from '@prisma/client';
 import { calculateXPs } from '../histories/utils';
+import { determineXPsRequired } from '../users/utils';
 
 @WebSocketGateway()
 export class GamesGateway implements OnGatewayDisconnect {
@@ -118,11 +119,11 @@ export class GamesGateway implements OnGatewayDisconnect {
     const { players, mode, paragraph } = await this.gamesService.getDisplayInfo(
       gameId,
     );
-    const averageCPs = calculateAverageCPs(players.map((p) => p.catPoints));
     await this.gamesService.removePlayer(user.id);
     const xpsBonus =
       mode !== GameMode.PRACTICE ? calculateXPs(payload, paragraph) : 0;
 
+    const averageCPs = calculateAverageCPs(players.map((p) => p.catPoints));
     const { hasLevelUp, history, player } = await this.historiesService.create(
       { ...payload, gameId },
       mode,
@@ -139,7 +140,8 @@ export class GamesGateway implements OnGatewayDisconnect {
       acc: payload.acc,
       position: payload.position,
       catPoints: history.catPoints,
-      xpsGained: player.xpsGained,
+      totalXPsBonus: xpsBonus,
+      newXPsGained: player.xpsGained,
     });
 
     this.io.sockets
@@ -157,6 +159,7 @@ export class GamesGateway implements OnGatewayDisconnect {
       socket.emit('levelUp', {
         currentLevel: player.currentLevel,
         xpsGained: player.xpsGained,
+        xpsRequired: determineXPsRequired(player.currentLevel),
       });
 
     this.endGameEarly(gameId, mode, leftPlayersCount);

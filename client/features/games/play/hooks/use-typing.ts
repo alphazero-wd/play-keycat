@@ -15,8 +15,7 @@ export const useTyping = (paragraph: string, gameId: number) => {
 
   const onKeyDown = (e: globalThis.KeyboardEvent) => {
     if (e.key === "Backspace") {
-      if (!prevError) return;
-      if (paragraph[charsTyped - 1] === " " && prevError === null) return;
+      if (prevError === null) return;
 
       setCharsTyped((prev) => prev - 1);
       setPrevError(() => null);
