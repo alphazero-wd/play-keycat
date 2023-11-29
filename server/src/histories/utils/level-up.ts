@@ -1,5 +1,5 @@
 import { User } from '@prisma/client';
-import { determineXPsRequired } from '../../users/utils';
+import { determineXPsRequired } from '../../xps';
 
 export const levelUp = (user: User, xpsBonus: number) => {
   // user.xpsGained = 90, xpsBonus = 200

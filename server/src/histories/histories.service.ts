@@ -8,25 +8,30 @@ import { GameMode, Prisma, User } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
 import { PrismaService } from '../prisma/prisma.service';
 import { PlayerFinishedDto } from '../games/dto';
-import { calculateCPs } from './utils';
+import { calculateCPsEarned } from './utils';
 import { RankUpdateStatus, getCurrentRank } from '../ranks';
 import { levelUp } from './utils';
+import { calculateXPsEarned } from '../xps';
 
 @Injectable()
 export class HistoriesService {
   constructor(private prisma: PrismaService) {}
 
   async create(
-    { acc, wpm, position, gameId }: PlayerFinishedDto,
+    { acc, wpm, position, gameId }: Omit<PlayerFinishedDto, 'leftPlayersCount'>,
     gameMode: GameMode,
     currentRank: string,
-    xpsBonus: number,
+    paragraph: string,
     user: User,
   ) {
     try {
+      const xpsBonus =
+        gameMode !== GameMode.PRACTICE
+          ? calculateXPsEarned(wpm, acc, position, paragraph)
+          : 0;
       const catPoints =
         gameMode === GameMode.RANKED
-          ? calculateCPs(wpm, acc, position, currentRank)
+          ? calculateCPsEarned(wpm, acc, position, currentRank)
           : 0;
       const results = await this.prisma.$transaction(async (client) => {
         const { newLevel, newXPsGained, hasLevelUp } = levelUp(user, xpsBonus);
@@ -49,7 +54,7 @@ export class HistoriesService {
         });
         return { hasLevelUp, player, history };
       });
-      return results;
+      return { ...results, xpsBonus };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === PrismaError.ForeignViolation)

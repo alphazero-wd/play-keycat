@@ -8,6 +8,10 @@ export class PlayerFinishedDto {
   @Max(100)
   acc: number;
 
+  @IsInt()
+  @Min(0)
+  leftPlayersCount: number;
+
   @Transform(() => Number)
   @IsInt()
   @Min(0)

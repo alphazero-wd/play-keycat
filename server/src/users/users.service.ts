@@ -9,7 +9,7 @@ import { PrismaError } from '../prisma/prisma-error';
 import { PrismaService } from '../prisma/prisma.service';
 import { getCurrentRank } from '../ranks';
 import { CreateUserDto, UpdateUserDto } from './dto';
-import { determineXPsRequired } from './utils';
+import { determineXPsRequired } from '../xps';
 
 @Injectable()
 export class UsersService {
@@ -40,20 +40,43 @@ export class UsersService {
   }
 
   async findByEmail(email: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
-    if (user) return user;
-    throw new BadRequestException({
-      success: false,
-      message: 'User with that email does not exist',
-    });
+    try {
+      const user = await this.prisma.user.findUniqueOrThrow({
+        where: { email },
+      });
+      return user;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError)
+        if (error.code === PrismaError.RecordNotFound)
+          throw new BadRequestException('User with that email does not exist');
+      throw new InternalServerErrorException('Something went wrong');
+    }
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const updatedUser = await this.prisma.user.update({
-      where: { id },
-      data: updateUserDto,
-    });
-    return updatedUser;
+    try {
+      const updatedUser = await this.prisma.user.update({
+        where: { id },
+        data: updateUserDto,
+      });
+      return updatedUser;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === PrismaError.RecordNotFound)
+          throw new BadRequestException('User with that email does not exist');
+        if (error.code === PrismaError.UniqueViolation) {
+          if (error.message.includes('username'))
+            throw new BadRequestException(
+              'User with that username already exists',
+            );
+          if (error.message.includes('email'))
+            throw new BadRequestException(
+              'User with that email already exists',
+            );
+        }
+      }
+      throw new InternalServerErrorException('Something went wrong');
+    }
   }
 
   async findById(id: number) {

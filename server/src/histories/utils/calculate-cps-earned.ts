@@ -1,16 +1,16 @@
 import { GameMode } from '@prisma/client';
-import { MAXIMUM_ACCURACY } from '../../common/constants';
+import { determineMaxPlayersCount } from '../../games/utils';
 import { ranks } from '../../ranks';
-import { determineBasedOnMode } from '../../games/utils';
 
-export const calculateCPs = (
+const MAXIMUM_ACCURACY = 100;
+export const calculateCPsEarned = (
   wpm: number,
   acc: number,
   position: number,
   rank: string,
 ) => {
   // only update CPs after ranked games
-  const { maxPlayersCount } = determineBasedOnMode(GameMode.RANKED);
+  const maxPlayersCount = determineMaxPlayersCount(GameMode.RANKED);
   const wpmPoints = wpm - ranks[rank].minWpm;
   const accPoints = acc - MAXIMUM_ACCURACY;
   const cpsEarned = wpmPoints + accPoints + 2 * (maxPlayersCount - position);

@@ -20,6 +20,7 @@ export const columns: ColumnDef<GameHistory>[] = [
   {
     accessorKey: "gameId",
     header: "#",
+    cell: ({ row, table }) => (row.index + 1) + (table.getState().pagination.pageIndex * table.getState().pagination.pageSize)
   },
   {
     accessorKey: "mode",

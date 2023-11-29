@@ -4,11 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Game, GameMode, Prisma, User } from '@prisma/client';
+import { GameMode, Prisma, User } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
 import { WsException } from '@nestjs/websockets';
 import { UsersService } from '../users/users.service';
-import { determineBasedOnMode, generateParagraph } from './utils';
+import { determineMaxPlayersCount, generateParagraph } from './utils';
 import { FindOrCreateGameDto } from './dto';
 
 @Injectable()
@@ -146,7 +146,7 @@ export class GamesService {
   }
 
   private async findOne(user: User, gameMode: GameMode) {
-    const { maxPlayersCount } = determineBasedOnMode(gameMode);
+    const maxPlayersCount = determineMaxPlayersCount(gameMode);
 
     const result = await this.prisma.$queryRaw<[] | [{ id: number }]>`
       SELECT g."id" FROM "Game" g

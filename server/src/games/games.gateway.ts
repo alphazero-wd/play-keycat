@@ -1,4 +1,4 @@
-import { ParseIntPipe, UseGuards } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -7,17 +7,22 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { GameMode } from '@prisma/client';
 import { Server } from 'socket.io';
 import { WsCookieAuthGuard } from '../auth/guards';
 import { SocketUser } from '../common/types';
 import { HistoriesService } from '../histories/histories.service';
+import { getCurrentRank } from '../ranks';
+import { determineXPsRequired } from '../xps';
 import { PlayerFinishedDto, PlayerProgressDto } from './dto';
 import { GamesService } from './games.service';
-import { addSeconds, calculateTimeLimit, determineBasedOnMode } from './utils';
-import { calculateAverageCPs, getCurrentRank } from '../ranks';
-import { GameMode } from '@prisma/client';
-import { calculateXPs } from '../histories/utils';
-import { determineXPsRequired } from '../users/utils';
+import {
+  addSeconds,
+  calculateAverageCPs,
+  calculateTimeLimit,
+  determineCountdown,
+  determineMaxPlayersCount,
+} from './utils';
 
 @WebSocketGateway()
 export class GamesGateway implements OnGatewayDisconnect {
@@ -37,10 +42,12 @@ export class GamesGateway implements OnGatewayDisconnect {
   ) {
     socket.join(`game:${gameId}`);
     const { players, mode } = await this.gamesService.getDisplayInfo(gameId);
-    const { countdown, maxPlayersCount } = determineBasedOnMode(mode);
+
+    const maxPlayersCount = determineMaxPlayersCount(mode);
+    const countdown = determineCountdown(mode);
 
     if (players.length === maxPlayersCount) {
-      const averageCPs = calculateAverageCPs(players.map((p) => p.catPoints));
+      const averageCPs = calculateAverageCPs(players);
       const game = await this.gamesService.updateTime(
         gameId,
         'startedAt',
@@ -112,25 +119,21 @@ export class GamesGateway implements OnGatewayDisconnect {
   @SubscribeMessage('playerFinished')
   async onPlayerFinished(
     @ConnectedSocket() socket: SocketUser,
-    @MessageBody() { gameId, ...payload }: PlayerFinishedDto,
-    @MessageBody('leftPlayersCount', ParseIntPipe) leftPlayersCount: number,
+    @MessageBody() { gameId, leftPlayersCount, ...payload }: PlayerFinishedDto,
   ) {
     const user = socket.request.user;
     const { players, mode, paragraph } = await this.gamesService.getDisplayInfo(
       gameId,
     );
     await this.gamesService.removePlayer(user.id);
-    const xpsBonus =
-      mode !== GameMode.PRACTICE ? calculateXPs(payload, paragraph) : 0;
-
-    const averageCPs = calculateAverageCPs(players.map((p) => p.catPoints));
-    const { hasLevelUp, history, player } = await this.historiesService.create(
-      { ...payload, gameId },
-      mode,
-      getCurrentRank(averageCPs),
-      xpsBonus,
-      user,
-    );
+    const { hasLevelUp, history, player, xpsBonus } =
+      await this.historiesService.create(
+        { ...payload, gameId },
+        mode,
+        getCurrentRank(calculateAverageCPs(players)),
+        paragraph,
+        user,
+      );
 
     const { prevRank, currentRank, rankUpdateStatus } =
       this.historiesService.checkRankUpdate(user, history.catPoints);
@@ -167,11 +170,7 @@ export class GamesGateway implements OnGatewayDisconnect {
   }
 
   async endGameEarly(gameId: number, mode: GameMode, leftPlayersCount: number) {
-    /* end early if all involved players have finished the game
-      - 5 players total: 2 AFKs, 2 finished, 1 unfinished
-      - check if players finished aka histories count = MAX_PLAYERS - leftPlayersCount
-    */
-    const { maxPlayersCount } = determineBasedOnMode(mode);
+    const maxPlayersCount = determineMaxPlayersCount(mode);
     const playersFinishedCount =
       await this.historiesService.countPlayersFinished(gameId);
     if (playersFinishedCount !== maxPlayersCount - leftPlayersCount) return;
@@ -184,7 +183,6 @@ export class GamesGateway implements OnGatewayDisconnect {
     if (!currentUser) return;
     const gameId = await this.gamesService.removePlayer(currentUser.id);
 
-    // check for `gameId` because a player might join in on multiple devices causes NestJS to raise an uncanny exception
     if (!gameId) return;
 
     this.io.sockets.to(`game:${gameId}`).emit('playerLeft', {
@@ -193,13 +191,6 @@ export class GamesGateway implements OnGatewayDisconnect {
     });
 
     const hasDeleted = await this.gamesService.removeIfEmpty(gameId);
-    /*
-        Suppose all players in a game left, there are 2 possible cases:
-        If there are no associated histories, we'll delete the time ref.
-        Otherwise, we might not want to delete the time ref.
-        =====> The role of the time ref is to check if a game is currently underway OR has been dissolved
-        After which we can officially end the game (if exists)
-      */
     if (hasDeleted) this.stopCountdown(gameId);
   }
 }

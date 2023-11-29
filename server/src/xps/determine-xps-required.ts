@@ -1,4 +1,5 @@
-import { BASE_XPS, LEVEL_FACTOR } from '../../common/constants';
+const BASE_XPS = 100;
+const LEVEL_FACTOR = 1.1;
 
 export const determineXPsRequired = (currentLevel: number) => {
   return Math.min(
