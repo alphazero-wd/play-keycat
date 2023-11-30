@@ -48,7 +48,7 @@ export class UsersService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)
         if (error.code === PrismaError.RecordNotFound)
-          throw new BadRequestException('User with that email does not exist');
+          throw new NotFoundException('User with that email does not exist');
       throw new InternalServerErrorException('Something went wrong');
     }
   }
@@ -63,7 +63,7 @@ export class UsersService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === PrismaError.RecordNotFound)
-          throw new BadRequestException('User with that email does not exist');
+          throw new NotFoundException('User with that id does not exist');
         if (error.code === PrismaError.UniqueViolation) {
           if (error.message.includes('username'))
             throw new BadRequestException(

@@ -65,44 +65,6 @@ export class GamesGateway implements OnGatewayDisconnect {
     this.io.sockets.to(`game:${gameId}`).emit('players', players);
   }
 
-  startCountdown(
-    gameId: number,
-    countdown: number,
-    callback: CallableFunction,
-  ) {
-    const interval = setInterval(() => {
-      this.io.sockets.to(`game:${gameId}`).emit('countdown', countdown);
-      if (countdown === 0) {
-        clearInterval(interval);
-        callback();
-      } else {
-        countdown--;
-      }
-    }, 1000);
-    this.gameTimers.set(`game:${gameId}`, interval);
-  }
-
-  stopCountdown(gameId: number) {
-    clearInterval(this.gameTimers.get(`game:${gameId}`));
-    this.gameTimers.delete(`game:${gameId}`);
-  }
-
-  startTimeLimit(gameId: number, countdown: number) {
-    this.startCountdown(gameId, countdown, async () => {
-      // end game here
-      const interval = this.gameTimers.get(`game:${gameId}`);
-      if (interval) this.endGame(gameId);
-    });
-  }
-
-  async endGame(gameId: number) {
-    const game = await this.gamesService.updateTime(gameId, 'endedAt');
-    this.io.sockets
-      .to(`game:${gameId}`)
-      .emit('endGame', { endedAt: game.endedAt.toISOString() });
-    this.gameTimers.delete(`game:${gameId}`);
-  }
-
   @UseGuards(WsCookieAuthGuard)
   @SubscribeMessage('progress')
   async reflectProgress(
@@ -168,7 +130,49 @@ export class GamesGateway implements OnGatewayDisconnect {
     this.io.sockets.emit('leaderboardUpdate');
   }
 
-  async endGameEarly(gameId: number, mode: GameMode, leftPlayersCount: number) {
+  private startCountdown(
+    gameId: number,
+    countdown: number,
+    callback: CallableFunction,
+  ) {
+    const interval = setInterval(() => {
+      this.io.sockets.to(`game:${gameId}`).emit('countdown', countdown);
+      if (countdown === 0) {
+        clearInterval(interval);
+        callback();
+      } else {
+        countdown--;
+      }
+    }, 1000);
+    this.gameTimers.set(`game:${gameId}`, interval);
+  }
+
+  private stopCountdown(gameId: number) {
+    clearInterval(this.gameTimers.get(`game:${gameId}`));
+    this.gameTimers.delete(`game:${gameId}`);
+  }
+
+  private startTimeLimit(gameId: number, countdown: number) {
+    this.startCountdown(gameId, countdown, async () => {
+      // end game here
+      const interval = this.gameTimers.get(`game:${gameId}`);
+      if (interval) this.endGame(gameId);
+    });
+  }
+
+  private async endGame(gameId: number) {
+    const game = await this.gamesService.updateTime(gameId, 'endedAt');
+    this.io.sockets
+      .to(`game:${gameId}`)
+      .emit('endGame', { endedAt: game.endedAt.toISOString() });
+    this.gameTimers.delete(`game:${gameId}`);
+  }
+
+  private async endGameEarly(
+    gameId: number,
+    mode: GameMode,
+    leftPlayersCount: number,
+  ) {
     const maxPlayersCount = determineMaxPlayersCount(mode);
     const playersFinishedCount =
       await this.historiesService.countPlayersFinished(gameId);
