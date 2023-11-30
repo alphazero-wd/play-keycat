@@ -21,7 +21,10 @@ export const useTyping = (paragraph: string, gameId: number) => {
       setPrevError(() => null);
       return;
     }
+    const isCapsLockOn = e.getModifierState("CapsLock");
+    if (isCapsLockOn) setAlert("warning", "Your Caps Lock key is ON");
     if (e.key.length > 1) return;
+
     if (prevError !== null) {
       setAlert("error", "You need to correct the typo before continuing");
       return;

@@ -11,7 +11,10 @@ const badgeClassesOnSize = {
   sm: "h-[40px] w-[40px]",
 };
 
-export const RankBadge = ({ rank, size = "md" }: RankBadgeProps) => {
+export const RankBadge = ({
+  rank = "Unranked",
+  size = "md",
+}: RankBadgeProps) => {
   if (rank === "Unranked") {
     return (
       <div
@@ -25,9 +28,12 @@ export const RankBadge = ({ rank, size = "md" }: RankBadgeProps) => {
   return (
     <Image
       src={`/images/${rank.split(" ")[0].toLowerCase()}.png`}
-      width={size === "md" ? 200 : 50}
-      className="mx-auto"
-      height={size === "md" ? 200 : 50}
+      width={500}
+      className={cn(
+        "mx-auto",
+        size === "sm" ? "relative -left-1 h-12 w-12" : "h-52 w-52",
+      )}
+      height={500}
       alt={rank}
     />
   );

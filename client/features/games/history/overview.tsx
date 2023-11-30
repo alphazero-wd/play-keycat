@@ -26,13 +26,15 @@ export const Overview = ({ game }: { game: Game }) => {
       },
       {
         icon: ClockIcon,
-        text: `${format(
-          differenceInMilliseconds(
-            new Date(game.endedAt),
-            new Date(game.startedAt),
-          ),
-          "m:ss",
-        )}`,
+        text: !game.endedAt
+          ? "Happening 🔥"
+          : `${format(
+              differenceInMilliseconds(
+                new Date(game.endedAt),
+                new Date(game.startedAt),
+              ),
+              "m:ss",
+            )}`,
         label: "Duration",
       },
       {

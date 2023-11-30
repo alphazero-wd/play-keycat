@@ -42,6 +42,8 @@ export const UserMenu = ({ user }: UserMenuProps) => {
   const setLevel = useUserMenu.use.setLevel();
   const setXPsRequired = useUserMenu.use.setXPsRequired();
   const xpsRequired = useUserMenu.use.xpsRequired();
+  const setRank = useUserMenu.use.setRank();
+  const rank = useUserMenu.use.rank();
   const userMenuItems = useMemo(
     () => [
       {
@@ -66,6 +68,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
     setXPs(user.xpsGained);
     setLevel(user.currentLevel);
     setXPsRequired(user.xpsRequired);
+    setRank(user.rank);
   }, [user]);
 
   const onLogout = useCallback(async () => {
@@ -91,11 +94,11 @@ export const UserMenu = ({ user }: UserMenuProps) => {
             <ProfileXPs xpsGained={xpsGained} xpsRequired={xpsRequired} />
           </div>
         </DropdownMenuGroup>
-        <DropdownMenuGroup className="flex items-center gap-x-3 px-2 py-1.5">
+        <DropdownMenuGroup className="flex items-center px-2 py-1.5">
           <div>
-            <RankBadge size="sm" rank={user.rank} />
+            <RankBadge size="sm" rank={rank!} />
           </div>
-          <DropdownMenuLabel>
+          <DropdownMenuLabel className={rank !== "Unranked" ? "-ml-2" : "ml-1"}>
             <div className="text-base">{user.rank}</div>{" "}
             <div className="font-normal text-muted-foreground">
               {catPoints} CPs

@@ -20,7 +20,7 @@ export class HistoriesService {
   async create(
     { acc, wpm, position, gameId }: Omit<PlayerFinishedDto, 'leftPlayersCount'>,
     gameMode: GameMode,
-    currentRank: string,
+    rank: string,
     paragraph: string,
     user: User,
   ) {
@@ -31,7 +31,7 @@ export class HistoriesService {
           : 0;
       const catPoints =
         gameMode === GameMode.RANKED
-          ? calculateCPsEarned(wpm, acc, position, currentRank)
+          ? calculateCPsEarned(wpm, acc, position, rank)
           : 0;
       const results = await this.prisma.$transaction(async (client) => {
         const { newLevel, newXPsGained, hasLevelUp } = levelUp(user, xpsBonus);
@@ -122,8 +122,8 @@ export class HistoriesService {
   }
 
   checkRankUpdate(user: User, catPoints: number) {
-    const prevRank = getCurrentRank(user.catPoints - catPoints);
-    const currentRank = getCurrentRank(user.catPoints);
+    const prevRank = getCurrentRank(user.catPoints);
+    const currentRank = getCurrentRank(user.catPoints + catPoints);
     const rankUpdateStatus =
       catPoints < 0 ? RankUpdateStatus.DEMOTED : RankUpdateStatus.PROMOTED;
     return { prevRank, currentRank, rankUpdateStatus };

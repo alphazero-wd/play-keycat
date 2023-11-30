@@ -84,7 +84,12 @@ export const ProfileCard = ({
         <div className="space-y-1">
           <div className="flex w-fit items-center gap-x-3">
             <RankBadge rank={profile.rank} size="sm" />
-            <div className="text-foreground">
+            <div
+              className={cn(
+                "text-foreground",
+                profile.rank !== "Unranked" && "-ml-2",
+              )}
+            >
               <div className="text-base font-semibold">{profile.rank}</div>{" "}
               <div className="text-sm text-muted-foreground">
                 {profile.catPoints} CPs

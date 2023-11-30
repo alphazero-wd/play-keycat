@@ -27,5 +27,5 @@ export const ranks: Record<string, Rank> = {
   'Emerald III': { minCPs: 3000, minWpm: 130, maxCPsPenalty: -19 },
   'Emerald II': { minCPs: 3250, minWpm: 140, maxCPsPenalty: -20 },
   'Emerald I': { minCPs: 3500, minWpm: 150, maxCPsPenalty: -21 },
-  Rainbow: { minCPs: 4000, minWpm: 160, maxCPsPenalty: -22 },
+  Nova: { minCPs: 4000, minWpm: 160, maxCPsPenalty: -22 },
 };

@@ -122,7 +122,7 @@ export class GamesGateway implements OnGatewayDisconnect {
     @MessageBody() { gameId, leftPlayersCount, ...payload }: PlayerFinishedDto,
   ) {
     const user = socket.request.user;
-    const { players, mode, paragraph } = await this.gamesService.getDisplayInfo(
+    const { mode, paragraph, players } = await this.gamesService.getDisplayInfo(
       gameId,
     );
     await this.gamesService.removePlayer(user.id);
@@ -154,7 +154,6 @@ export class GamesGateway implements OnGatewayDisconnect {
     if (prevRank !== currentRank)
       socket.emit('rankUpdate', {
         status: rankUpdateStatus,
-        prevRank,
         currentRank,
       });
 

@@ -5,5 +5,5 @@ export const determineMaxPlayersCount = (mode: GameMode) => {
 };
 
 export const determineCountdown = (mode: GameMode) => {
-  return mode !== GameMode.PRACTICE ? 3 : 10;
+  return mode === GameMode.PRACTICE ? 3 : 10;
 };

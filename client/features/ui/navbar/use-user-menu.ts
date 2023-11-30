@@ -7,6 +7,7 @@ type State = {
   currentLevel: number;
   xpsGained: number;
   xpsRequired: number;
+  rank: string | null;
 };
 
 type Action = {
@@ -14,6 +15,7 @@ type Action = {
   setXPs: (xpsGained: number) => void;
   setLevel: (newLevel: number) => void;
   setXPsRequired: (xpsRequired: number) => void;
+  setRank: (newRank: string) => void;
 };
 
 const useUserMenuBase = create<State & Action>((set) => ({
@@ -21,7 +23,9 @@ const useUserMenuBase = create<State & Action>((set) => ({
   currentLevel: 1,
   xpsGained: 0,
   xpsRequired: 0,
+  rank: null,
   setCatPoints: (catPoints) => set(() => ({ catPoints })),
+  setRank: (newRank) => set(() => ({ rank: newRank })),
   setXPs: (xpsGained) => set(() => ({ xpsGained })),
   setLevel: (newLevel) => set(() => ({ currentLevel: newLevel })),
   setXPsRequired: (xpsRequired) => set(() => ({ xpsRequired })),

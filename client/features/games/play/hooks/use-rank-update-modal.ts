@@ -4,7 +4,6 @@ import { RankUpdateStatus } from "../types";
 
 type State = {
   isModalOpen: boolean;
-  prevRank: string | null;
   currentRank: string | null;
   status: RankUpdateStatus | null;
 };
@@ -16,7 +15,6 @@ type Action = {
 
 const initialState: State = {
   isModalOpen: false,
-  prevRank: null,
   currentRank: null,
   status: null,
 };
@@ -24,6 +22,6 @@ const initialState: State = {
 const useRankUpdateModalBase = create<State & Action>((set) => ({
   ...initialState,
   onOpen: (payload) => set(() => ({ isModalOpen: true, ...payload })),
-  onClose: () => set(() => initialState),
+  onClose: () => set(() => ({ isModalOpen: false })),
 }));
 export const useRankUpdateModal = createSelectors(useRankUpdateModalBase);
