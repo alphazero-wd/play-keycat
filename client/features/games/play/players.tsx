@@ -1,6 +1,12 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/features/ui/avatar";
 import { ProfileCard, User } from "@/features/users/profile";
 import { CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../ui/tooltip";
 import { Position } from "../history";
 import {
   getPlayerPosition,
@@ -21,6 +27,7 @@ export const Players = ({
   const players = usePlayersStore.use.players();
   const hasFinished = useGameStore.use.hasFinished();
   const endedAt = useGameStore.use.endedAt();
+  const leftPlayerIds = usePlayersStore.use.leftPlayerIds();
 
   return (
     <div className="mt-6 max-w-2xl space-y-4">
@@ -49,12 +56,24 @@ export const Players = ({
                 </span>{" "}
                 WPM
               </div>
+              <XMarkIcon className="h-5 w-5 text-red-500" />
               {gameMode !== GameMode.PRACTICE ? (
-                <div className="w-full flex-shrink-0 text-sm font-medium text-secondary-foreground">
-                  {getPlayerPosition(player.id) > 0 && (
-                    <Position position={getPlayerPosition(player.id)} />
-                  )}
-                </div>
+                endedAt && leftPlayerIds.has(player.id) ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <XMarkIcon className="h-5 w-5 text-red-500" />
+                      </TooltipTrigger>
+                      <TooltipContent>AFK Player</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <div className="w-full flex-shrink-0 text-sm font-medium text-secondary-foreground">
+                    {getPlayerPosition(player.id) > 0 && (
+                      <Position position={getPlayerPosition(player.id)} />
+                    )}
+                  </div>
+                )
               ) : (
                 <div className="text-2xl">
                   {hasFinished ? (

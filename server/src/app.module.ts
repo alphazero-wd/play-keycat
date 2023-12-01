@@ -9,6 +9,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { GamesModule } from './games/games.module';
 import { HistoriesModule } from './histories/histories.module';
 import { LeaderboardsModule } from './leaderboards/leaderboards.module';
+import { APP_FILTER } from '@nestjs/core';
+import { GlobalExceptionFilter } from './common/filters';
 
 @Module({
   imports: [
@@ -29,6 +31,9 @@ import { LeaderboardsModule } from './leaderboards/leaderboards.module';
     LeaderboardsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_FILTER, useClass: GlobalExceptionFilter },
+  ],
 })
 export class AppModule {}

@@ -71,15 +71,6 @@ describe('AuthService', () => {
         BadRequestException,
       );
     });
-
-    it('should throw an internal server error exception if something goes wrong', async () => {
-      jest
-        .spyOn(usersService, 'create')
-        .mockRejectedValue(new InternalServerErrorException());
-      expect(authService.register(createUserDto)).rejects.toThrowError(
-        InternalServerErrorException,
-      );
-    });
   });
 
   describe('validateUser', () => {
@@ -104,16 +95,6 @@ describe('AuthService', () => {
         authService.validateUser(user.email, user.password),
       ).rejects.toThrowError(BadRequestException);
     });
-
-    it('should throw an internal server error exception when something goes wrong', async () => {
-      jest
-        .spyOn(usersService, 'findByEmail')
-        .mockRejectedValue(new InternalServerErrorException());
-      expect(
-        authService.validateUser(user.email, user.password),
-      ).rejects.toThrowError(InternalServerErrorException);
-    });
-
     it('should log the user in if the provided data is correct', async () => {
       jest.spyOn(usersService, 'findByEmail').mockResolvedValue(user);
       const password = 'p@ssw0rD';

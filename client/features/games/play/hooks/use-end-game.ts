@@ -58,12 +58,7 @@ export const useEndGame = (
       finishGame();
       sendResult();
     }
-  }, [
-    typingStats.charsTyped,
-    typingStats.prevError,
-    game.paragraph,
-    sendResult,
-  ]);
+  }, [typingStats.charsTyped, typingStats.prevError, game.paragraph]);
 
   useEffect(() => {
     const hasTimeup = !hasFinished && endedAt;

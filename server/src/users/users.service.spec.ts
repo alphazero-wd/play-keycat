@@ -94,17 +94,6 @@ describe('UsersService', () => {
         }),
       ).rejects.toThrowError(BadRequestException);
     });
-
-    it('should throw an internal server error if other error is thrown', async () => {
-      jest.spyOn(prisma.user, 'create').mockRejectedValue('some error');
-      expect(
-        service.create({
-          username: user.username,
-          email: user.email,
-          password: user.password,
-        }),
-      ).rejects.toThrowError(InternalServerErrorException);
-    });
   });
 
   describe('findByEmail', () => {

@@ -1,6 +1,8 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -9,7 +11,6 @@ import { PrismaError } from '../prisma/prisma-error';
 import { WsException } from '@nestjs/websockets';
 import { UsersService } from '../users/users.service';
 import { determineMaxPlayersCount, generateParagraph } from './utils';
-import { FindOrCreateGameDto } from './dto';
 
 @Injectable()
 export class GamesService {
@@ -18,12 +19,61 @@ export class GamesService {
     private usersService: UsersService,
   ) {}
 
-  async findOrCreate(user: User, { gameMode }: FindOrCreateGameDto) {
-    await this.checkPlayerAlreadyInGame(user.id);
-    let gameIdToJoin = await this.findOne(user, gameMode);
-    if (!gameIdToJoin) gameIdToJoin = await this.create(user, gameMode);
-    await this.addPlayer(gameIdToJoin, user.id);
-    return gameIdToJoin;
+  async checkPlayerAlreadyInGame(playerId: number) {
+    try {
+      const player = await this.usersService.findById(playerId);
+      if (player.inGameId)
+        throw new ForbiddenException(
+          'You are already in a game. Please leave the game before joining in another one',
+        );
+    } catch (error) {
+      if (error instanceof InternalServerErrorException)
+        throw new InternalServerErrorException('Something went wrong');
+      throw error;
+    }
+  }
+
+  async updateCurrentlyPlayingGame(playerId: number, gameId: number | null) {
+    await this.prisma.user.update({
+      where: { id: playerId },
+      data: { inGameId: gameId },
+    });
+  }
+
+  async findOne(user: User, gameMode: GameMode) {
+    const maxPlayersCount = determineMaxPlayersCount(gameMode);
+    try {
+      const result = await this.prisma.$queryRaw<[] | [{ id: number }]>`
+        SELECT g."id" FROM "Game" g
+        LEFT JOIN "User" u
+        ON u."inGameId" = g."id"
+        WHERE g."minPoints" <= ${user.catPoints}
+        AND g."maxPoints" >= ${user.catPoints}
+        AND g."startedAt" IS NULL
+        AND g."mode"::text = ${gameMode}
+        GROUP BY g."id"
+        HAVING COUNT(u."id") < ${maxPlayersCount}
+        LIMIT 1;
+      `;
+      return result[0]?.id;
+    } catch (error) {
+      throw new InternalServerErrorException('Something went wrong');
+    }
+  }
+
+  async create(user: User, gameMode: GameMode) {
+    try {
+      const paragraph = generateParagraph();
+      const minPoints = Math.max(user.catPoints - 250, 0);
+      const maxPoints = user.catPoints + 250;
+
+      const game = await this.prisma.game.create({
+        data: { minPoints, maxPoints, paragraph, mode: gameMode },
+      });
+      return game.id;
+    } catch (error) {
+      throw new InternalServerErrorException('Something went wrong');
+    }
   }
 
   async getDisplayInfo(gameId: number) {
@@ -45,22 +95,6 @@ export class GamesService {
     }
   }
 
-  async removePlayer(playerId: number) {
-    try {
-      const { inGameId } = await this.usersService.findById(playerId);
-      await this.prisma.user.update({
-        where: { id: playerId },
-        data: { inGameId: null },
-      });
-      return inGameId;
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === PrismaError.RecordNotFound)
-          throw new WsException('Cannot find the player in the game');
-      }
-    }
-  }
-
   async updateTime(
     gameId: number,
     field: 'startedAt' | 'endedAt',
@@ -79,13 +113,6 @@ export class GamesService {
           throw new WsException('Cannot update game with the given id');
       throw new WsException('Something went wrong');
     }
-  }
-
-  async countPlayersInGame(gameId: number) {
-    const playersCount = await this.prisma.user.count({
-      where: { inGameId: gameId },
-    });
-    return playersCount;
   }
 
   async removeIfEmpty(gameId: number) {
@@ -120,60 +147,5 @@ export class GamesService {
           throw new NotFoundException('Cannot find game with the given id');
       throw new NotFoundException('Something went wrong');
     }
-  }
-
-  private async checkPlayerAlreadyInGame(playerId: number) {
-    const player = await this.usersService.findById(playerId);
-    if (!player) throw new WsException('Player not found');
-    if (player.inGameId)
-      throw new ForbiddenException(
-        'You are already in a game. Please leave the game before joining in another one',
-      );
-  }
-
-  private async addPlayer(gameId: number, playerId: number) {
-    try {
-      await this.prisma.user.update({
-        where: { id: playerId },
-        data: { inGameId: gameId },
-      });
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError)
-        if (error.code === PrismaError.ForeignViolation)
-          throw new WsException('Game not found');
-      throw error;
-    }
-  }
-
-  private async findOne(user: User, gameMode: GameMode) {
-    const maxPlayersCount = determineMaxPlayersCount(gameMode);
-
-    const result = await this.prisma.$queryRaw<[] | [{ id: number }]>`
-      SELECT g."id" FROM "Game" g
-      LEFT JOIN "User" u
-      ON u."inGameId" = g."id"
-      WHERE g."minPoints" <= ${user.catPoints}
-      AND g."maxPoints" >= ${user.catPoints}
-      AND g."startedAt" IS NULL
-      AND g."mode"::text = ${gameMode}
-      GROUP BY g."id"
-      HAVING COUNT(u."id") < ${maxPlayersCount}
-      LIMIT 1;
-    `;
-    return result[0]?.id;
-  }
-
-  private async create(user: User, gameMode: GameMode) {
-    const paragraph = generateParagraph();
-
-    const game = await this.prisma.game.create({
-      data: {
-        minPoints: Math.max(user.catPoints - 250, 0),
-        maxPoints: user.catPoints + 250,
-        paragraph,
-        mode: gameMode,
-      },
-    });
-    return game.id;
   }
 }

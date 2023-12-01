@@ -87,7 +87,7 @@ export class GamesGateway implements OnGatewayDisconnect {
     const { mode, paragraph, players } = await this.gamesService.getDisplayInfo(
       gameId,
     );
-    await this.gamesService.removePlayer(user.id);
+    await this.gamesService.updateCurrentlyPlayingGame(user.id, null);
     const { hasLevelUp, history, player, xpsBonus } =
       await this.historiesService.create(
         { ...payload, gameId },
@@ -184,16 +184,16 @@ export class GamesGateway implements OnGatewayDisconnect {
   async handleDisconnect(socket: SocketUser) {
     const currentUser = socket.request.user;
     if (!currentUser) return;
-    const gameId = await this.gamesService.removePlayer(currentUser.id);
+    await this.gamesService.updateCurrentlyPlayingGame(currentUser.id, null);
 
-    if (!gameId) return;
-
-    this.io.sockets.to(`game:${gameId}`).emit('playerLeft', {
+    this.io.sockets.to(`game:${currentUser.inGameId}`).emit('playerLeft', {
       id: currentUser.id,
       username: currentUser.username,
     });
 
-    const hasDeleted = await this.gamesService.removeIfEmpty(gameId);
-    if (hasDeleted) this.stopCountdown(gameId);
+    const hasDeleted = await this.gamesService.removeIfEmpty(
+      currentUser.inGameId,
+    );
+    if (hasDeleted) this.stopCountdown(currentUser.inGameId);
   }
 }
