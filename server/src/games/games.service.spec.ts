@@ -1,21 +1,16 @@
+import { faker } from '@faker-js/faker';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { GamesService } from './games.service';
-import {
-  BadRequestException,
-  ForbiddenException,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { WsException } from '@nestjs/websockets';
 import { Game, GameMode, Prisma, User } from '@prisma/client';
-import { userFixture } from '../users/test-utils';
-import { UsersService } from '../users/users.service';
+import { PrismaError } from '../prisma/prisma-error';
 import { PrismaService } from '../prisma/prisma.service';
 import { getCurrentRank } from '../ranks';
+import { userFixture } from '../users/test-utils';
+import { UsersService } from '../users/users.service';
 import { determineXPsRequired } from '../xps';
+import { GamesService } from './games.service';
 import { gameFixture } from './test-utils';
-import { PrismaError } from '../prisma/prisma-error';
-import { WsException } from '@nestjs/websockets';
-import { determineMaxPlayersCount } from './utils';
 
 describe('GamesService', () => {
   let gamesService: GamesService;
@@ -100,30 +95,6 @@ describe('GamesService', () => {
   });
 
   describe('updateCurrentlyPlayingGame', () => {
-    it('should throw an exception if user is not found', async () => {
-      jest.spyOn(prisma.user, 'update').mockRejectedValue(
-        new Prisma.PrismaClientKnownRequestError('', {
-          clientVersion: '5.0',
-          code: PrismaError.RecordNotFound,
-        }),
-      );
-      expect(
-        gamesService.updateCurrentlyPlayingGame(user.id, game.id),
-      ).rejects.toThrowError(NotFoundException);
-    });
-
-    it('should throw an exception if game is not found', async () => {
-      jest.spyOn(prisma.user, 'update').mockRejectedValue(
-        new Prisma.PrismaClientKnownRequestError('', {
-          clientVersion: '5.0',
-          code: PrismaError.ForeignViolation,
-        }),
-      );
-      expect(
-        gamesService.updateCurrentlyPlayingGame(user.id, game.id),
-      ).rejects.toThrowError(NotFoundException);
-    });
-
     it('should add player to game', async () => {
       jest.spyOn(prisma.user, 'update').mockResolvedValue(user);
       expect(
@@ -143,13 +114,11 @@ describe('GamesService', () => {
     it('should return undefined if no game is found', async () => {
       jest.spyOn(prisma, '$queryRaw').mockResolvedValue([]);
       expect(await gamesService.findOne(user, GameMode.CASUAL)).toBeUndefined();
-      expect(determineMaxPlayersCount).toHaveBeenCalledWith(GameMode.CASUAL);
     });
 
     it('should return game id to join if there is at least 1', async () => {
-      jest.spyOn(prisma, '$queryRaw').mockResolvedValue([{ id: 100 }]);
-      expect(await gamesService.findOne(user, GameMode.RANKED)).toBeUndefined();
-      expect(determineMaxPlayersCount).toHaveBeenCalledWith(GameMode.RANKED);
+      jest.spyOn(prisma, '$queryRaw').mockResolvedValue([{ id: game.id }]);
+      expect(await gamesService.findOne(user, GameMode.RANKED)).toBe(game.id);
     });
   });
 
@@ -157,6 +126,110 @@ describe('GamesService', () => {
     it('should create a game', async () => {
       jest.spyOn(prisma.game, 'create').mockResolvedValue(game);
       expect(await gamesService.create(user, GameMode.CASUAL)).toBe(game.id);
+    });
+  });
+
+  describe('getDisplayInfo', () => {
+    it('should throw an exception if game is not found', async () => {
+      jest.spyOn(prisma.game, 'findUniqueOrThrow').mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('not found', {
+          code: PrismaError.RecordNotFound,
+          clientVersion: '5.0',
+        }),
+      );
+      expect(gamesService.getDisplayInfo(game.id)).rejects.toThrowError(
+        WsException,
+      );
+    });
+
+    it('should return game if it is found', async () => {
+      jest.spyOn(prisma.game, 'findUniqueOrThrow').mockResolvedValue(game);
+      expect(gamesService.getDisplayInfo(game.id)).resolves.toEqual(game);
+    });
+  });
+
+  describe('updateTime', () => {
+    it('should throw an exception if game is not found', async () => {
+      jest.spyOn(prisma.game, 'update').mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('not found', {
+          code: PrismaError.RecordNotFound,
+          clientVersion: '5.0',
+        }),
+      );
+      expect(
+        gamesService.updateTime(game.id, 'startedAt'),
+      ).rejects.toThrowError(WsException);
+    });
+
+    it('should update the game time', async () => {
+      jest.spyOn(prisma.game, 'update').mockResolvedValue(game);
+      const startedAt = faker.date.past();
+      expect(
+        gamesService.updateTime(game.id, 'startedAt', startedAt),
+      ).resolves.toEqual(game);
+      expect(prisma.game.update).toHaveBeenCalledWith({
+        where: { id: game.id },
+        data: { startedAt },
+      });
+    });
+  });
+
+  describe('removeIfEmpty', () => {
+    it('should throw an error if game is not found', () => {
+      jest.spyOn(prisma.user, 'count').mockResolvedValue(0);
+      jest.spyOn(prisma.gameHistory, 'count').mockResolvedValue(0);
+      jest.spyOn(prisma.game, 'delete').mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('', {
+          code: PrismaError.RecordNotFound,
+          clientVersion: '5.0',
+        }),
+      );
+      expect(gamesService.removeIfEmpty(game.id)).rejects.toThrowError(
+        WsException,
+      );
+    });
+
+    it('should not delete the game if there are players in-game', async () => {
+      jest.spyOn(prisma.user, 'count').mockResolvedValue(3);
+      jest.spyOn(prisma.user, 'count').mockResolvedValue(0);
+      jest.spyOn(prisma.game, 'delete').mockResolvedValue(game);
+      expect(await gamesService.removeIfEmpty(game.id)).toBeFalsy();
+      expect(prisma.game.delete).toHaveBeenCalledTimes(0);
+    });
+
+    it('should not delete the game if there are histories associated with the games', async () => {
+      jest.spyOn(prisma.user, 'count').mockResolvedValue(0);
+      jest.spyOn(prisma.gameHistory, 'count').mockResolvedValue(2);
+      jest.spyOn(prisma.game, 'delete').mockResolvedValue(game);
+      expect(await gamesService.removeIfEmpty(game.id)).toBeFalsy();
+      expect(prisma.game.delete).toHaveBeenCalledTimes(0);
+    });
+
+    it('should delete the game if it has been abandoned', async () => {
+      jest.spyOn(prisma.user, 'count').mockResolvedValue(0);
+      jest.spyOn(prisma.gameHistory, 'count').mockResolvedValue(0);
+      jest.spyOn(prisma.game, 'delete').mockResolvedValue(game);
+      expect(await gamesService.removeIfEmpty(game.id)).toBeTruthy();
+      expect(prisma.game.delete).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('findById', () => {
+    it('should throw an exception if game is not found', async () => {
+      jest.spyOn(prisma.game, 'findUniqueOrThrow').mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('not found', {
+          code: PrismaError.RecordNotFound,
+          clientVersion: '5.0',
+        }),
+      );
+      expect(gamesService.findById(game.id, user.id)).rejects.toThrowError(
+        NotFoundException,
+      );
+    });
+
+    it('should return game if it is found', async () => {
+      jest.spyOn(prisma.game, 'findUniqueOrThrow').mockResolvedValue(game);
+      expect(gamesService.findById(game.id, user.id)).resolves.toEqual(game);
     });
   });
 });

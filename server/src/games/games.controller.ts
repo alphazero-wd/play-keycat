@@ -26,11 +26,11 @@ export class GamesController {
     @CurrentUser() user: User,
     @Body() { gameMode }: FindOrCreateGameDto,
   ) {
+    await this.gamesService.checkPlayerAlreadyInGame(user.id);
+    let gameIdToJoin = await this.gamesService.findOne(user, gameMode);
+    if (!gameIdToJoin)
+      gameIdToJoin = await this.gamesService.create(user, gameMode);
     try {
-      await this.gamesService.checkPlayerAlreadyInGame(user.id);
-      let gameIdToJoin = await this.gamesService.findOne(user, gameMode);
-      if (!gameIdToJoin)
-        gameIdToJoin = await this.gamesService.create(user, gameMode);
       await this.gamesService.updateCurrentlyPlayingGame(user.id, gameIdToJoin);
       return gameIdToJoin;
     } catch (error) {
