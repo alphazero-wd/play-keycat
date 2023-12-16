@@ -125,7 +125,7 @@ export class GamesService {
       const toBeDeleted = historiesCount === 0 && playersCount === 0;
       // if the game has ended, but everyone has left the game then don't delete the game
       if (toBeDeleted) await this.prisma.game.delete({ where: { id: gameId } });
-      return toBeDeleted;
+      return playersCount;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)
         if (error.code === PrismaError.RecordNotFound)
