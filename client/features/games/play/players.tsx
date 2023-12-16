@@ -57,7 +57,6 @@ export const Players = ({
                 </span>{" "}
                 WPM
               </div>
-              <XMarkIcon className="h-5 w-5 text-red-500" />
               {gameMode !== GameMode.PRACTICE ? (
                 <div className="w-full flex-shrink-0 text-sm font-medium text-secondary-foreground">
                   {getPlayerPosition(player.id) > 0 && (

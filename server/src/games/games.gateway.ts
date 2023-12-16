@@ -19,6 +19,7 @@ import {
   addSeconds,
   calculateAverageCPs,
   calculateTimeLimit,
+  checkAllFinished,
   determineCountdown,
   determineMaxPlayersCount,
 } from './utils';
@@ -52,7 +53,7 @@ export class GamesGateway implements OnGatewayDisconnect {
       const game = await this.gamesService.updateTime(
         gameId,
         'startedAt',
-        addSeconds(countdown),
+        countdown,
       );
       this.gameTimersService.startCountdown(this.io, gameId, countdown, () => {
         const timeLimit = calculateTimeLimit(averageCPs, game.paragraph);
@@ -127,6 +128,7 @@ export class GamesGateway implements OnGatewayDisconnect {
         xpsRequired: determineXPsRequired(player.currentLevel),
       });
 
+    this.endGameEarly(gameId, mode, leftPlayersCount);
     this.io.sockets.emit('leaderboardUpdate');
   }
 
@@ -162,5 +164,20 @@ export class GamesGateway implements OnGatewayDisconnect {
         await this.endGame(gameId);
       },
     );
+  }
+  private async endGameEarly(
+    gameId: number,
+    mode: GameMode,
+    leftPlayersCount: number,
+  ) {
+    const playersFinished = await this.historiesService.countPlayersFinished(
+      gameId,
+    );
+    const allFinished = checkAllFinished(
+      leftPlayersCount,
+      determineMaxPlayersCount(mode),
+      playersFinished,
+    );
+    if (allFinished) await this.endGame(gameId);
   }
 }

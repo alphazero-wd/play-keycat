@@ -11,6 +11,7 @@ import { UsersService } from '../users/users.service';
 import { determineXPsRequired } from '../xps';
 import { GamesService } from './games.service';
 import { gameFixture } from './test-utils';
+import { addSeconds } from './utils';
 
 describe('GamesService', () => {
   let gamesService: GamesService;
@@ -163,13 +164,12 @@ describe('GamesService', () => {
 
     it('should update the game time', async () => {
       jest.spyOn(prisma.game, 'update').mockResolvedValue(game);
-      const startedAt = faker.date.past();
       expect(
-        gamesService.updateTime(game.id, 'startedAt', startedAt),
+        gamesService.updateTime(game.id, 'startedAt', 10),
       ).resolves.toEqual(game);
       expect(prisma.game.update).toHaveBeenCalledWith({
         where: { id: game.id },
-        data: { startedAt },
+        data: { startedAt: addSeconds(10) },
       });
     });
   });
@@ -191,9 +191,9 @@ describe('GamesService', () => {
 
     it('should not delete the game if there are players in-game', async () => {
       jest.spyOn(prisma.user, 'count').mockResolvedValue(3);
-      jest.spyOn(prisma.user, 'count').mockResolvedValue(0);
+      jest.spyOn(prisma.gameHistory, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.game, 'delete').mockResolvedValue(game);
-      expect(await gamesService.removeIfEmpty(game.id)).toBeFalsy();
+      expect(await gamesService.removeIfEmpty(game.id)).toBe(3);
       expect(prisma.game.delete).toHaveBeenCalledTimes(0);
     });
 
@@ -201,7 +201,7 @@ describe('GamesService', () => {
       jest.spyOn(prisma.user, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.gameHistory, 'count').mockResolvedValue(2);
       jest.spyOn(prisma.game, 'delete').mockResolvedValue(game);
-      expect(await gamesService.removeIfEmpty(game.id)).toBeFalsy();
+      expect(await gamesService.removeIfEmpty(game.id)).toBe(0);
       expect(prisma.game.delete).toHaveBeenCalledTimes(0);
     });
 
@@ -209,7 +209,7 @@ describe('GamesService', () => {
       jest.spyOn(prisma.user, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.gameHistory, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.game, 'delete').mockResolvedValue(game);
-      expect(await gamesService.removeIfEmpty(game.id)).toBeTruthy();
+      expect(await gamesService.removeIfEmpty(game.id)).toBe(0);
       expect(prisma.game.delete).toHaveBeenCalledTimes(1);
     });
   });

@@ -9,7 +9,11 @@ import { GameMode, Prisma, User } from '@prisma/client';
 import { PrismaError } from '../prisma/prisma-error';
 import { WsException } from '@nestjs/websockets';
 import { UsersService } from '../users/users.service';
-import { determineMaxPlayersCount, generateParagraph } from './utils';
+import {
+  addSeconds,
+  determineMaxPlayersCount,
+  generateParagraph,
+} from './utils';
 
 @Injectable()
 export class GamesService {
@@ -97,12 +101,12 @@ export class GamesService {
   async updateTime(
     gameId: number,
     field: 'startedAt' | 'endedAt',
-    date = new Date(),
+    extraSeconds: number = 0,
   ) {
     try {
       const game = await this.prisma.game.update({
         where: { id: gameId },
-        data: { [field]: date },
+        data: { [field]: addSeconds(extraSeconds) },
       });
 
       return game;
