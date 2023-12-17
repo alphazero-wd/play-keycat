@@ -16,10 +16,10 @@ import { determineXPsRequired } from '../xps';
 import { PlayerFinishedDto, PlayerProgressDto } from './dto';
 import { GamesService } from './games.service';
 import {
-  addSeconds,
   calculateAverageCPs,
   calculateTimeLimit,
   checkAllFinished,
+  checkRankUpdate,
   determineCountdown,
   determineMaxPlayersCount,
 } from './utils';
@@ -83,24 +83,26 @@ export class GamesGateway implements OnGatewayDisconnect {
   @SubscribeMessage('playerFinished')
   async onPlayerFinished(
     @ConnectedSocket() socket: SocketUser,
-    @MessageBody() { gameId, leftPlayersCount, ...payload }: PlayerFinishedDto,
+    @MessageBody() { leftPlayersCount, ...payload }: PlayerFinishedDto,
   ) {
     const user = socket.request.user;
     const { mode, paragraph, players } = await this.gamesService.getDisplayInfo(
-      gameId,
+      payload.gameId,
     );
     await this.gamesService.updateCurrentlyPlayingGame(user.id, null);
     const { hasLevelUp, history, player, xpsBonus } =
       await this.historiesService.create(
-        { ...payload, gameId },
+        payload,
         mode,
         getCurrentRank(calculateAverageCPs(players)),
         paragraph,
         user,
       );
 
-    const { prevRank, currentRank, rankUpdateStatus } =
-      this.historiesService.checkRankUpdate(user, history.catPoints);
+    const { prevRank, currentRank, rankUpdateStatus } = checkRankUpdate(
+      user,
+      history.catPoints,
+    );
 
     socket.emit('gameSummary', {
       wpm: payload.wpm,
@@ -112,7 +114,7 @@ export class GamesGateway implements OnGatewayDisconnect {
     });
 
     this.io.sockets
-      .to(`game:${gameId}`)
+      .to(`game:${payload.gameId}`)
       .emit('updatePosition', { id: player.id, position: payload.position });
 
     if (prevRank !== currentRank)
@@ -128,7 +130,7 @@ export class GamesGateway implements OnGatewayDisconnect {
         xpsRequired: determineXPsRequired(player.currentLevel),
       });
 
-    this.endGameEarly(gameId, mode, leftPlayersCount);
+    await this.endGameEarly(payload.gameId, mode, leftPlayersCount);
     this.io.sockets.emit('leaderboardUpdate');
   }
 
@@ -155,13 +157,8 @@ export class GamesGateway implements OnGatewayDisconnect {
   }
 
   private startTimeLimit(gameId: string, countdown: number) {
-    this.gameTimersService.startCountdown(
-      this.io,
-      gameId,
-      countdown,
-      async () => {
-        await this.endGame(gameId);
-      },
+    this.gameTimersService.startCountdown(this.io, gameId, countdown, () =>
+      this.endGame(gameId),
     );
   }
   private async endGameEarly(

@@ -3,7 +3,7 @@ import { GamesGateway } from './games.gateway';
 import { GamesService } from './games.service';
 import { GameTimersService } from '../game-timers/game-timers.service';
 import { HistoriesService } from '../histories/histories.service';
-import { Game, GameMode, User } from '@prisma/client';
+import { Game, GameHistory, GameMode, User } from '@prisma/client';
 import { userFixture } from '../users/test-utils';
 import { gameFixture } from './test-utils';
 import { Server } from 'socket.io';
@@ -12,8 +12,13 @@ import {
   calculateAverageCPs,
   calculateTimeLimit,
   determineCountdown,
+  determineMaxPlayersCount,
 } from './utils';
 import { faker } from '@faker-js/faker';
+import { PlayerFinishedDto } from './dto';
+import { historyFixture } from '../histories/test-utils';
+import { RankUpdateStatus, getCurrentRank } from '../ranks';
+import { determineXPsRequired } from '../xps';
 
 jest.useFakeTimers();
 jest.spyOn(global, 'setInterval');
@@ -21,6 +26,8 @@ jest.spyOn(global, 'setInterval');
 describe('GamesGateway', () => {
   let gateway: GamesGateway;
   let gamesService: GamesService;
+  let gameTimersService: GameTimersService;
+  let historiesService: HistoriesService;
   let user: User;
   let game: Game;
   let socket: SocketUser;
@@ -36,16 +43,26 @@ describe('GamesGateway', () => {
           useValue: {
             getDisplayInfo: jest.fn(),
             updateTime: jest.fn(),
+            updateCurrentlyPlayingGame: jest.fn(),
+            removeIfEmpty: jest.fn(),
           },
         },
-        { provide: HistoriesService, useValue: {} },
+        {
+          provide: HistoriesService,
+          useValue: {
+            create: jest.fn(),
+            countPlayersFinished: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     gateway = module.get<GamesGateway>(GamesGateway);
     gamesService = module.get<GamesService>(GamesService);
-    user = userFixture();
+    gameTimersService = module.get<GameTimersService>(GameTimersService);
+    historiesService = module.get<HistoriesService>(HistoriesService);
     game = gameFixture();
+    user = userFixture({ inGameId: game.id });
     socket = {
       join: jest.fn(),
       emit: jest.fn(),
@@ -56,6 +73,7 @@ describe('GamesGateway', () => {
         to: jest.fn().mockReturnValue({
           emit: jest.fn(),
         }),
+        emit: jest.fn(),
       },
     } as unknown as Server;
     gateway.io = io;
@@ -84,6 +102,7 @@ describe('GamesGateway', () => {
           gateway.io.sockets.to(`game:${game.id}`).emit,
         ).toHaveBeenLastCalledWith('players', players);
       });
+
       it('should broadcast the countdown to all players in a game', async () => {
         jest.spyOn(gamesService, 'getDisplayInfo').mockResolvedValueOnce({
           players: [user, userFixture()],
@@ -126,6 +145,25 @@ describe('GamesGateway', () => {
         expect(
           gateway.io.sockets.to(`game:${game.id}`).emit,
         ).toHaveBeenCalledTimes(countdown + timeLimit + 3);
+      });
+
+      it('should end game after the time limit is over', async () => {
+        const players: User[] = [user, userFixture()];
+        const paragraph = game.paragraph;
+        jest.spyOn(gamesService, 'getDisplayInfo').mockResolvedValueOnce({
+          players,
+          paragraph,
+          mode: GameMode.CASUAL,
+        });
+        const countdown = determineCountdown(GameMode.RANKED);
+        const averageCPs = calculateAverageCPs(players);
+        const timeLimit = calculateTimeLimit(averageCPs, paragraph);
+        await gateway.joinGame(socket, game.id);
+        jest.advanceTimersByTime((countdown + timeLimit + 1) * 1000);
+        expect(gamesService.updateTime).toHaveBeenLastCalledWith(
+          game.id,
+          'endedAt',
+        );
       });
     });
 
@@ -184,5 +222,147 @@ describe('GamesGateway', () => {
     });
   });
 
-  describe('playerFinished', () => {});
+  describe('playerFinished', () => {
+    let payload: PlayerFinishedDto;
+    let history: GameHistory;
+    let saveHistoryResult: Awaited<ReturnType<HistoriesService['create']>>;
+    let xpsBonus: number;
+    beforeEach(async () => {
+      xpsBonus = faker.number.int({ min: 0, max: 400 });
+      history = historyFixture(game.id, user.id);
+      saveHistoryResult = {
+        hasLevelUp: false,
+        history,
+        player: user,
+        xpsBonus,
+      };
+      jest.spyOn(gamesService, 'getDisplayInfo').mockResolvedValue({
+        mode: GameMode.RANKED,
+        paragraph: game.paragraph,
+        players: [user, userFixture()],
+      });
+      jest
+        .spyOn(historiesService, 'create')
+        .mockResolvedValue(saveHistoryResult);
+      payload = {
+        acc: faker.number.float({ min: 0, max: 100 }),
+        gameId: game.id,
+        leftPlayersCount: 1,
+        position: 1,
+        wpm: faker.number.float({ min: 1, max: 200 }),
+      };
+    });
+    it('should remove player from game upon finishing', async () => {
+      await gateway.onPlayerFinished(socket, payload);
+      expect(gamesService.updateCurrentlyPlayingGame).toHaveBeenCalledTimes(1);
+      expect(gamesService.updateCurrentlyPlayingGame).toHaveBeenLastCalledWith(
+        user.id,
+        null,
+      );
+    });
+
+    it('should send a game summary back to each player in a game', async () => {
+      await gateway.onPlayerFinished(socket, payload);
+      expect(socket.emit).toHaveBeenCalledWith('gameSummary', {
+        wpm: payload.wpm,
+        acc: payload.acc,
+        position: payload.position,
+        catPoints: history.catPoints,
+        totalXPsBonus: xpsBonus,
+        newXPsGained: user.xpsGained,
+      });
+    });
+
+    it('should end game early if all players in-game have finished', async () => {
+      jest
+        .spyOn(gamesService, 'updateTime')
+        .mockResolvedValue({ ...game, mode: GameMode.RANKED });
+      jest.spyOn(historiesService, 'countPlayersFinished').mockResolvedValue(1);
+      await gateway.onPlayerFinished(socket, payload);
+      expect(gamesService.updateTime).toHaveBeenCalledWith(game.id, 'endedAt');
+      expect(
+        gateway.io.sockets.to(`game:${game.id}`).emit,
+      ).toHaveBeenLastCalledWith('endGame', {
+        endedAt: game.endedAt.toISOString(),
+      });
+    });
+
+    it("should broadcast the current player's position to all players in a game", async () => {
+      await gateway.onPlayerFinished(socket, payload);
+      expect(
+        gateway.io.sockets.to(`game:${game.id}`).emit,
+      ).toHaveBeenCalledWith('updatePosition', {
+        id: user.id,
+        position: payload.position,
+      });
+    });
+
+    it('should send a rank update message back to a player', async () => {
+      jest.spyOn(historiesService, 'create').mockResolvedValue({
+        ...saveHistoryResult,
+        history: { ...history, catPoints: 500 },
+      });
+      await gateway.onPlayerFinished(socket, payload);
+      expect(socket.emit).toHaveBeenCalledWith('rankUpdate', {
+        status: RankUpdateStatus.PROMOTED,
+        currentRank: getCurrentRank(user.catPoints + 500),
+      });
+    });
+
+    it('should send a level up message back to a player', async () => {
+      jest.spyOn(historiesService, 'create').mockResolvedValue({
+        ...saveHistoryResult,
+        hasLevelUp: true,
+      });
+      await gateway.onPlayerFinished(socket, payload);
+      expect(socket.emit).toHaveBeenCalledWith('levelUp', {
+        xpsGained: user.xpsGained,
+        xpsRequired: determineXPsRequired(user.currentLevel),
+        currentLevel: user.currentLevel,
+      });
+    });
+
+    it('should broadcast a leaderboard update', async () => {
+      await gateway.onPlayerFinished(socket, payload);
+      expect(gateway.io.sockets.emit).toHaveBeenLastCalledWith(
+        'leaderboardUpdate',
+      );
+    });
+  });
+
+  describe('handleDisconnect', () => {
+    it('should remove player from the game', async () => {
+      const remainingPlayersCount =
+        determineMaxPlayersCount(GameMode.RANKED) - 1;
+      jest
+        .spyOn(gamesService, 'removeIfEmpty')
+        .mockResolvedValue(remainingPlayersCount);
+      jest.spyOn(gameTimersService, 'stopCountdown');
+      await gateway.handleDisconnect(socket);
+      expect(
+        gateway.io.sockets.to(`game:${game.id}`).emit,
+      ).toHaveBeenCalledWith('playerLeft', {
+        id: user.id,
+        username: user.username,
+      });
+      expect(gamesService.updateCurrentlyPlayingGame).toHaveBeenCalledWith(
+        user.id,
+        null,
+      );
+      expect(gameTimersService.stopCountdown).not.toHaveBeenCalled();
+    });
+
+    it('should remove the game if no players are in-game', async () => {
+      jest.spyOn(gamesService, 'updateTime').mockResolvedValue(game);
+      jest.spyOn(gamesService, 'removeIfEmpty').mockResolvedValue(0);
+      jest.spyOn(gameTimersService, 'stopCountdown');
+      await gateway.handleDisconnect(socket);
+      expect(gamesService.updateTime).toBeCalledWith(game.id, 'endedAt');
+      expect(
+        gateway.io.sockets.to(`game:${game.id}`).emit,
+      ).toHaveBeenCalledWith('endGame', {
+        endedAt: game.endedAt.toISOString(),
+      });
+    });
+  });
 });

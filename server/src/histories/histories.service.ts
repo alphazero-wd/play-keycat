@@ -9,7 +9,6 @@ import { PrismaError } from '../prisma/prisma-error';
 import { PrismaService } from '../prisma/prisma.service';
 import { PlayerFinishedDto } from '../games/dto';
 import { calculateCPsEarned } from './utils';
-import { RankUpdateStatus, getCurrentRank } from '../ranks';
 import { levelUp } from './utils';
 import { calculateXPsEarned } from '../xps';
 
@@ -119,13 +118,5 @@ export class HistoriesService {
       orderBy: { game: { startedAt: 'desc' } },
     });
     return { playerHistories, playerHistoriesCount };
-  }
-
-  checkRankUpdate(user: User, catPoints: number) {
-    const prevRank = getCurrentRank(user.catPoints);
-    const currentRank = getCurrentRank(user.catPoints + catPoints);
-    const rankUpdateStatus =
-      catPoints < 0 ? RankUpdateStatus.DEMOTED : RankUpdateStatus.PROMOTED;
-    return { prevRank, currentRank, rankUpdateStatus };
   }
 }

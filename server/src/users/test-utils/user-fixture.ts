@@ -6,11 +6,10 @@ import { v4 } from 'uuid';
 export const userFixture = (attrs?: Partial<User>): User => {
   const currentLevel = faker.number.int({ min: 1 });
   return {
-    ...attrs,
     id: v4(),
     email: faker.internet.email(),
     password: faker.internet.password(),
-    catPoints: faker.number.int({ min: 0, max: 5000 }),
+    catPoints: faker.number.int({ min: 0, max: 3000 }),
     currentLevel,
     inGameId: null,
     joinedAt: faker.date.past(),
@@ -18,7 +17,8 @@ export const userFixture = (attrs?: Partial<User>): User => {
     username: faker.internet.userName(),
     xpsGained: faker.number.int({
       min: 0,
-      max: determineXPsRequired(currentLevel),
+      max: determineXPsRequired(currentLevel) - 1,
     }),
+    ...attrs,
   };
 };
