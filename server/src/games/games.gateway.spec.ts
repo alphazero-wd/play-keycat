@@ -173,7 +173,7 @@ describe('GamesGateway', () => {
       const wpm = faker.number.int({ min: 0, max: 200 });
       const progress = faker.number.float({ min: 0.1, max: 100 });
       gateway.reflectProgress(socket, { gameId, wpm, progress });
-      expect(gateway.io.to(`game:${gameId}`).emit).toHaveBeenCalledWith(
+      expect(gateway.io.sockets.to(`game:${gameId}`).emit).toHaveBeenCalledWith(
         'playerProgress',
         {
           id: user.id,

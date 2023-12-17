@@ -1,14 +1,16 @@
 version: '3'
 services:
-  postgres:
-    container_name: keycat_pg
-    image: postgres:alpine
+  cockroach:
+    container_name: cockroach
+    hostname: cockroach
     ports:
-      - 5432:5432
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=keycat
+      - 26257:26257
+      - 8080:8080
+    volumes:
+      - '/data/cockroach:/data/cockroach'
+    image: cockroachdb/cockroach:latest
+    command: start-single-node --insecure
+
   redis:
     container_name: keycat_redis
     image: redis:alpine
