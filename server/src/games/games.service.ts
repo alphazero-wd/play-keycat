@@ -135,7 +135,7 @@ export class GamesService {
       if (error instanceof Prisma.PrismaClientKnownRequestError)
         if (error.code === PrismaError.RecordNotFound)
           throw new WsException('Cannot delete game with the given id');
-      throw new WsException('Something went wrong');
+      throw new WsException(error.message);
     }
   }
 

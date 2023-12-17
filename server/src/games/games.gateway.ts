@@ -134,7 +134,6 @@ export class GamesGateway implements OnGatewayDisconnect {
 
   async handleDisconnect(socket: SocketUser) {
     const currentUser = socket.request.user;
-    if (!currentUser) return;
     await this.gamesService.updateCurrentlyPlayingGame(currentUser.id, null);
 
     this.io.sockets.to(`game:${currentUser.inGameId}`).emit('playerLeft', {

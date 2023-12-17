@@ -24,7 +24,9 @@ export class GameTimersService {
   }
 
   stopCountdown(gameId: string) {
-    clearInterval(this.gameTimers.get(`game:${gameId}`));
+    const interval = this.gameTimers.get(`game:${gameId}`);
+    if (!interval) return;
+    clearInterval(interval);
     this.gameTimers.delete(`game:${gameId}`);
   }
 }
