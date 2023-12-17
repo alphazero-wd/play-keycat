@@ -41,7 +41,7 @@ export const useGameSocket = (game: Game) => {
       id,
       username,
     }: {
-      id: number;
+      id: string;
       username: string;
     }) {
       if (getPlayerProgress(id) < 100 && !endedAt) {

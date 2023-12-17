@@ -1,7 +1,7 @@
 import { GameHistory } from "../history";
 
 export interface Game {
-  id: number;
+  id: string;
   minPoints: number;
   maxPoints: number;
   paragraph: string;

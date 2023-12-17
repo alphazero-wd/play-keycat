@@ -15,7 +15,7 @@ export class HistoriesController {
 
   @UseGuards(CookieAuthGuard)
   @Get('games/:id/history')
-  async findByGame(@Param('id', ParseIntPipe) gameId: number) {
+  async findByGame(@Param('id') gameId: string) {
     const gameHistories = await this.historiesService.findByGame(gameId);
     return gameHistories;
   }

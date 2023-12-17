@@ -14,6 +14,7 @@ import {
   determineMaxPlayersCount,
   generateParagraph,
 } from './utils';
+import { v4 } from 'uuid';
 
 @Injectable()
 export class GamesService {
@@ -22,7 +23,7 @@ export class GamesService {
     private usersService: UsersService,
   ) {}
 
-  async checkPlayerAlreadyInGame(playerId: number) {
+  async checkPlayerAlreadyInGame(playerId: string) {
     try {
       const player = await this.usersService.findById(playerId);
       if (player.inGameId)
@@ -36,7 +37,7 @@ export class GamesService {
     }
   }
 
-  async updateCurrentlyPlayingGame(playerId: number, gameId: number | null) {
+  async updateCurrentlyPlayingGame(playerId: string, gameId: string | null) {
     await this.prisma.user.update({
       where: { id: playerId },
       data: { inGameId: gameId },
@@ -46,7 +47,7 @@ export class GamesService {
   async findOne(user: User, gameMode: GameMode) {
     const maxPlayersCount = determineMaxPlayersCount(gameMode);
     try {
-      const result = await this.prisma.$queryRaw<[] | [{ id: number }]>`
+      const result = await this.prisma.$queryRaw<[] | [{ id: string }]>`
         SELECT g."id" FROM "Game" g
         LEFT JOIN "User" u
         ON u."inGameId" = g."id"
@@ -71,7 +72,7 @@ export class GamesService {
       const maxPoints = user.catPoints + 250;
 
       const game = await this.prisma.game.create({
-        data: { minPoints, maxPoints, paragraph, mode: gameMode },
+        data: { id: v4(), minPoints, maxPoints, paragraph, mode: gameMode },
       });
       return game.id;
     } catch (error) {
@@ -79,7 +80,7 @@ export class GamesService {
     }
   }
 
-  async getDisplayInfo(gameId: number) {
+  async getDisplayInfo(gameId: string) {
     try {
       const game = await this.prisma.game.findUniqueOrThrow({
         where: { id: gameId },
@@ -99,7 +100,7 @@ export class GamesService {
   }
 
   async updateTime(
-    gameId: number,
+    gameId: string,
     field: 'startedAt' | 'endedAt',
     extraSeconds: number = 0,
   ) {
@@ -118,7 +119,7 @@ export class GamesService {
     }
   }
 
-  async removeIfEmpty(gameId: number) {
+  async removeIfEmpty(gameId: string) {
     try {
       const playersCount = await this.prisma.user.count({
         where: { inGameId: gameId },
@@ -138,7 +139,7 @@ export class GamesService {
     }
   }
 
-  async findById(id: number, userId: number) {
+  async findById(id: string, userId: string) {
     try {
       const game = await this.prisma.game.findUniqueOrThrow({
         where: { id, startedAt: null, players: { some: { id: userId } } },

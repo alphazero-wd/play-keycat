@@ -34,7 +34,7 @@ export const updateProgress = ({
   progress,
   wpm,
 }: {
-  id: number;
+  id: string;
   progress: number;
   wpm: number;
 }) => {
@@ -48,7 +48,7 @@ export const updatePosition = ({
   id,
   position,
 }: {
-  id: number;
+  id: string;
   position: number;
 }) => {
   usePlayersStoreBase.setState((prev) => ({
@@ -56,28 +56,28 @@ export const updatePosition = ({
   }));
 };
 
-export const addLeftPlayer = (id: number) => {
+export const addLeftPlayer = (id: string) => {
   usePlayersStoreBase.setState((prev) => ({
     leftPlayerIds: new Set(prev.leftPlayerIds).add(id),
   }));
 };
 
-export const getPlayerProgress = (id: number) => {
+export const getPlayerProgress = (id: string) => {
   const progress = usePlayersStoreBase.getState().playersProgress.get(id);
   return progress || 0;
 };
 
-export const getPlayerWpm = (id: number) => {
+export const getPlayerWpm = (id: string) => {
   const wpm = usePlayersStoreBase.getState().playersWpm.get(id);
   return wpm || 0;
 };
 
-export const getPlayerPosition = (id: number) => {
+export const getPlayerPosition = (id: string) => {
   const position = usePlayersStoreBase.getState().playersPosition.get(id);
   return position || 0;
 };
 
-export const determinePosition = (id: number) => {
+export const determinePosition = (id: string) => {
   // Input: {1: 50, 2: 75, 3: 60, 4: 75, 5: 100}, playerId = 3
   // Set + Sorted DESC: [100, 75, 60, 50]
   // Output: 3

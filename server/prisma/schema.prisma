@@ -17,7 +17,7 @@ model User {
   password     String
   joinedAt     DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  inGameId     String?
+  inGameId     String?  @db.Uuid
   currentLevel Int      @default(1)
   xpsGained    Int      @default(0)
   catPoints    Int      @default(0)
@@ -40,8 +40,8 @@ model Game {
 }
 
 model GameHistory {
-  gameId    String
-  playerId  String
+  gameId    String  @db.Uuid
+  playerId  String  @db.Uuid
   wpm       Int
   acc       Decimal @db.Decimal(4, 1)
   catPoints Int

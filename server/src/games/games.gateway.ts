@@ -40,7 +40,7 @@ export class GamesGateway implements OnGatewayDisconnect {
   @SubscribeMessage('joinGame')
   async joinGame(
     @ConnectedSocket() socket: SocketUser,
-    @MessageBody('gameId') gameId: number,
+    @MessageBody('gameId') gameId: string,
   ) {
     socket.join(`game:${gameId}`);
     const { players, mode } = await this.gamesService.getDisplayInfo(gameId);
@@ -148,14 +148,14 @@ export class GamesGateway implements OnGatewayDisconnect {
     if (playersCount === 0) this.endGame(currentUser.inGameId);
   }
 
-  private async endGame(gameId: number) {
+  private async endGame(gameId: string) {
     const game = await this.gamesService.updateTime(gameId, 'endedAt');
     this.io.sockets
       .to(`game:${gameId}`)
       .emit('endGame', { endedAt: game.endedAt.toISOString() });
   }
 
-  private startTimeLimit(gameId: number, countdown: number) {
+  private startTimeLimit(gameId: string, countdown: number) {
     this.gameTimersService.startCountdown(
       this.io,
       gameId,
@@ -166,7 +166,7 @@ export class GamesGateway implements OnGatewayDisconnect {
     );
   }
   private async endGameEarly(
-    gameId: number,
+    gameId: string,
     mode: GameMode,
     leftPlayersCount: number,
   ) {

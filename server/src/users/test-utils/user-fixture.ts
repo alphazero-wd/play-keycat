@@ -1,12 +1,13 @@
 import { faker } from '@faker-js/faker';
 import { User } from '@prisma/client';
 import { determineXPsRequired } from '../../xps';
+import { v4 } from 'uuid';
 
 export const userFixture = (attrs?: Partial<User>): User => {
   const currentLevel = faker.number.int({ min: 1 });
   return {
     ...attrs,
-    id: faker.number.int({ min: 1 }),
+    id: v4(),
     email: faker.internet.email(),
     password: faker.internet.password(),
     catPoints: faker.number.int({ min: 0, max: 5000 }),

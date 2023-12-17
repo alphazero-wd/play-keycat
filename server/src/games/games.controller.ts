@@ -5,7 +5,6 @@ import {
   InternalServerErrorException,
   NotFoundException,
   Param,
-  ParseIntPipe,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -45,10 +44,7 @@ export class GamesController {
   }
 
   @Get(':id')
-  async findById(
-    @Param('id', ParseIntPipe) id: number,
-    @CurrentUser() user: User,
-  ) {
+  async findById(@Param('id') id: string, @CurrentUser() user: User) {
     const game = await this.gamesService.findById(id, user.id);
     return game;
   }

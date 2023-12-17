@@ -183,4 +183,6 @@ describe('GamesGateway', () => {
       );
     });
   });
+
+  describe('playerFinished', () => {});
 });

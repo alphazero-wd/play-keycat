@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { calculateProgress, calculateWpm } from "../calculate-typing";
 import { useGameStore } from "./use-game-store";
 
-export const useTyping = (paragraph: string, gameId: number) => {
+export const useTyping = (paragraph: string, gameId: string) => {
   const startedAt = useGameStore.use.startedAt();
   const [typos, setTypos] = useState(0);
   const [prevError, setPrevError] = useState<number | null>(null);

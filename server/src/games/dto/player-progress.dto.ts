@@ -1,9 +1,8 @@
-import { IsInt, Max, Min } from 'class-validator';
+import { IsInt, IsUUID, Max, Min } from 'class-validator';
 
 export class PlayerProgressDto {
-  @IsInt()
-  @Min(1)
-  gameId: number;
+  @IsUUID(4)
+  gameId: string;
 
   @IsInt()
   @Min(1)

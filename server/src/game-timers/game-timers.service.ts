@@ -7,7 +7,7 @@ export class GameTimersService {
 
   startCountdown(
     io: Server,
-    gameId: number,
+    gameId: string,
     countdown: number,
     callback: CallableFunction,
   ) {
@@ -23,7 +23,7 @@ export class GameTimersService {
     this.gameTimers.set(`game:${gameId}`, interval);
   }
 
-  stopCountdown(gameId: number) {
+  stopCountdown(gameId: string) {
     clearInterval(this.gameTimers.get(`game:${gameId}`));
     this.gameTimers.delete(`game:${gameId}`);
   }

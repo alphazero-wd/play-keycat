@@ -20,5 +20,5 @@ export class PlayerFinishedDto {
   position: number;
 
   @Min(1)
-  gameId: number;
+  gameId: string;
 }

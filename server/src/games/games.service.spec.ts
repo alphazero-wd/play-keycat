@@ -12,6 +12,7 @@ import { determineXPsRequired } from '../xps';
 import { GamesService } from './games.service';
 import { gameFixture } from './test-utils';
 import { addSeconds } from './utils';
+import { v4 } from 'uuid';
 
 describe('GamesService', () => {
   let gamesService: GamesService;
@@ -74,7 +75,7 @@ describe('GamesService', () => {
     it('should throw a not found error if they are already in another game', () => {
       jest.spyOn(usersService, 'findById').mockResolvedValue({
         ...user,
-        inGameId: 100,
+        inGameId: v4(),
         rank: getCurrentRank(user.catPoints),
         xpsRequired: determineXPsRequired(user.currentLevel),
       });
