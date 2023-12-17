@@ -13,6 +13,7 @@ import {
   calculateTimeLimit,
   determineCountdown,
 } from './utils';
+import { faker } from '@faker-js/faker';
 
 jest.useFakeTimers();
 jest.spyOn(global, 'setInterval');
@@ -48,6 +49,7 @@ describe('GamesGateway', () => {
     socket = {
       join: jest.fn(),
       emit: jest.fn(),
+      request: { user },
     } as unknown as SocketUser;
     io = {
       sockets: {
@@ -162,6 +164,23 @@ describe('GamesGateway', () => {
         ).toHaveBeenCalledTimes(0);
         expect(gamesService.updateTime).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('reflectProgress', () => {
+    it('should broadcast the progress to all players in a game', () => {
+      const gameId = game.id;
+      const wpm = faker.number.int({ min: 0, max: 200 });
+      const progress = faker.number.float({ min: 0.1, max: 100 });
+      gateway.reflectProgress(socket, { gameId, wpm, progress });
+      expect(gateway.io.to(`game:${gameId}`).emit).toHaveBeenCalledWith(
+        'playerProgress',
+        {
+          id: user.id,
+          progress,
+          wpm,
+        },
+      );
     });
   });
 });
