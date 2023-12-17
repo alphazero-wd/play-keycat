@@ -8,11 +8,18 @@ import { userFixture } from '../users/test-utils';
 import { gameFixture } from './test-utils';
 import { Server } from 'socket.io';
 import { SocketUser } from '../common/types';
+import {
+  calculateAverageCPs,
+  calculateTimeLimit,
+  determineCountdown,
+} from './utils';
+
+jest.useFakeTimers();
+jest.spyOn(global, 'setInterval');
 
 describe('GamesGateway', () => {
   let gateway: GamesGateway;
   let gamesService: GamesService;
-  let gameTimersService: GameTimersService;
   let user: User;
   let game: Game;
   let socket: SocketUser;
@@ -22,12 +29,7 @@ describe('GamesGateway', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GamesGateway,
-        {
-          provide: GameTimersService,
-          useValue: {
-            startCountdown: jest.fn(),
-          },
-        },
+        GameTimersService,
         {
           provide: GamesService,
           useValue: {
@@ -41,7 +43,6 @@ describe('GamesGateway', () => {
 
     gateway = module.get<GamesGateway>(GamesGateway);
     gamesService = module.get<GamesService>(GamesService);
-    gameTimersService = module.get<GameTimersService>(GameTimersService);
     user = userFixture();
     game = gameFixture();
     socket = {
@@ -63,36 +64,104 @@ describe('GamesGateway', () => {
   });
 
   describe('joinGame', () => {
-    it('should not start the countdown if there are not enough players', async () => {
-      jest.spyOn(gamesService, 'getDisplayInfo').mockResolvedValueOnce({
-        players: [user],
-        paragraph: game.paragraph,
-        mode: GameMode.RANKED,
-      });
-      expect(gamesService.updateTime).not.toHaveBeenCalled();
-      expect(gameTimersService.startCountdown).not.toHaveBeenCalled();
+    beforeEach(() => {
+      jest.spyOn(gamesService, 'updateTime').mockResolvedValue(game);
+      jest.clearAllTimers();
     });
 
-    it('should start a 10-second countdown if there are enough players', async () => {
-      jest.spyOn(gamesService, 'getDisplayInfo').mockResolvedValueOnce({
-        players: [user, { ...user, id: 2 }],
-        paragraph: game.paragraph,
-        mode: GameMode.RANKED,
+    describe('regardless of the game mode', () => {
+      it('should broadcast the players in-game', async () => {
+        const players = [user, userFixture()];
+        jest.spyOn(gamesService, 'getDisplayInfo').mockResolvedValue({
+          players,
+          paragraph: game.paragraph,
+          mode: GameMode.RANKED,
+        });
+        await gateway.joinGame(socket, game.id);
+        expect(
+          gateway.io.sockets.to(`game:${game.id}`).emit,
+        ).toHaveBeenLastCalledWith('players', players);
       });
-      await gateway.joinGame(socket, game.id);
-      expect(gamesService.updateTime).toHaveBeenCalledTimes(1);
-      expect(gamesService.updateTime).toHaveBeenCalledWith(
-        game.id,
-        'startedAt',
-        10,
-      );
-      expect(gameTimersService.startCountdown).toHaveBeenCalledTimes(1);
-      expect(gameTimersService.startCountdown).toHaveBeenCalledWith(
-        gateway.io,
-        game.id,
-        10,
-        expect.any(Function),
-      );
+      it('should broadcast the countdown to all players in a game', async () => {
+        jest.spyOn(gamesService, 'getDisplayInfo').mockResolvedValueOnce({
+          players: [user, userFixture()],
+          paragraph: game.paragraph,
+          mode: GameMode.RANKED,
+        });
+        const countdown = determineCountdown(GameMode.RANKED);
+        await gateway.joinGame(socket, game.id);
+        expect(gamesService.updateTime).toHaveBeenCalledTimes(1);
+        expect(gamesService.updateTime).toHaveBeenCalledWith(
+          game.id,
+          'startedAt',
+          countdown,
+        );
+        jest.advanceTimersByTime(countdown * 1000);
+        expect(
+          gateway.io.sockets.to(`game:${game.id}`).emit,
+        ).toHaveBeenCalledTimes(countdown + 1);
+      });
+
+      it('should broadcast to all players in a game the time remaining', async () => {
+        const players: User[] = [user, userFixture()];
+        const paragraph = game.paragraph;
+        jest.spyOn(gamesService, 'getDisplayInfo').mockResolvedValueOnce({
+          players,
+          paragraph,
+          mode: GameMode.CASUAL,
+        });
+        const countdown = determineCountdown(GameMode.RANKED);
+        const averageCPs = calculateAverageCPs(players);
+        const timeLimit = calculateTimeLimit(averageCPs, paragraph);
+        await gateway.joinGame(socket, game.id);
+        jest.advanceTimersByTime((countdown + timeLimit) * 1000);
+        /*
+          first countdown: (3 or 10) + 1
+          time limit:      timeLimit + 1
+          players:         +1
+          => +3
+        */
+        expect(
+          gateway.io.sockets.to(`game:${game.id}`).emit,
+        ).toHaveBeenCalledTimes(countdown + timeLimit + 3);
+      });
+    });
+
+    describe('and game mode is PRACTICE', () => {
+      it('should broadcast a short countdown if there is 1 player in practice mode', async () => {
+        const paragraph = game.paragraph;
+        jest.spyOn(gamesService, 'getDisplayInfo').mockResolvedValueOnce({
+          players: [user],
+          paragraph,
+          mode: GameMode.PRACTICE,
+        });
+        const countdown = determineCountdown(GameMode.PRACTICE);
+        await gateway.joinGame(socket, game.id);
+        expect(gamesService.updateTime).toHaveBeenCalledTimes(1);
+        expect(gamesService.updateTime).toHaveBeenCalledWith(
+          game.id,
+          'startedAt',
+          countdown,
+        );
+        jest.advanceTimersByTime(countdown * 1000);
+        expect(
+          gateway.io.sockets.to(`game:${game.id}`).emit,
+        ).toHaveBeenCalledTimes(countdown + 1);
+      });
+    });
+
+    describe('and game mode is RANKED or CASUAL', () => {
+      it('should not start the countdown if there are not enough players', async () => {
+        jest.spyOn(gamesService, 'getDisplayInfo').mockResolvedValueOnce({
+          players: [user],
+          paragraph: game.paragraph,
+          mode: GameMode.RANKED,
+        });
+        expect(
+          gateway.io.sockets.to(`game:${game.id}`).emit,
+        ).toHaveBeenCalledTimes(0);
+        expect(gamesService.updateTime).not.toHaveBeenCalled();
+      });
     });
   });
 });

@@ -3,8 +3,6 @@ import { Server } from 'socket.io';
 
 @Injectable()
 export class GameTimersService {
-  constructor() {}
-
   private gameTimers: Map<string, NodeJS.Timeout> = new Map();
 
   startCountdown(

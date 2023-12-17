@@ -55,8 +55,8 @@ export class GamesGateway implements OnGatewayDisconnect {
         'startedAt',
         countdown,
       );
+      const timeLimit = calculateTimeLimit(averageCPs, game.paragraph);
       this.gameTimersService.startCountdown(this.io, gameId, countdown, () => {
-        const timeLimit = calculateTimeLimit(averageCPs, game.paragraph);
         this.io.sockets
           .to(`game:${gameId}`)
           .emit('startGame', { startedAt: game.startedAt.toISOString() });
