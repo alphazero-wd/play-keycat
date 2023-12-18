@@ -26,7 +26,6 @@ jest.spyOn(global, 'setInterval');
 describe('GamesGateway', () => {
   let gateway: GamesGateway;
   let gamesService: GamesService;
-  let gameTimersService: GameTimersService;
   let historiesService: HistoriesService;
   let user: User;
   let game: Game;
@@ -41,6 +40,7 @@ describe('GamesGateway', () => {
         {
           provide: GamesService,
           useValue: {
+            countPlayersInGame: jest.fn(),
             getDisplayInfo: jest.fn(),
             updateTime: jest.fn(),
             updateCurrentlyPlayingGame: jest.fn(),
@@ -59,7 +59,6 @@ describe('GamesGateway', () => {
 
     gateway = module.get<GamesGateway>(GamesGateway);
     gamesService = module.get<GamesService>(GamesService);
-    gameTimersService = module.get<GameTimersService>(GameTimersService);
     historiesService = module.get<HistoriesService>(HistoriesService);
     game = gameFixture();
     user = userFixture({ inGameId: game.id });
@@ -86,7 +85,6 @@ describe('GamesGateway', () => {
   describe('joinGame', () => {
     beforeEach(() => {
       jest.spyOn(gamesService, 'updateTime').mockResolvedValue(game);
-      jest.clearAllTimers();
     });
 
     describe('regardless of the game mode', () => {
@@ -331,13 +329,13 @@ describe('GamesGateway', () => {
   });
 
   describe('handleDisconnect', () => {
-    it('should remove player from the game', async () => {
+    it('should remove player from the game, but not delete if there are players', async () => {
       const remainingPlayersCount =
         determineMaxPlayersCount(GameMode.RANKED) - 1;
       jest
-        .spyOn(gamesService, 'removeIfEmpty')
+        .spyOn(gamesService, 'countPlayersInGame')
         .mockResolvedValue(remainingPlayersCount);
-      jest.spyOn(gameTimersService, 'stopCountdown');
+      jest.spyOn(gamesService, 'removeIfEmpty');
       await gateway.handleDisconnect(socket);
       expect(
         gateway.io.sockets.to(`game:${game.id}`).emit,
@@ -349,15 +347,18 @@ describe('GamesGateway', () => {
         user.id,
         null,
       );
-      expect(gameTimersService.stopCountdown).not.toHaveBeenCalled();
+      expect(gamesService.removeIfEmpty).not.toHaveBeenCalled();
+      expect(gamesService.updateTime).not.toHaveBeenCalled();
     });
 
     it('should remove the game if no players are in-game', async () => {
       jest.spyOn(gamesService, 'updateTime').mockResolvedValue(game);
-      jest.spyOn(gamesService, 'removeIfEmpty').mockResolvedValue(0);
-      jest.spyOn(gameTimersService, 'stopCountdown');
+      jest.spyOn(gamesService, 'countPlayersInGame').mockResolvedValue(0);
+      jest.spyOn(gamesService, 'removeIfEmpty');
       await gateway.handleDisconnect(socket);
       expect(gamesService.updateTime).toBeCalledWith(game.id, 'endedAt');
+      expect(gamesService.removeIfEmpty).toHaveBeenCalledTimes(1);
+      expect(gamesService.removeIfEmpty).toHaveBeenCalledWith(game.id);
       expect(
         gateway.io.sockets.to(`game:${game.id}`).emit,
       ).toHaveBeenCalledWith('endGame', {

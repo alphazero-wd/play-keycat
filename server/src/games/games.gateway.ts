@@ -143,10 +143,13 @@ export class GamesGateway implements OnGatewayDisconnect {
       username: currentUser.username,
     });
 
-    const playersCount = await this.gamesService.removeIfEmpty(
+    const playersCount = await this.gamesService.countPlayersInGame(
       currentUser.inGameId,
     );
-    if (playersCount === 0) this.endGame(currentUser.inGameId);
+    if (playersCount === 0) {
+      await this.endGame(currentUser.inGameId);
+      await this.gamesService.removeIfEmpty(currentUser.inGameId);
+    }
   }
 
   private async endGame(gameId: string) {

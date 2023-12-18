@@ -4,10 +4,10 @@ import { create } from "zustand";
 
 type State = {
   players: User[];
-  leftPlayerIds: Set<number>;
-  playersPosition: Map<number, number>;
-  playersProgress: Map<number, number>;
-  playersWpm: Map<number, number>;
+  leftPlayerIds: Set<string>;
+  playersPosition: Map<string, number>;
+  playersProgress: Map<string, number>;
+  playersWpm: Map<string, number>;
 };
 
 type Action = {
@@ -25,7 +25,18 @@ const initialState: State = {
 
 const usePlayersStoreBase = create<State & Action>()((set) => ({
   ...initialState,
-  onPlayers: (updatedPlayers) => set(() => ({ players: updatedPlayers })),
+  onPlayers: (updatedPlayers) => {
+    set(() => {
+      const playersProgress = new Map();
+      for (let player of updatedPlayers) playersProgress.set(player.id, 0);
+
+      return {
+        players: updatedPlayers,
+        playersProgress,
+      };
+    });
+  },
+
   resetPlayers: () => set(() => initialState),
 }));
 
@@ -78,10 +89,6 @@ export const getPlayerPosition = (id: string) => {
 };
 
 export const determinePosition = (id: string) => {
-  // Input: {1: 50, 2: 75, 3: 60, 4: 75, 5: 100}, playerId = 3
-  // Set + Sorted DESC: [100, 75, 60, 50]
-  // Output: 3
-
   const playersProgress = usePlayersStoreBase.getState().playersProgress;
   const progress = playersProgress.values();
   const sortedProgressSetDesc = Array.from(new Set(progress)).sort(

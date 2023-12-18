@@ -119,18 +119,21 @@ export class GamesService {
     }
   }
 
+  async countPlayersInGame(gameId: string) {
+    const playersCount = await this.prisma.user.count({
+      where: { inGameId: gameId },
+    });
+    return playersCount;
+  }
+
   async removeIfEmpty(gameId: string) {
     try {
-      const playersCount = await this.prisma.user.count({
-        where: { inGameId: gameId },
-      });
       const historiesCount = await this.prisma.gameHistory.count({
         where: { gameId },
       });
-      const toBeDeleted = historiesCount === 0 && playersCount === 0;
+      const toBeDeleted = historiesCount === 0;
       // if the game has ended, but everyone has left the game then don't delete the game
       if (toBeDeleted) await this.prisma.game.delete({ where: { id: gameId } });
-      return playersCount;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)
         if (error.code === PrismaError.RecordNotFound)

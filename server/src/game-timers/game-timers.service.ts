@@ -11,11 +11,11 @@ export class GameTimersService {
     countdown: number,
     callback: CallableFunction,
   ) {
-    const interval = setInterval(async () => {
+    const interval = setInterval(() => {
       io.sockets.to(`game:${gameId}`).emit('countdown', countdown);
       if (countdown === 0) {
         this.stopCountdown(gameId);
-        await callback();
+        callback();
       } else {
         countdown--;
       }
@@ -23,7 +23,7 @@ export class GameTimersService {
     this.gameTimers.set(`game:${gameId}`, interval);
   }
 
-  stopCountdown(gameId: string) {
+  private stopCountdown(gameId: string) {
     const interval = this.gameTimers.get(`game:${gameId}`);
     if (interval) {
       clearInterval(interval);

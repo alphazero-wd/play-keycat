@@ -14,6 +14,13 @@ export const useTyping = (paragraph: string, gameId: string) => {
   const setAlert = useAlert.use.setAlert();
 
   const onKeyDown = (e: globalThis.KeyboardEvent) => {
+    if (!startedAt) {
+      setAlert(
+        "error",
+        "You have to wait until the countdown is over before typing",
+      );
+      return;
+    }
     if (e.key === "Backspace") {
       if (prevError === null) return;
 
@@ -49,7 +56,7 @@ export const useTyping = (paragraph: string, gameId: string) => {
     return () => {
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [typos, prevError, charsTyped]);
+  }, [startedAt, typos, prevError, charsTyped]);
 
   return { typos, prevError, charsTyped };
 };
