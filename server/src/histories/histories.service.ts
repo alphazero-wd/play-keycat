@@ -32,8 +32,8 @@ export class HistoriesService {
         gameMode === GameMode.RANKED
           ? calculateCPsEarned(wpm, acc, position, rank)
           : 0;
+      const { newLevel, newXPsGained, hasLevelUp } = levelUp(user, xpsBonus);
       const results = await this.prisma.$transaction(async (client) => {
-        const { newLevel, newXPsGained, hasLevelUp } = levelUp(user, xpsBonus);
         const player = await client.user.update({
           where: { id: user.id },
           data: {
@@ -51,9 +51,9 @@ export class HistoriesService {
             playerId: user.id,
           },
         });
-        return { hasLevelUp, player, history };
+        return { player, history };
       });
-      return { ...results, xpsBonus };
+      return { ...results, hasLevelUp, xpsBonus };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === PrismaError.ForeignViolation)

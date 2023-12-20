@@ -9,7 +9,7 @@ export const userFixture = (attrs?: Partial<User>): User => {
     id: v4(),
     email: faker.internet.email(),
     password: faker.internet.password(),
-    catPoints: faker.number.int({ min: 0, max: 3000 }),
+    catPoints: faker.number.int({ min: 1000, max: 3000 }),
     currentLevel,
     inGameId: null,
     joinedAt: faker.date.past(),
