@@ -39,7 +39,7 @@ export class HistoriesService {
           data: {
             currentLevel: newLevel,
             xpsGained: newXPsGained,
-            catPoints: Math.max(user.catPoints + catPoints, 0),
+            catPoints: user.catPoints + catPoints,
           },
         });
         const history = await client.gameHistory.create({
@@ -47,7 +47,7 @@ export class HistoriesService {
             wpm,
             acc,
             gameId,
-            catPoints: user.catPoints + catPoints < 0 ? 0 : catPoints,
+            catPoints,
             playerId: user.id,
           },
         });

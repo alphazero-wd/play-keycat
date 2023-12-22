@@ -295,7 +295,19 @@ describe('GamesGateway', () => {
       });
     });
 
-    it('should send a rank update message back to a player', async () => {
+    it('should send a rank demotion message back to a player', async () => {
+      jest.spyOn(historiesService, 'create').mockResolvedValue({
+        ...saveHistoryResult,
+        history: { ...history, catPoints: -500 },
+      });
+      await gateway.onPlayerFinished(socket, payload);
+      expect(socket.emit).toHaveBeenCalledWith('rankUpdate', {
+        status: RankUpdateStatus.DEMOTED,
+        currentRank: getCurrentRank(user.catPoints - 500),
+      });
+    });
+
+    it('should send a rank promotion message back to a player', async () => {
       jest.spyOn(historiesService, 'create').mockResolvedValue({
         ...saveHistoryResult,
         history: { ...history, catPoints: 500 },

@@ -1,4 +1,3 @@
-import { faker } from '@faker-js/faker';
 import { GameHistory, Prisma } from '@prisma/client';
 
 export const historyFixture = (
@@ -9,9 +8,9 @@ export const historyFixture = (
   return {
     gameId,
     playerId,
-    acc: new Prisma.Decimal(faker.number.float({ min: 0, max: 100 })),
-    catPoints: faker.number.int({ min: -23, max: 120 }),
-    wpm: faker.number.int({ min: 0, max: 200 }),
+    acc: new Prisma.Decimal(95),
+    catPoints: 10,
+    wpm: 40,
     ...attrs,
   };
 };
