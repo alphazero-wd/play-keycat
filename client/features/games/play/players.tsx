@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/features/ui/avatar";
 import { ProfileCard, User } from "@/features/users/profile";
+import { cn } from "@/lib/utils";
 import { CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Position } from "../history";
 import {
@@ -21,11 +22,18 @@ export const Players = ({
   const players = usePlayersStore.use.players();
   const hasFinished = useGameStore.use.hasFinished();
   const endedAt = useGameStore.use.endedAt();
+  const leftPlayerIds = usePlayersStore.use.leftPlayerIds();
 
   return (
     <div className="mt-6 max-w-2xl space-y-4">
       {players.map((player) => (
-        <div key={player.id} className="flex items-center justify-between">
+        <div
+          key={player.id}
+          className={cn(
+            "flex items-center justify-between",
+            leftPlayerIds.has(player.id) && "opacity-50",
+          )}
+        >
           <div className="flex w-[200px] items-center justify-between">
             <ProfileCard gameMode={gameMode} player={player} userId={user.id} />
             <Avatar

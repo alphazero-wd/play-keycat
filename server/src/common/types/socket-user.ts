@@ -1,5 +1,5 @@
 import { Request } from 'express';
 import { Socket } from 'socket.io';
-import { UserResponse } from '../../auth/types';
+import { User } from '@prisma/client';
 
-export type SocketUser = Socket & { request: Request & { user: UserResponse } };
+export type SocketUser = Socket & { request: Request & { user: User } };

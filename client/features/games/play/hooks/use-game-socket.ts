@@ -1,3 +1,4 @@
+import { useAlert } from "@/features/ui/alert";
 import { socket } from "@/lib/socket";
 import { useEffect } from "react";
 import { Game } from "../types";
@@ -15,6 +16,7 @@ import {
 import { useRankUpdateModal } from "./use-rank-update-modal";
 
 export const useGameSocket = (game: Game) => {
+  const setAlert = useAlert.use.setAlert();
   const endedAt = useGameStore.use.endedAt();
 
   const onPlayers = usePlayersStore.use.onPlayers();
@@ -35,8 +37,17 @@ export const useGameSocket = (game: Game) => {
       if (game.id) socket.emit("joinGame", { gameId: game.id });
     }
 
-    function handlePlayerLeft({ id }: { id: number }) {
-      if (getPlayerProgress(id) < 100 && !endedAt) addLeftPlayer(id);
+    function handlePlayerLeft({
+      id,
+      username,
+    }: {
+      id: string;
+      username: string;
+    }) {
+      if (getPlayerProgress(id) < 100 && !endedAt) {
+        addLeftPlayer(id);
+        setAlert("info", `Player ${username} has left the game!`);
+      }
     }
 
     socket.on("connect", onConnect);

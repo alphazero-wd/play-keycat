@@ -9,9 +9,9 @@ import { PrismaError } from '../prisma/prisma-error';
 import { PrismaService } from '../prisma/prisma.service';
 import { PlayerFinishedDto } from '../games/dto';
 import { calculateCPsEarned } from './utils';
-import { RankUpdateStatus, getCurrentRank } from '../ranks';
 import { levelUp } from './utils';
 import { calculateXPsEarned } from '../xps';
+import { PAGE_LIMIT } from '../common/constants';
 
 @Injectable()
 export class HistoriesService {
@@ -33,14 +33,14 @@ export class HistoriesService {
         gameMode === GameMode.RANKED
           ? calculateCPsEarned(wpm, acc, position, rank)
           : 0;
+      const { newLevel, newXPsGained, hasLevelUp } = levelUp(user, xpsBonus);
       const results = await this.prisma.$transaction(async (client) => {
-        const { newLevel, newXPsGained, hasLevelUp } = levelUp(user, xpsBonus);
         const player = await client.user.update({
           where: { id: user.id },
           data: {
             currentLevel: newLevel,
             xpsGained: newXPsGained,
-            catPoints: Math.max(user.catPoints + catPoints, 0),
+            catPoints: user.catPoints + catPoints,
           },
         });
         const history = await client.gameHistory.create({
@@ -48,13 +48,13 @@ export class HistoriesService {
             wpm,
             acc,
             gameId,
-            catPoints: user.catPoints + catPoints < 0 ? 0 : catPoints,
+            catPoints,
             playerId: user.id,
           },
         });
-        return { hasLevelUp, player, history };
+        return { player, history };
       });
-      return { ...results, xpsBonus };
+      return { ...results, hasLevelUp, xpsBonus };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === PrismaError.ForeignViolation)
@@ -68,7 +68,7 @@ export class HistoriesService {
     }
   }
 
-  async countPlayersFinished(gameId: number) {
+  async countPlayersFinished(gameId: string) {
     const gameHistoriesCount = await this.prisma.gameHistory.count({
       where: { gameId },
     });
@@ -76,7 +76,7 @@ export class HistoriesService {
     return gameHistoriesCount;
   }
 
-  async findByGame(gameId: number) {
+  async findByGame(gameId: string) {
     try {
       const game = await this.prisma.game.findUniqueOrThrow({
         where: { id: gameId },
@@ -107,7 +107,7 @@ export class HistoriesService {
     });
     const playerHistories = await this.prisma.gameHistory.findMany({
       where: { player: { username } },
-      take: 10,
+      take: PAGE_LIMIT,
       skip: offset,
       select: {
         gameId: true,
@@ -119,13 +119,5 @@ export class HistoriesService {
       orderBy: { game: { startedAt: 'desc' } },
     });
     return { playerHistories, playerHistoriesCount };
-  }
-
-  checkRankUpdate(user: User, catPoints: number) {
-    const prevRank = getCurrentRank(user.catPoints);
-    const currentRank = getCurrentRank(user.catPoints + catPoints);
-    const rankUpdateStatus =
-      catPoints < 0 ? RankUpdateStatus.DEMOTED : RankUpdateStatus.PROMOTED;
-    return { prevRank, currentRank, rankUpdateStatus };
   }
 }

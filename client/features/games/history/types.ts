@@ -3,7 +3,7 @@ import { Game } from "../play";
 
 export interface GameHistory {
   player: User;
-  gameId: number;
+  gameId: string;
   game: Game;
   wpm: number;
   acc: number;

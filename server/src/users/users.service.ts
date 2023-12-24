@@ -10,6 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { getCurrentRank } from '../ranks';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { determineXPsRequired } from '../xps';
+import { v4 } from 'uuid';
 
 @Injectable()
 export class UsersService {
@@ -18,7 +19,7 @@ export class UsersService {
   async create(createUserDto: CreateUserDto) {
     try {
       const newUser = await this.prisma.user.create({
-        data: createUserDto,
+        data: { ...createUserDto, id: v4() },
       });
       return newUser;
     } catch (error) {
@@ -48,12 +49,12 @@ export class UsersService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError)
         if (error.code === PrismaError.RecordNotFound)
-          throw new BadRequestException('User with that email does not exist');
+          throw new NotFoundException('User with that email does not exist');
       throw new InternalServerErrorException('Something went wrong');
     }
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
     try {
       const updatedUser = await this.prisma.user.update({
         where: { id },
@@ -63,7 +64,7 @@ export class UsersService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === PrismaError.RecordNotFound)
-          throw new BadRequestException('User with that email does not exist');
+          throw new NotFoundException('User with that id does not exist');
         if (error.code === PrismaError.UniqueViolation) {
           if (error.message.includes('username'))
             throw new BadRequestException(
@@ -79,7 +80,7 @@ export class UsersService {
     }
   }
 
-  async findById(id: number) {
+  async findById(id: string) {
     try {
       const user = await this.prisma.user.findUniqueOrThrow({
         where: { id },

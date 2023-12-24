@@ -4,10 +4,10 @@ import { create } from "zustand";
 
 type State = {
   players: User[];
-  leftPlayerIds: Set<number>;
-  playersPosition: Map<number, number>;
-  playersProgress: Map<number, number>;
-  playersWpm: Map<number, number>;
+  leftPlayerIds: Set<string>;
+  playersPosition: Map<string, number>;
+  playersProgress: Map<string, number>;
+  playersWpm: Map<string, number>;
 };
 
 type Action = {
@@ -25,7 +25,18 @@ const initialState: State = {
 
 const usePlayersStoreBase = create<State & Action>()((set) => ({
   ...initialState,
-  onPlayers: (updatedPlayers) => set(() => ({ players: updatedPlayers })),
+  onPlayers: (updatedPlayers) => {
+    set(() => {
+      const playersProgress = new Map();
+      for (let player of updatedPlayers) playersProgress.set(player.id, 0);
+
+      return {
+        players: updatedPlayers,
+        playersProgress,
+      };
+    });
+  },
+
   resetPlayers: () => set(() => initialState),
 }));
 
@@ -34,7 +45,7 @@ export const updateProgress = ({
   progress,
   wpm,
 }: {
-  id: number;
+  id: string;
   progress: number;
   wpm: number;
 }) => {
@@ -48,7 +59,7 @@ export const updatePosition = ({
   id,
   position,
 }: {
-  id: number;
+  id: string;
   position: number;
 }) => {
   usePlayersStoreBase.setState((prev) => ({
@@ -56,32 +67,28 @@ export const updatePosition = ({
   }));
 };
 
-export const addLeftPlayer = (id: number) => {
+export const addLeftPlayer = (id: string) => {
   usePlayersStoreBase.setState((prev) => ({
     leftPlayerIds: new Set(prev.leftPlayerIds).add(id),
   }));
 };
 
-export const getPlayerProgress = (id: number) => {
+export const getPlayerProgress = (id: string) => {
   const progress = usePlayersStoreBase.getState().playersProgress.get(id);
   return progress || 0;
 };
 
-export const getPlayerWpm = (id: number) => {
+export const getPlayerWpm = (id: string) => {
   const wpm = usePlayersStoreBase.getState().playersWpm.get(id);
   return wpm || 0;
 };
 
-export const getPlayerPosition = (id: number) => {
+export const getPlayerPosition = (id: string) => {
   const position = usePlayersStoreBase.getState().playersPosition.get(id);
   return position || 0;
 };
 
-export const determinePosition = (id: number) => {
-  // Input: {1: 50, 2: 75, 3: 60, 4: 75, 5: 100}, playerId = 3
-  // Set + Sorted DESC: [100, 75, 60, 50]
-  // Output: 3
-
+export const determinePosition = (id: string) => {
   const playersProgress = usePlayersStoreBase.getState().playersProgress;
   const progress = playersProgress.values();
   const sortedProgressSetDesc = Array.from(new Set(progress)).sort(

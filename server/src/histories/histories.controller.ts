@@ -15,18 +15,16 @@ export class HistoriesController {
 
   @UseGuards(CookieAuthGuard)
   @Get('games/:id/history')
-  async findByGame(@Param('id', ParseIntPipe) gameId: number) {
+  async findByGame(@Param('id') gameId: string) {
     const gameHistories = await this.historiesService.findByGame(gameId);
     return gameHistories;
   }
 
   @Get('player/:username/histories')
-  async findPlayerHistories(
+  async findByPlayer(
     @Param('username') username: string,
     @Query('offset', ParseIntPipe) offset: number,
   ) {
-    const { playerHistories, playerHistoriesCount } =
-      await this.historiesService.findByPlayer(username, offset);
-    return { playerHistories, playerHistoriesCount };
+    return this.historiesService.findByPlayer(username, offset);
   }
 }

@@ -1,5 +1,9 @@
 import * as argon2 from 'argon2';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto';
 
@@ -22,6 +26,7 @@ export class AuthService {
       await this.verifyPassword(user.password, password);
       return user;
     } catch (error) {
+      if (error instanceof InternalServerErrorException) throw error;
       // for security reasons
       throw new BadRequestException({
         success: false,

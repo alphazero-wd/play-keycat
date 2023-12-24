@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { calculateProgress, calculateWpm } from "../calculate-typing";
 import { useGameStore } from "./use-game-store";
 
-export const useTyping = (paragraph: string, gameId: number) => {
+export const useTyping = (paragraph: string, gameId: string) => {
   const startedAt = useGameStore.use.startedAt();
   const [typos, setTypos] = useState(0);
   const [prevError, setPrevError] = useState<number | null>(null);
@@ -14,6 +14,13 @@ export const useTyping = (paragraph: string, gameId: number) => {
   const setAlert = useAlert.use.setAlert();
 
   const onKeyDown = (e: globalThis.KeyboardEvent) => {
+    if (!startedAt) {
+      setAlert(
+        "error",
+        "You have to wait until the countdown is over before typing",
+      );
+      return;
+    }
     if (e.key === "Backspace") {
       if (prevError === null) return;
 
@@ -49,7 +56,7 @@ export const useTyping = (paragraph: string, gameId: number) => {
     return () => {
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [typos, prevError, charsTyped]);
+  }, [startedAt, typos, prevError, charsTyped]);
 
   return { typos, prevError, charsTyped };
 };

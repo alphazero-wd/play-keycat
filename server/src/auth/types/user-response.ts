@@ -2,7 +2,7 @@ import { User } from '@prisma/client';
 import { Exclude } from 'class-transformer';
 
 export class UserResponse implements User {
-  id: number;
+  id: string;
 
   username: string;
 
@@ -14,7 +14,7 @@ export class UserResponse implements User {
 
   joinedAt: Date;
   updatedAt: Date;
-  inGameId: number;
+  inGameId: string;
   catPoints: number;
   currentLevel: number;
   xpsGained: number;

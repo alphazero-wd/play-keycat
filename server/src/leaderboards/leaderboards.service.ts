@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { getCurrentRank } from '../ranks';
+import { PAGE_LIMIT, TOP_LEADERBOARDS } from '../common/constants';
 
 @Injectable()
 export class LeaderboardsService {
@@ -10,10 +11,10 @@ export class LeaderboardsService {
 
   async findTop100Players(offset: number) {
     const topPlayersCount = await this.prisma.user.count({
-      take: 100,
+      take: TOP_LEADERBOARDS,
     });
     const topPlayers = await this.prisma.user.findMany({
-      take: 10,
+      take: PAGE_LIMIT,
       skip: offset,
       select: {
         id: true,
@@ -22,7 +23,7 @@ export class LeaderboardsService {
         _count: { select: { histories: true } },
         histories: {
           select: { wpm: true },
-          take: 10,
+          take: PAGE_LIMIT,
           orderBy: { game: { startedAt: 'desc' } },
         },
       },
@@ -39,8 +40,7 @@ export class LeaderboardsService {
           ...player,
           rank: getCurrentRank(player.catPoints),
           highestWpm,
-          lastTenAverageWpm:
-            Math.trunc(sumWpm / Math.min(10, histories.length)) || 0,
+          lastTenAverageWpm: Math.trunc(sumWpm / histories.length) || 0,
           gamesPlayed: _count.histories,
         };
       }),

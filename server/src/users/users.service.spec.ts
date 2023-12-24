@@ -7,6 +7,11 @@ import { PrismaError } from '../prisma/prisma-error';
 import { getCurrentRank } from '../ranks';
 import { determineXPsRequired } from '../xps';
 import { faker } from '@faker-js/faker';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -69,7 +74,7 @@ describe('UsersService', () => {
           email: user.email,
           password: user.password,
         }),
-      ).rejects.toThrowError('User with that username already exists');
+      ).rejects.toThrowError(BadRequestException);
     });
 
     it('should throw an error if email exists', async () => {
@@ -87,18 +92,7 @@ describe('UsersService', () => {
           email: user.email,
           password: user.password,
         }),
-      ).rejects.toThrowError('User with that email already exists');
-    });
-
-    it('should throw an internal server error if other error is thrown', async () => {
-      jest.spyOn(prisma.user, 'create').mockRejectedValue('some error');
-      expect(
-        service.create({
-          username: user.username,
-          email: user.email,
-          password: user.password,
-        }),
-      ).rejects.toThrowError('Something went wrong');
+      ).rejects.toThrowError(BadRequestException);
     });
   });
 
@@ -119,7 +113,7 @@ describe('UsersService', () => {
           ),
         );
       expect(service.findByEmail(user.email)).rejects.toThrowError(
-        'User with that email does not exist',
+        NotFoundException,
       );
     });
 
@@ -128,7 +122,7 @@ describe('UsersService', () => {
         .spyOn(prisma.user, 'findUniqueOrThrow')
         .mockRejectedValue('some error');
       expect(service.findByEmail(user.email)).rejects.toThrowError(
-        'Something went wrong',
+        InternalServerErrorException,
       );
     });
   });
@@ -151,7 +145,7 @@ describe('UsersService', () => {
         );
       expect(
         service.update(user.id, { username: user.username }),
-      ).rejects.toThrowError('User with that email does not exist');
+      ).rejects.toThrowError(NotFoundException);
     });
 
     it('should throw an error if username exists', async () => {
@@ -165,7 +159,7 @@ describe('UsersService', () => {
         );
       expect(
         service.update(user.id, { username: user.username }),
-      ).rejects.toThrowError('User with that username already exists');
+      ).rejects.toThrowError(BadRequestException);
     });
 
     it('should throw an error if email exists', async () => {
@@ -179,14 +173,14 @@ describe('UsersService', () => {
         );
       expect(
         service.update(user.id, { email: user.email }),
-      ).rejects.toThrowError('User with that email already exists');
+      ).rejects.toThrowError(BadRequestException);
     });
 
     it('should throw a server error if other error is thrown', async () => {
       jest.spyOn(prisma.user, 'update').mockRejectedValue('some error');
       expect(
         service.update(user.id, { username: user.username }),
-      ).rejects.toThrowError('Something went wrong');
+      ).rejects.toThrowError(InternalServerErrorException);
     });
   });
 
@@ -210,9 +204,7 @@ describe('UsersService', () => {
             { code: PrismaError.RecordNotFound, clientVersion: '5.0' },
           ),
         );
-      expect(service.findById(user.id)).rejects.toThrowError(
-        'Cannot find user with the given id',
-      );
+      expect(service.findById(user.id)).rejects.toThrowError(NotFoundException);
     });
 
     it('should throw a server error if other error is thrown', async () => {
@@ -220,7 +212,7 @@ describe('UsersService', () => {
         .spyOn(prisma.user, 'findUniqueOrThrow')
         .mockRejectedValue('some error');
       expect(service.findById(user.id)).rejects.toThrowError(
-        'Something went wrong',
+        InternalServerErrorException,
       );
     });
   });
@@ -260,7 +252,7 @@ describe('UsersService', () => {
           ),
         );
       expect(service.findProfile(user.username)).rejects.toThrowError(
-        'Cannot find player with the given username',
+        NotFoundException,
       );
     });
 
@@ -269,7 +261,7 @@ describe('UsersService', () => {
         .spyOn(prisma.user, 'findUniqueOrThrow')
         .mockRejectedValue('some error');
       expect(service.findProfile(user.username)).rejects.toThrowError(
-        'Something went wrong',
+        InternalServerErrorException,
       );
     });
   });

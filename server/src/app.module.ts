@@ -9,6 +9,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { GamesModule } from './games/games.module';
 import { HistoriesModule } from './histories/histories.module';
 import { LeaderboardsModule } from './leaderboards/leaderboards.module';
+import { GameTimersModule } from './game-timers/game-timers.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { LeaderboardsModule } from './leaderboards/leaderboards.module';
     GamesModule,
     HistoriesModule,
     LeaderboardsModule,
+    GameTimersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
