@@ -21,12 +21,10 @@ export class HistoriesController {
   }
 
   @Get('player/:username/histories')
-  async findPlayerHistories(
+  async findByPlayer(
     @Param('username') username: string,
     @Query('offset', ParseIntPipe) offset: number,
   ) {
-    const { playerHistories, playerHistoriesCount } =
-      await this.historiesService.findByPlayer(username, offset);
-    return { playerHistories, playerHistoriesCount };
+    return this.historiesService.findByPlayer(username, offset);
   }
 }

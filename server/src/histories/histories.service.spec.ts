@@ -9,10 +9,10 @@ import { getCurrentRank } from '../ranks';
 import { calculateXPsEarned } from '../xps';
 import { PlayerFinishedDto } from '../games/dto';
 import { calculateCPsEarned, levelUp } from './utils';
-import { determineMaxPlayersCount } from '../games/utils';
 import { PrismaError } from '../prisma/prisma-error';
 import { NotFoundException } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
+import { PAGE_LIMIT } from '../common/constants';
 
 describe('HistoriesService', () => {
   let service: HistoriesService;
@@ -25,7 +25,7 @@ describe('HistoriesService', () => {
     const prismaMock = {
       user: { update: jest.fn() },
       game: { findUniqueOrThrow: jest.fn() },
-      gameHistory: { create: jest.fn(), count: jest.fn() },
+      gameHistory: { create: jest.fn(), count: jest.fn(), findMany: jest.fn() },
       $transaction: jest
         .fn()
         .mockImplementation((callback) => callback(prismaMock)),
@@ -248,6 +248,47 @@ describe('HistoriesService', () => {
               },
             }),
           }),
+        }),
+      );
+    });
+  });
+
+  describe('findByPlayer', () => {
+    let totalPlayerGameHistories: number;
+    let offset: number;
+    beforeEach(() => {
+      totalPlayerGameHistories = 100;
+      offset = 20;
+      jest
+        .spyOn(prisma.gameHistory, 'count')
+        .mockResolvedValue(totalPlayerGameHistories);
+      jest.spyOn(prisma.gameHistory, 'findMany').mockResolvedValue([history]);
+    });
+    it("should return a limited number of histories by player's username from an offset", async () => {
+      const results = await service.findByPlayer(user.username, offset);
+      expect(results).toEqual({
+        playerHistories: [history],
+        playerHistoriesCount: totalPlayerGameHistories,
+      });
+      expect(prisma.gameHistory.count).toHaveBeenCalledWith({
+        where: { player: { username: user.username } },
+      });
+      expect(prisma.gameHistory.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          take: PAGE_LIMIT,
+          skip: offset,
+        }),
+      );
+    });
+
+    it('should get associated game for each history and sort by startedAt in descending order', async () => {
+      await service.findByPlayer(user.username, offset);
+      expect(prisma.gameHistory.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          select: expect.objectContaining({
+            game: { select: { startedAt: true, mode: true } },
+          }),
+          orderBy: { game: { startedAt: 'desc' } },
         }),
       );
     });

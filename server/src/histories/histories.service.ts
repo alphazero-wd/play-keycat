@@ -11,6 +11,7 @@ import { PlayerFinishedDto } from '../games/dto';
 import { calculateCPsEarned } from './utils';
 import { levelUp } from './utils';
 import { calculateXPsEarned } from '../xps';
+import { PAGE_LIMIT } from '../common/constants';
 
 @Injectable()
 export class HistoriesService {
@@ -106,7 +107,7 @@ export class HistoriesService {
     });
     const playerHistories = await this.prisma.gameHistory.findMany({
       where: { player: { username } },
-      take: 10,
+      take: PAGE_LIMIT,
       skip: offset,
       select: {
         gameId: true,

@@ -4,10 +4,7 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto';
 import { User } from '@prisma/client';
 import { userFixture } from '../users/test-utils';
-import {
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 
 describe('AuthController', () => {
   let controller: AuthController;
