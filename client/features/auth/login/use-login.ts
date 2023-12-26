@@ -11,9 +11,10 @@ import { login } from "./login-api";
 
 const formSchema = z.object({
   email: z
-    .string({ required_error: "Email is required" })
-    .email({ message: "Please provide a valid email" }),
-  password: z.string({ required_error: "Password is required" }),
+    .string()
+    .min(1, { message: "Email is required" })
+    .email({ message: "Email is invalid" }),
+  password: z.string().min(1, { message: "Password is required" }),
 });
 
 export const useLogin = () => {
@@ -35,7 +36,7 @@ export const useLogin = () => {
       router.refresh();
       router.replace("/");
     } catch (error: any) {
-      const message: string = error.response.data.message;
+      const message = error.response?.data?.message;
       setAlert("error", message);
     } finally {
       setLoading(false);

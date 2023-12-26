@@ -1,0 +1,31 @@
+name: server:lint_and_test
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "server/**"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "server/**"
+
+jobs:
+  test:
+    name: lint-and-test-client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 16.x
+          cache: "yarn"
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
+        working-directory: ./server
+      - name: Run all unit tests
+        run: cd server && yarn test
+        id: test

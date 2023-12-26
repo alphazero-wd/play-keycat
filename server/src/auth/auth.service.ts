@@ -28,10 +28,7 @@ export class AuthService {
     } catch (error) {
       if (error instanceof InternalServerErrorException) throw error;
       // for security reasons
-      throw new BadRequestException({
-        success: false,
-        message: 'Wrong email or password provided',
-      });
+      throw new BadRequestException('Wrong email or password provided');
     }
   }
 
