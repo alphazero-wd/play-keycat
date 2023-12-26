@@ -1,5 +1,5 @@
 import { Alert } from "@/features/ui/alert";
-import { render, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { setupServer } from "msw/node";
@@ -22,7 +22,7 @@ test("should display login form", async () => {
 
 describe("validation is not successful", () => {
   it("should show errors if email and password fields are empty", async () => {
-    const screen = render(<LoginForm />);
+    render(<LoginForm />);
     const loginButton = screen.getByText(/log in/i);
     await userEvent.click(loginButton);
     const emailErrorMessage = await screen.findByText(/email is required/i);
@@ -33,7 +33,7 @@ describe("validation is not successful", () => {
   });
 
   it("should show an error if email is not valid", async () => {
-    const screen = render(<LoginForm />);
+    render(<LoginForm />);
     const emailInput = screen.getByLabelText(/email/i);
     const loginButton = screen.getByText(/log in/i);
     await userEvent.type(emailInput, "abc@a");
@@ -45,7 +45,7 @@ describe("validation is not successful", () => {
 
 describe("validation is successful", () => {
   it("should display loading and disable the button until response is received", async () => {
-    const screen = render(<LoginForm />);
+    render(<LoginForm />);
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
     const loginButton = screen.getByText(/log in/i);
@@ -74,10 +74,13 @@ describe("validation is successful", () => {
       );
       server.use(
         http.post("/auth/login", () => {
-          return new HttpResponse(null, { status: 400 });
+          return HttpResponse.json(
+            { message: "Wrong email or password provided" },
+            { status: 400 },
+          );
         }),
       );
-      const screen = render(components);
+      render(components);
       const emailInput = screen.getByLabelText(/email/i);
       const passwordInput = screen.getByLabelText(/password/i);
       const loginButton = screen.getByText(/log in/i);
@@ -101,10 +104,13 @@ describe("validation is successful", () => {
       );
       server.use(
         http.post("/auth/login", () => {
-          return new HttpResponse(null, { status: 500 });
+          return HttpResponse.json(
+            { message: "Something went wrong" },
+            { status: 500 },
+          );
         }),
       );
-      const screen = render(components);
+      render(components);
       const emailInput = screen.getByLabelText(/email/i);
       const passwordInput = screen.getByLabelText(/password/i);
       const loginButton = screen.getByText(/log in/i);
@@ -120,7 +126,7 @@ describe("validation is successful", () => {
 
   describe("and login are successful", () => {
     it("should reset form if login successfully", async () => {
-      const screen = render(<LoginForm />);
+      render(<LoginForm />);
       const emailInput = screen.getByLabelText(/email/i);
       const passwordInput = screen.getByLabelText(/password/i);
       const loginButton = screen.getByText(/log in/i);
@@ -143,7 +149,7 @@ describe("validation is successful", () => {
           <LoginForm />
         </>
       );
-      const screen = render(components);
+      render(components);
       const emailInput = screen.getByLabelText(/email/i);
       const passwordInput = screen.getByLabelText(/password/i);
       const loginButton = screen.getByText(/log in/i);

@@ -29,7 +29,6 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "jest.environment.js",
     "jest.environment.js"
   ],
   "exclude": ["node_modules"]

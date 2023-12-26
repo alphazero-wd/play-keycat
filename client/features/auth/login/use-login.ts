@@ -36,18 +36,7 @@ export const useLogin = () => {
       router.refresh();
       router.replace("/");
     } catch (error: any) {
-      let message = "";
-      switch (error.response.status) {
-        case 400:
-          message = "Wrong email or password provided";
-          break;
-        case 500:
-          message = "Something went wrong :(";
-          break;
-        default:
-          message = "";
-          break;
-      }
+      const message = error.response?.data?.message;
       setAlert("error", message);
     } finally {
       setLoading(false);
