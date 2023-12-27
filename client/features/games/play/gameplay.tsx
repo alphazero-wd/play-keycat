@@ -26,8 +26,8 @@ export const Gameplay = ({ user, game }: { user: User; game: Game }) => {
   const { loading, joinGame } = useJoinGame(game.mode);
   const hasFinished = useGameStore.use.hasFinished();
   const endedAt = useGameStore.use.endedAt();
-
   const countdown = useCountdown.use.countdown();
+  const startedAt = useGameStore.use.startedAt();
 
   const typingStats = useTyping(game.paragraph, game.id);
 
@@ -38,8 +38,18 @@ export const Gameplay = ({ user, game }: { user: User; game: Game }) => {
       <RankUpdateModal />
       <GameSummaryModal gameMode={game.mode} />
       <div className="container max-w-3xl">
-        <GameHeading gameMode={game.mode} />
-        <GameSubheading gameMode={game.mode} />
+        <GameHeading
+          countdown={countdown}
+          startedAt={startedAt}
+          endedAt={endedAt}
+          gameMode={game.mode}
+        />
+        <GameSubheading
+          countdown={countdown}
+          startedAt={startedAt}
+          endedAt={endedAt}
+          gameMode={game.mode}
+        />
 
         <Players gameMode={game.mode} user={user} />
 

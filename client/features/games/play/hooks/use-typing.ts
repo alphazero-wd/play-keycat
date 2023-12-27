@@ -14,7 +14,7 @@ export const useTyping = (paragraph: string, gameId: string) => {
   const setAlert = useAlert.use.setAlert();
 
   const onKeyDown = (e: globalThis.KeyboardEvent) => {
-    if (!startedAt) {
+    if (!startedAt && e.key.length === 1) {
       setAlert(
         "error",
         "You have to wait until the countdown is over before typing",

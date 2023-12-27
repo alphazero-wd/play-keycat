@@ -1,12 +1,19 @@
 import { useMemo } from "react";
-import { useCountdown, useGameStore } from "./hooks";
 import { GameMode } from "./types";
 
-export const GameHeading = ({ gameMode }: { gameMode: GameMode }) => {
-  const countdown = useCountdown.use.countdown();
-  const startedAt = useGameStore.use.startedAt();
-  const endedAt = useGameStore.use.endedAt();
+interface GameHeadingProps {
+  gameMode: GameMode;
+  startedAt: string | null;
+  endedAt: string | null;
+  countdown: number;
+}
 
+export const GameHeading = ({
+  gameMode,
+  startedAt,
+  endedAt,
+  countdown,
+}: GameHeadingProps) => {
   const title = useMemo(() => {
     if (!startedAt && !isFinite(countdown)) {
       if (gameMode === GameMode.PRACTICE) return "Setting things up... 🪄";
