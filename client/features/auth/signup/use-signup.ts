@@ -16,16 +16,19 @@ import { signup } from "./signup-api";
 
 const formSchema = z.object({
   username: z
-    .string({ required_error: "Username is required" })
-    .max(30, { message: "Username can only be 30 characters long" })
+    .string()
+    .min(1, { message: "Username is required" })
+    .max(30, { message: "Username is too long" })
     .regex(VALID_USERNAME_REGEX, {
       message: "Username can only contain letters, numbers and underscores (_)",
     }),
   email: z
-    .string({ required_error: "Email is required" })
-    .email({ message: "Please provide a valid email" }),
+    .string()
+    .min(1, { message: "Email is required" })
+    .email({ message: "Email is invalid" }),
   password: z
-    .string({ required_error: "Password is required" })
+    .string()
+    .min(1, { message: "Password is required" })
     .regex(STRONG_PASSWORD_REGEX, { message: "Password is not strong enough" }),
 });
 
