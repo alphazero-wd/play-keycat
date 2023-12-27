@@ -9,12 +9,12 @@ export const GameHeading = ({ gameMode }: { gameMode: GameMode }) => {
 
   const title = useMemo(() => {
     if (!startedAt && !isFinite(countdown)) {
-      if (gameMode === GameMode.PRACTICE) return "Setting things up 🪄";
-      return "Finding players 🔍";
+      if (gameMode === GameMode.PRACTICE) return "Setting things up... 🪄";
+      return "Finding players... 🔍";
     }
     if (!startedAt && countdown >= 0) {
-      if (countdown <= 3) return "Headstart coming up 🚀";
-      return "Game starting soonly 🏁";
+      if (countdown <= 3) return "Headstart coming up... 🚀";
+      return "Game starting soonly... 🏁";
     }
     if (startedAt && !endedAt && countdown > 0) {
       if (countdown <= 10) return "Game ending soonly ⌛";

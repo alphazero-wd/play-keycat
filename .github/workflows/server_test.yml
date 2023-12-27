@@ -1,4 +1,4 @@
-name: server:lint_and_test
+name: server:test
 
 on:
   push:
@@ -14,7 +14,7 @@ on:
 
 jobs:
   test:
-    name: lint-and-test-server
+    name: test-server
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
