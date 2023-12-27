@@ -14,7 +14,7 @@ on:
 
 jobs:
   test:
-    name: lint-and-test-client
+    name: lint-and-test-server
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
