@@ -28,7 +28,7 @@ export const ProfileCard = ({
   gameMode,
 }: {
   player: User;
-  userId?: number;
+  userId?: string;
   gameMode: GameMode;
 }) => {
   const [profile, setProfile] = useState<User | undefined>();

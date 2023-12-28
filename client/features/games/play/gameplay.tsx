@@ -27,7 +27,6 @@ export const Gameplay = ({ user, game }: { user: User; game: Game }) => {
   const hasFinished = useGameStore.use.hasFinished();
   const endedAt = useGameStore.use.endedAt();
   const countdown = useCountdown.use.countdown();
-  const startedAt = useGameStore.use.startedAt();
 
   const typingStats = useTyping(game.paragraph, game.id);
 
@@ -38,23 +37,18 @@ export const Gameplay = ({ user, game }: { user: User; game: Game }) => {
       <RankUpdateModal />
       <GameSummaryModal gameMode={game.mode} />
       <div className="container max-w-3xl">
-        <GameHeading
-          countdown={countdown}
-          startedAt={startedAt}
-          endedAt={endedAt}
-          gameMode={game.mode}
-        />
-        <GameSubheading
-          countdown={countdown}
-          startedAt={startedAt}
-          endedAt={endedAt}
-          gameMode={game.mode}
-        />
+        <GameHeading gameMode={game.mode} />
+        <GameSubheading gameMode={game.mode} />
 
         <Players gameMode={game.mode} user={user} />
 
         {!hasFinished && isFinite(countdown) && !endedAt && (
-          <TypingParagraph game={game} typingStats={typingStats} />
+          <TypingParagraph
+            charsTyped={typingStats.charsTyped}
+            prevError={typingStats.prevError}
+            gameMode={game.mode}
+            paragraph={game.paragraph}
+          />
         )}
         <div className="mt-3 flex justify-between gap-x-4">
           <Button variant="outline" asChild>
