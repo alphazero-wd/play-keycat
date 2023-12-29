@@ -23,19 +23,20 @@ import { RankBadge } from "./rank-badge";
 import { User } from "./types";
 
 export const ProfileCard = ({
-  player,
+  username,
   userId,
   gameMode,
 }: {
-  player: User;
+  username: string;
   userId?: string;
   gameMode: GameMode;
 }) => {
   const [profile, setProfile] = useState<User | undefined>();
 
   useEffect(() => {
-    getPlayerProfile(player.username).then((data) => setProfile(data));
-  }, []);
+    getPlayerProfile(username).then((data) => setProfile(data));
+  }, [username]);
+  console.log({ profile });
 
   if (!profile) return;
 
@@ -44,7 +45,7 @@ export const ProfileCard = ({
       <HoverCardTrigger asChild className="line-clamp-1">
         <div>
           <Link
-            href={`/player/${player.username}/profile`}
+            href={`/player/${profile.username}/profile`}
             className={cn(
               gameMode === GameMode.RANKED && "text-primary",
               gameMode === GameMode.CASUAL &&
@@ -54,9 +55,9 @@ export const ProfileCard = ({
               "font-medium hover:underline",
             )}
           >
-            @{player.username}
+            @{profile.username}
           </Link>{" "}
-          <span>{player.id === userId && "(you)"}</span>
+          {profile.id === userId && "(you)"}
         </div>
       </HoverCardTrigger>
       <HoverCardContent className="w-80 space-y-3">

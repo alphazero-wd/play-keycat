@@ -92,6 +92,19 @@ describe("test the update of CPs and XPs", () => {
     await userEvent.click(screen.getByTestId("user-menu-trigger"), {
       pointerEventsCheck: 0,
     });
+    // reset state to guarantee permanent update in the menu
+    act(() => {
+      useGameSummaryModal.setState({
+        acc: undefined,
+        catPoints: undefined,
+        isModalOpen: false,
+        newXPsGained: undefined,
+        position: undefined,
+        totalXPsBonus: undefined,
+        wpm: undefined,
+      });
+    });
+
     expect(await screen.findByText(/60 cps/i)).toBeInTheDocument();
     await waitFor(
       async () => {

@@ -33,14 +33,14 @@ export const Gameplay = ({ user, game }: { user: User; game: Game }) => {
   useEndGame(user, typingStats, game);
   return (
     <>
-      <LevelUpModal gameMode={game.mode} user={user} />
+      <LevelUpModal gameMode={game.mode} />
       <RankUpdateModal />
       <GameSummaryModal gameMode={game.mode} />
       <div className="container max-w-3xl">
         <GameHeading gameMode={game.mode} />
         <GameSubheading gameMode={game.mode} />
 
-        <Players gameMode={game.mode} user={user} />
+        <Players gameMode={game.mode} userId={user.id} />
 
         {!hasFinished && isFinite(countdown) && !endedAt && (
           <TypingParagraph

@@ -21,9 +21,11 @@ export const RankUpdateModal = () => {
   const setRank = useUserMenu.use.setRank();
 
   useEffect(() => {
-    if (isModalOpen && currentRank) setRank(currentRank);
+    if (!isModalOpen) return;
+    if (currentRank) setRank(currentRank);
   }, [isModalOpen, currentRank]);
-  if (!currentRank) return;
+
+  if (!currentRank || !status) return;
 
   return (
     <AlertDialog open={isModalOpen} onOpenChange={onClose}>

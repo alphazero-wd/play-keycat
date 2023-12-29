@@ -99,7 +99,9 @@ export const UserMenu = (props: UserMenuProps) => {
             <RankBadge size="sm" rank={rank!} />
           </div>
           <DropdownMenuLabel className={rank !== "Unranked" ? "-ml-2" : "ml-1"}>
-            <div className="text-base">{props.rank}</div>{" "}
+            <div data-testid="rank-label" className="text-base">
+              {rank}
+            </div>{" "}
             <div className="font-normal text-muted-foreground">
               {catPoints} CPs
             </div>
