@@ -1,11 +1,11 @@
 import { useTable } from "@/features/ui/data-table";
-import { User } from "@/features/users/profile";
+import { Profile, User } from "@/features/users/profile";
 import { socket } from "@/lib/socket";
 import { useEffect, useMemo, useState } from "react";
 import { columnsWrapper } from "./columns";
 
 export const useLeaderboard = (user?: User) => {
-  const [topPlayers, setTopPlayers] = useState<User[]>([]);
+  const [topPlayers, setTopPlayers] = useState<Profile[]>([]);
   const [topPlayersCount, setTopPlayersCount] = useState(0);
   const table = useTable(columnsWrapper(user), topPlayers, topPlayersCount);
 

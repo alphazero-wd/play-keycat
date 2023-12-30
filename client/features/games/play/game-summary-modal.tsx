@@ -18,7 +18,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Badge as BadgeIcon } from "lucide-react";
 import { useEffect, useMemo } from "react";
-import { CPsUpdateStat, Position } from "../history";
+import { CPsUpdateStat, Position } from "../shared";
 import { useGameSummaryModal } from "./hooks";
 import { GameMode } from "./types";
 

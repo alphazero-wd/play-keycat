@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/features/ui/card";
-import { User } from "../profile";
 import { RankBadge } from "./rank-badge";
+import { Profile } from "./types";
 
-export const About = ({ player }: { player: User }) => {
+export const About = ({ player }: { player: Profile }) => {
   return (
     <div>
       <h3 className="font-medium text-foreground">About the player</h3>

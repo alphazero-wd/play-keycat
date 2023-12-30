@@ -1,12 +1,11 @@
 import { User } from "@/features/users/profile";
-import { Game } from "../play";
+import { Game } from "../play/types";
 
 export interface GameHistory {
-  player: User;
+  player: Pick<User, "username" | "id">;
   gameId: string;
   game: Game;
   wpm: number;
   acc: number;
-  timeTaken: number;
   catPoints: number;
 }

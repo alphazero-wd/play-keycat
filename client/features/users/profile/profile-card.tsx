@@ -20,7 +20,7 @@ import { getPlayerProfile } from "./get-player-profile";
 import { ProfileLevel } from "./profile-level";
 import { ProfileXPs } from "./profile-xps";
 import { RankBadge } from "./rank-badge";
-import { User } from "./types";
+import { Profile } from "./types";
 
 export const ProfileCard = ({
   username,
@@ -31,7 +31,7 @@ export const ProfileCard = ({
   userId?: string;
   gameMode: GameMode;
 }) => {
-  const [profile, setProfile] = useState<User | undefined>();
+  const [profile, setProfile] = useState<Profile | undefined>();
 
   useEffect(() => {
     getPlayerProfile(username).then((data) => setProfile(data));

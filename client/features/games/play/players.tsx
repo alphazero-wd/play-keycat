@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/features/ui/avatar";
 import { ProfileCard } from "@/features/users/profile";
 import { cn } from "@/lib/utils";
 import { CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Position } from "../history";
+import { Position } from "../shared";
 import {
   getPlayerPosition,
   getPlayerProgress,

@@ -35,7 +35,11 @@ export default async function GameHistoryPage({
 
       <div className="mb-5">
         <h3 className="mb-1 font-medium">Leaderboard</h3>
-        <PlayerStats user={user} game={game} />
+        <PlayerStats
+          userId={user?.id}
+          histories={game.histories}
+          gameMode={game.mode}
+        />
       </div>
 
       <Button variant="outline" asChild>
