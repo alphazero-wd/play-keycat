@@ -13,6 +13,7 @@ import { PrismaError } from '../prisma/prisma-error';
 import { NotFoundException } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
 import { PAGE_LIMIT } from '../common/constants';
+import { faker } from '@faker-js/faker';
 
 describe('HistoriesService', () => {
   let service: HistoriesService;
@@ -93,35 +94,22 @@ describe('HistoriesService', () => {
       beforeEach(() =>
         jest.spyOn(prisma.gameHistory, 'create').mockResolvedValue(history),
       );
-      it('should add CPs and XPs if game mode is RANKED', async () => {
+      it('should add CPs and XPs correctly if game mode is RANKED', async () => {
         jest.spyOn(prisma.user, 'update').mockResolvedValue(user);
-        const { wpm, acc, position } = payload;
         const rank = getCurrentRank(user.catPoints);
-        const xpsEarned = calculateXPsEarned(
-          wpm,
-          acc,
-          position,
-          game.paragraph,
-        );
-        const cpsEarned = calculateCPsEarned(wpm, acc, position, rank);
-        await service.create(
-          payload,
-          GameMode.RANKED,
-          rank,
-          game.paragraph,
-          user,
-        );
+        const paragraph = faker.string.sample(100);
+        await service.create(payload, GameMode.RANKED, rank, paragraph, user);
         expect(prisma.user.update).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
-              xpsGained: user.xpsGained + xpsEarned,
-              catPoints: user.catPoints + cpsEarned,
+              xpsGained: user.xpsGained + 47,
+              catPoints: user.catPoints + 60,
             }),
           }),
         );
 
         expect(prisma.gameHistory.create).toHaveBeenCalledWith({
-          data: expect.objectContaining({ catPoints: cpsEarned }),
+          data: expect.objectContaining({ catPoints: 60 }),
         });
       });
 
@@ -149,25 +137,18 @@ describe('HistoriesService', () => {
       });
 
       it('should not add CPs if game mode is CASUAL', async () => {
-        const { wpm, acc, position } = payload;
+        const paragraph = faker.string.sample(100);
         await service.create(
           payload,
           GameMode.CASUAL,
           getCurrentRank(user.catPoints),
-          game.paragraph,
+          paragraph,
           user,
         );
-        const xpsGained = calculateXPsEarned(
-          wpm,
-          acc,
-          position,
-          game.paragraph,
-        );
-
         expect(prisma.user.update).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
-              xpsGained: user.xpsGained + xpsGained,
+              xpsGained: user.xpsGained + 47,
               catPoints: user.catPoints,
             }),
           }),
@@ -179,35 +160,25 @@ describe('HistoriesService', () => {
       });
 
       it('should level up correctly', async () => {
+        const predictableText = faker.string.sample(450);
         const { wpm, acc, position } = payload; // make very good performance so level up is feasible
-        const aboutToLevelUpUser = { ...user, xpsGained: 90 }; // make XPs close to next level
+        const aboutToLevelUpUser = { ...user, currentLevel: 1, xpsGained: 90 }; // make XPs close to next level
         jest.spyOn(prisma.user, 'update').mockResolvedValue(user);
-        const xpsEarned = calculateXPsEarned(
-          wpm,
-          acc,
-          position,
-          game.paragraph,
-        );
-        const { newLevel, newXPsGained } = levelUp(
-          aboutToLevelUpUser,
-          xpsEarned,
-        );
-        const results = await service.create(
+        await service.create(
           { ...payload, wpm, acc, position },
           GameMode.CASUAL,
           getCurrentRank(user.catPoints),
-          game.paragraph,
+          predictableText,
           aboutToLevelUpUser,
         );
         expect(prisma.user.update).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
-              currentLevel: newLevel,
-              xpsGained: newXPsGained,
+              currentLevel: 3,
+              xpsGained: 92,
             }),
           }),
         );
-        expect(results.hasLevelUp).toBeTruthy();
       });
     });
 

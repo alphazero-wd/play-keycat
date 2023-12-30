@@ -4,8 +4,8 @@ import { determineXPsRequired } from '../../xps';
 export const levelUp = (user: User, xpsBonus: number) => {
   let newLevel = user.currentLevel;
   let xpsGained = user.xpsGained;
-  while (xpsBonus >= determineXPsRequired(newLevel) - user.xpsGained) {
-    xpsBonus -= determineXPsRequired(newLevel) - user.xpsGained;
+  while (xpsBonus >= determineXPsRequired(newLevel) - xpsGained) {
+    xpsBonus -= determineXPsRequired(newLevel) - xpsGained;
     xpsGained = 0;
     newLevel++;
   }

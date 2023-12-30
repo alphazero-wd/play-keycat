@@ -8,9 +8,9 @@ export const historyFixture = (
   return {
     gameId,
     playerId,
-    acc: new Prisma.Decimal(95),
+    acc: new Prisma.Decimal(98),
     catPoints: 10,
-    wpm: 40,
+    wpm: 120,
     ...attrs,
   };
 };
