@@ -29,6 +29,7 @@ export const Players = ({
       {players.map((player) => (
         <div
           key={player.id}
+          data-testid={"player-" + player.id}
           className={cn(
             "flex items-center justify-between",
             leftPlayerIds.has(player.id) && "opacity-50",
@@ -70,9 +71,17 @@ export const Players = ({
               ) : (
                 <div className="text-2xl">
                   {hasFinished ? (
-                    <CheckIcon className="h-5 w-5 text-green-500" />
+                    <CheckIcon
+                      title="finished"
+                      className="h-5 w-5 text-green-500"
+                    />
                   ) : (
-                    endedAt && <XMarkIcon className="h-5 w-5 text-red-500" />
+                    endedAt && (
+                      <XMarkIcon
+                        title="failed"
+                        className="h-5 w-5 text-red-500"
+                      />
+                    )
                   )}
                 </div>
               )}

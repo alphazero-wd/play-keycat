@@ -36,7 +36,6 @@ export const ProfileCard = ({
   useEffect(() => {
     getPlayerProfile(username).then((data) => setProfile(data));
   }, [username]);
-  console.log({ profile });
 
   if (!profile) return;
 
