@@ -1,8 +1,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/features/ui/avatar";
-import { ProfileCard, User } from "@/features/users/profile";
+import { ProfileCard } from "@/features/users/profile";
 import { cn } from "@/lib/utils";
 import { CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Position } from "../history";
+import { Position } from "../shared";
 import {
   getPlayerPosition,
   getPlayerProgress,
@@ -13,10 +13,10 @@ import {
 import { GameMode } from "./types";
 
 export const Players = ({
-  user,
+  userId,
   gameMode,
 }: {
-  user: User;
+  userId: string;
   gameMode: GameMode;
 }) => {
   const players = usePlayersStore.use.players();
@@ -29,13 +29,18 @@ export const Players = ({
       {players.map((player) => (
         <div
           key={player.id}
+          data-testid={"player-" + player.id}
           className={cn(
             "flex items-center justify-between",
             leftPlayerIds.has(player.id) && "opacity-50",
           )}
         >
           <div className="flex w-[200px] items-center justify-between">
-            <ProfileCard gameMode={gameMode} player={player} userId={user.id} />
+            <ProfileCard
+              gameMode={gameMode}
+              username={player.username}
+              userId={userId}
+            />
             <Avatar
               className="transition-transform"
               style={{
@@ -66,9 +71,17 @@ export const Players = ({
               ) : (
                 <div className="text-2xl">
                   {hasFinished ? (
-                    <CheckIcon className="h-5 w-5 text-green-500" />
+                    <CheckIcon
+                      title="finished"
+                      className="h-5 w-5 text-green-500"
+                    />
                   ) : (
-                    endedAt && <XMarkIcon className="h-5 w-5 text-red-500" />
+                    endedAt && (
+                      <XMarkIcon
+                        title="failed"
+                        className="h-5 w-5 text-red-500"
+                      />
+                    )
                   )}
                 </div>
               )}

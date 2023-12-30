@@ -9,12 +9,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/features/ui/table";
-import { User } from "@/features/users/profile";
-import { Game, GameMode } from "../play/types";
-import { CPsUpdateStat } from "./cps-update-stat";
-import { Position } from "./position";
+import { GameMode } from "../play/types";
+import { CPsUpdateStat, Position } from "../shared";
+import { GameHistory } from "./types";
 
-export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
+interface PlayerStatsProps {
+  gameMode: GameMode;
+  histories: Omit<GameHistory, "game">[];
+  userId?: string;
+}
+
+export const PlayerStats = ({
+  gameMode,
+  histories,
+  userId,
+}: PlayerStatsProps) => {
+  const playerPositions = (() => {
+    const positions = Array(histories.length).fill(0);
+    let currentPosition = 1;
+    histories.forEach((history, i) => {
+      positions[i] = currentPosition;
+      if (i == histories.length - 1 || histories[i + 1].wpm < history.wpm)
+        currentPosition++;
+    });
+    return positions;
+  })();
+
   return (
     <Table>
       <TableCaption>Players who are AFK won&apos;t be shown here.</TableCaption>
@@ -24,39 +44,33 @@ export const PlayerStats = ({ game, user }: { game: Game; user?: User }) => {
           <TableHead>Player</TableHead>
           <TableHead className="text-right">WPM</TableHead>
           <TableHead className="text-right">Accuracy</TableHead>
-          {game.mode !== GameMode.PRACTICE && (
+          {gameMode !== GameMode.PRACTICE && (
             <TableHead className="text-center">Position</TableHead>
           )}
           <TableHead className="text-right">Cat Points</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {game.histories.map((history, index) => (
+        {histories.map((history, index) => (
           <TableRow key={history.player.id}>
             <TableCell className="text-right font-medium">
               {index + 1}
             </TableCell>
             <TableCell className="flex items-center gap-x-3">
               <PlayerCell
-                gameMode={game.mode}
-                player={history.player}
-                user={user}
+                gameMode={gameMode}
+                username={history.player.username}
+                userId={userId}
               />
             </TableCell>
             <TableCell className="text-right text-base font-medium">
               {history.wpm}
             </TableCell>
             <TableCell className="text-right">{history.acc}%</TableCell>
-            {game.mode !== GameMode.PRACTICE && (
+            {gameMode !== GameMode.PRACTICE && (
               <TableCell>
                 <div className="mx-auto w-fit text-center">
-                  <Position
-                    position={
-                      index > 0 && history.wpm === game.histories[index - 1].wpm
-                        ? index
-                        : index + 1
-                    }
-                  />
+                  <Position position={playerPositions[index]} />
                 </div>
               </TableCell>
             )}

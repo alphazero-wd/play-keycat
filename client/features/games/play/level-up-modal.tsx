@@ -7,19 +7,13 @@ import {
   AlertDialogTitle,
 } from "@/features/ui/alert-dialog";
 import { useUserMenu } from "@/features/ui/navbar/use-user-menu";
-import { ProfileXPs, User } from "@/features/users/profile";
-import { useEffect, useState } from "react";
+import { ProfileXPs } from "@/features/users/profile";
+import { useEffect } from "react";
 import { GameModeButton } from "../../ui/button";
 import { useLevelUpModal } from "./hooks";
 import { GameMode } from "./types";
 
-export const LevelUpModal = ({
-  user,
-  gameMode,
-}: {
-  user: User;
-  gameMode: GameMode;
-}) => {
+export const LevelUpModal = ({ gameMode }: { gameMode: GameMode }) => {
   const isModalOpen = useLevelUpModal.use.isModalOpen();
   const onClose = useLevelUpModal.use.onClose();
   const newLevel = useLevelUpModal.use.currentLevel();
@@ -27,20 +21,12 @@ export const LevelUpModal = ({
   const levelUp = useUserMenu.use.setLevel();
   const xpsRequired = useLevelUpModal.use.xpsRequired();
   const setXPsRequired = useUserMenu.use.setXPsRequired();
-  const [xpsGainedChange, setXPsGainedChange] = useState(0);
 
   useEffect(() => {
     if (!isModalOpen) return;
-    const xpsRemainingTimer = setTimeout(
-      () => setXPsGainedChange(xpsGained),
-      500,
-    );
     levelUp(newLevel);
     setXPsRequired(xpsRequired);
-    return () => {
-      clearTimeout(xpsRemainingTimer);
-    };
-  }, [isModalOpen, xpsGained, xpsRequired, newLevel]);
+  }, [isModalOpen, xpsRequired, newLevel]);
 
   return (
     <AlertDialog open={isModalOpen} onOpenChange={onClose}>
@@ -53,10 +39,10 @@ export const LevelUpModal = ({
         </AlertDialogHeader>
         <div className="my-5 flex items-center justify-between gap-x-4">
           <div className="w-[80%]">
-            <ProfileXPs xpsGained={xpsGainedChange} xpsRequired={xpsRequired} />
+            <ProfileXPs xpsGained={xpsGained} xpsRequired={xpsRequired} />
           </div>
           <div className="font-medium text-secondary-foreground">
-            {xpsGained} / {user.xpsRequired}
+            {xpsGained} / {xpsRequired}
           </div>
         </div>
         <AlertDialogFooter>

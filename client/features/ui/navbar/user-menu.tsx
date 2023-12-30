@@ -1,11 +1,6 @@
 "use client";
 import { useLogout } from "@/features/auth/logout";
-import {
-  ProfileLevel,
-  ProfileXPs,
-  RankBadge,
-  User,
-} from "@/features/users/profile";
+import { ProfileLevel, ProfileXPs, RankBadge } from "@/features/users/profile";
 import {
   ArrowRightOnRectangleIcon,
   ChartBarIcon,
@@ -29,10 +24,15 @@ import {
 import { useUserMenu } from "./use-user-menu";
 
 interface UserMenuProps {
-  user: User;
+  username: string;
+  catPoints: number;
+  xpsGained: number;
+  currentLevel: number;
+  xpsRequired: number;
+  rank: string;
 }
 
-export const UserMenu = ({ user }: UserMenuProps) => {
+export const UserMenu = (props: UserMenuProps) => {
   const { logout } = useLogout();
   const catPoints = useUserMenu.use.catPoints();
   const xpsGained = useUserMenu.use.xpsGained();
@@ -48,28 +48,28 @@ export const UserMenu = ({ user }: UserMenuProps) => {
     () => [
       {
         text: "Profile",
-        href: `/player/${user.username}/profile`,
+        href: `/player/${props.username}/profile`,
         icon: UserIcon,
       },
       { text: "Lobby", href: "/", icon: HomeIcon },
       { text: "Leaderboards", href: "/leaderboards", icon: ChartBarIcon },
       {
         text: "Friends",
-        href: `player/${user.username}/friends`,
+        href: `player/${props.username}/friends`,
         icon: UserGroupIcon,
       },
       { text: "Settings", href: "/settings", icon: Cog6ToothIcon },
     ],
-    [user.username],
+    [props.username],
   );
 
   useEffect(() => {
-    setCatPoints(user.catPoints);
-    setXPs(user.xpsGained);
-    setLevel(user.currentLevel);
-    setXPsRequired(user.xpsRequired);
-    setRank(user.rank);
-  }, [user]);
+    setCatPoints(props.catPoints);
+    setXPs(props.xpsGained);
+    setLevel(props.currentLevel);
+    setXPsRequired(props.xpsRequired);
+    setRank(props.rank);
+  }, [props]);
 
   const onLogout = useCallback(async () => {
     await logout();
@@ -77,16 +77,16 @@ export const UserMenu = ({ user }: UserMenuProps) => {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger data-testid="user-menu-trigger">
         <Avatar>
           <AvatarImage src="/icons/beginner.jpg" alt="@shadcn" />
-          <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
+          <AvatarFallback>{props.username[0].toUpperCase()}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuGroup>
           <DropdownMenuLabel className="flex items-center gap-x-4">
-            {user.username}
+            {props.username}
             <ProfileLevel currentLevel={currentLevel} />
           </DropdownMenuLabel>
 
@@ -99,7 +99,9 @@ export const UserMenu = ({ user }: UserMenuProps) => {
             <RankBadge size="sm" rank={rank!} />
           </div>
           <DropdownMenuLabel className={rank !== "Unranked" ? "-ml-2" : "ml-1"}>
-            <div className="text-base">{user.rank}</div>{" "}
+            <div data-testid="rank-label" className="text-base">
+              {rank}
+            </div>{" "}
             <div className="font-normal text-muted-foreground">
               {catPoints} CPs
             </div>

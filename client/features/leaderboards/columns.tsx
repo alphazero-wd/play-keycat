@@ -5,12 +5,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/features/ui/tooltip";
-import { RankBadge, User } from "@/features/users/profile";
+import { Profile, RankBadge, User } from "@/features/users/profile";
 import { ColumnDef } from "@tanstack/react-table";
 import { GameMode } from "../games/play/types";
 
 export const columnsWrapper = (user?: User) => {
-  const columns: ColumnDef<User>[] = [
+  const columns: ColumnDef<Profile>[] = [
     {
       accessorKey: "order",
       header: "#",
@@ -22,8 +22,8 @@ export const columnsWrapper = (user?: User) => {
       cell: ({ row }) => (
         <PlayerCell
           gameMode={GameMode.RANKED}
-          player={row.original}
-          user={user}
+          username={row.original.username}
+          userId={user?.id}
         />
       ),
     },

@@ -17,8 +17,8 @@ import {
 
 export const ProfileShares = ({ player }: { player: User }) => {
   const url = useMemo(
-    () => `http://localhost:3000/player/${player.username}/profile`,
-    [],
+    () => `${window.location.origin}/player/${player.username}/profile`,
+    [player.username],
   );
   return (
     <DropdownMenu>

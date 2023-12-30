@@ -18,7 +18,14 @@ export async function Navbar() {
           <div className="flex items-center gap-x-4">
             <ThemeSwitcher />
             {user ? (
-              <UserMenu user={user} />
+              <UserMenu
+                catPoints={user.catPoints}
+                currentLevel={user.currentLevel}
+                rank={user.rank}
+                username={user.username}
+                xpsGained={user.xpsGained}
+                xpsRequired={user.xpsRequired}
+              />
             ) : (
               <div className="flex items-center gap-x-3">
                 <Button asChild variant="outline">
